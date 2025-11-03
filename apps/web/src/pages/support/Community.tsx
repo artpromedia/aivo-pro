@@ -243,7 +243,7 @@ const Community: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-indigo-50 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-white to-indigo-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -257,7 +257,7 @@ const Community: React.FC = () => {
               Join the Conversation
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              AIVO <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Community</span> Hub
+              AIVO <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600">Community</span> Hub
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Connect with educators, parents, and specialists from around the world. Share experiences, 
@@ -266,7 +266,7 @@ const Community: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={handleJoinCommunity}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <Heart className="w-5 h-5" />
                 Join Our Community
@@ -301,7 +301,7 @@ const Community: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="bg-linear-to-br from-indigo-50 to-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <stat.icon className="w-8 h-8 text-indigo-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
@@ -357,7 +357,7 @@ const Community: React.FC = () => {
               <div className="mb-8">
                 <button 
                   onClick={handleCreatePost}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all inline-flex items-center gap-2"
+                  className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all inline-flex items-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Start a Discussion
@@ -489,7 +489,7 @@ const Community: React.FC = () => {
                   
                   <button 
                     onClick={() => handleJoinEvent(event.id)}
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
+                    className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
                   >
                     Join Event
                   </button>
@@ -549,7 +549,7 @@ const Community: React.FC = () => {
       {/* Join CTA */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

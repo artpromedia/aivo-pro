@@ -232,7 +232,7 @@ const Downloads: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-green-50 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-white to-green-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -246,7 +246,7 @@ const Downloads: React.FC = () => {
               Free Educational Resources
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Expert <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Resources</span> & Guides
+              Expert <span className="text-transparent bg-clip-text bg-linear-to-r from-green-600 to-blue-600">Resources</span> & Guides
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Access our comprehensive library of whitepapers, implementation guides, 
@@ -255,7 +255,7 @@ const Downloads: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={() => setActiveCategory('guides')}
-                className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-linear-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <BookOpen className="w-5 h-5" />
                 Browse Implementation Guides
@@ -290,7 +290,7 @@ const Downloads: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="bg-linear-to-br from-green-50 to-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <stat.icon className="w-8 h-8 text-green-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
@@ -388,7 +388,7 @@ const Downloads: React.FC = () => {
                 <div className="flex gap-3">
                   <button 
                     onClick={() => handleDownload(resource.id)}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all inline-flex items-center justify-center gap-2"
+                    className="flex-1 bg-linear-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all inline-flex items-center justify-center gap-2"
                   >
                     <Download className="w-5 h-5" />
                     Download {resource.premium ? '(Premium)' : 'Free'}
@@ -404,7 +404,7 @@ const Downloads: React.FC = () => {
       </section>
 
       {/* All Resources */}
-      <section className="py-20 px-6 bg-gradient-to-r from-green-50 to-blue-50">
+      <section className="py-20 px-6 bg-linear-to-r from-green-50 to-blue-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -471,7 +471,7 @@ const Downloads: React.FC = () => {
                   </span>
                   <div className="flex gap-1">
                     {resource.featured && (
-                      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <div className="bg-linear-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                         <Star className="w-3 h-3" />
                       </div>
                     )}
@@ -525,7 +525,7 @@ const Downloads: React.FC = () => {
       {/* Premium Resources CTA */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-linear-to-r from-green-600 to-blue-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

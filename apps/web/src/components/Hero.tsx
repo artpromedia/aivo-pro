@@ -17,7 +17,7 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center overflow-hidden pt-20">
       {/* Animated background blobs */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
@@ -49,7 +49,7 @@ export const Hero: React.FC = () => {
             >
               Personalized Learning for
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-purple-800">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-pink-600 to-purple-800">
                 Every Unique Mind
               </span>
             </motion.h1>
@@ -76,7 +76,7 @@ export const Hero: React.FC = () => {
               <Button
                 size="lg"
                 onClick={handleStartLearning}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                className="bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
               >
                 Start Learning
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -107,7 +107,7 @@ export const Hero: React.FC = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
                 <div className="w-64 bg-white rounded-[2.5rem] shadow-2xl p-2">
-                  <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-[2rem] p-6 h-80">
+                  <div className="bg-linear-to-br from-purple-100 to-pink-100 rounded-[2rem] p-6 h-80">
                     <div className="flex items-center justify-center h-full flex-col">
                       <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-md">
                         <Play className="w-8 h-8 text-purple-600" />
@@ -127,7 +127,7 @@ export const Hero: React.FC = () => {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
                 <div className="w-64 bg-white rounded-[2.5rem] shadow-2xl p-2">
-                  <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-[2rem] p-4 h-80">
+                  <div className="bg-linear-to-br from-blue-100 to-purple-100 rounded-[2rem] p-4 h-80">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
                       <span className="font-semibold text-sm">AIVO Assistant</span>
@@ -136,7 +136,7 @@ export const Hero: React.FC = () => {
                       <div className="bg-white rounded-xl p-3 shadow-sm">
                         <p className="text-xs font-medium text-gray-700">Daily Learning Goal</p>
                         <div className="mt-2 h-1.5 bg-gray-200 rounded-full">
-                          <div className="h-1.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" style={{ width: '75%' }}></div>
+                          <div className="h-1.5 bg-linear-to-r from-purple-600 to-pink-600 rounded-full" style={{ width: '75%' }}></div>
                         </div>
                       </div>
                       <div className="bg-white rounded-xl p-3 shadow-sm">
@@ -159,7 +159,7 @@ export const Hero: React.FC = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
               >
                 <div className="w-64 bg-white rounded-[2.5rem] shadow-2xl p-2">
-                  <div className="bg-gradient-to-br from-green-100 to-blue-100 rounded-[2rem] p-6 h-80">
+                  <div className="bg-linear-to-br from-green-100 to-blue-100 rounded-[2rem] p-6 h-80">
                     <div className="flex items-center justify-center h-full flex-col">
                       <div className="text-4xl mb-4">🎯</div>
                       <p className="text-xs font-medium text-gray-700 text-center px-2">

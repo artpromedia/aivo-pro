@@ -19,7 +19,7 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   // const { user, logout } = useAuth();
-  const user = null; // Temporarily disable auth for testing
+  const user = null as { firstName?: string } | null; // Temporarily disable auth for testing
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -105,7 +105,7 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-2"
               >
                 <User className="w-4 h-4" />
-                {user.firstName || 'Dashboard'}
+                {user?.firstName || 'Dashboard'}
               </Button>
               <Button variant="ghost" size="sm" onClick={handleLogoutClick}>
                 Log out
@@ -204,7 +204,7 @@ export const Header: React.FC = () => {
                           }}
                         >
                           <User className="w-4 h-4" />
-                          {user.firstName || 'Dashboard'}
+                          {user?.firstName || 'Dashboard'}
                         </Button>
                         <Button 
                           variant="ghost"

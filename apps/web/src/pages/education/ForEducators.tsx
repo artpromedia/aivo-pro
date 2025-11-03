@@ -92,7 +92,7 @@ export const ForEducators: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-purple-50 via-white to-pink-50">
+      <section className="py-20 px-6 bg-linear-to-br from-purple-50 via-white to-pink-50">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -104,7 +104,7 @@ export const ForEducators: React.FC = () => {
               </span>
               <h1 className="text-5xl font-bold text-gray-900 mb-6">
                 Empower Every Student with 
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600">
                   Personalized Learning
                 </span>
               </h1>
@@ -113,7 +113,7 @@ export const ForEducators: React.FC = () => {
                 adaptive learning experiences that meet each student where they are.
               </p>
               <div className="flex gap-4">
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <Button className="bg-linear-to-r from-purple-600 to-pink-600 text-white">
                   Start Free Trial
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -129,7 +129,7 @@ export const ForEducators: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-8 relative overflow-hidden">
+              <div className="bg-linear-to-br from-purple-100 to-pink-100 rounded-3xl p-8 relative overflow-hidden">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white rounded-xl p-4 shadow-lg">
                     <BarChart className="w-8 h-8 text-purple-600 mb-2" />
@@ -251,7 +251,7 @@ export const ForEducators: React.FC = () => {
                 <ul className="space-y-3">
                   {category.items.map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 shrink-0"></div>
                       <span className="text-gray-600">{item}</span>
                     </li>
                   ))}
@@ -283,7 +283,7 @@ export const ForEducators: React.FC = () => {
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.name}
-                className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100"
+                className="bg-linear-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -293,7 +293,7 @@ export const ForEducators: React.FC = () => {
                   "{testimonial.quote}"
                 </blockquote>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-linear-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
                     {testimonial.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -309,7 +309,7 @@ export const ForEducators: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+      <section className="py-20 bg-linear-to-r from-purple-600 to-pink-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

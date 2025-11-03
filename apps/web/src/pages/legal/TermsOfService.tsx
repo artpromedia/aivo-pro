@@ -31,7 +31,7 @@ export const TermsOfService: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-purple-50 to-white">
+      <section className="py-20 px-6 bg-linear-to-b from-purple-50 to-white">
         <div className="container mx-auto max-w-4xl">
           <motion.div 
             className="text-center mb-12"

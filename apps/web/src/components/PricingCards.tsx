@@ -72,7 +72,7 @@ export const PricingCards: React.FC = () => {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-purple-50">
+    <section className="py-24 bg-linear-to-b from-white to-purple-50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <motion.span
@@ -142,7 +142,7 @@ export const PricingCards: React.FC = () => {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-linear-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                     Most Popular
                   </span>
                 </div>
@@ -180,7 +180,7 @@ export const PricingCards: React.FC = () => {
                 onClick={() => handlePlanClick(plan.name)}
                 className={`w-full mb-6 ${
                   plan.popular 
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
+                    ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' 
                     : ''
                 }`}
               >
@@ -190,7 +190,7 @@ export const PricingCards: React.FC = () => {
               <ul className="space-y-3">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3 h-3 text-purple-600" />
                     </div>
                     <span className="text-gray-700 text-sm">{feature}</span>

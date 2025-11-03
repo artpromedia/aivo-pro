@@ -115,7 +115,7 @@ export const ForParents: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-20 px-6 bg-linear-to-br from-blue-50 via-white to-purple-50">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -127,7 +127,7 @@ export const ForParents: React.FC = () => {
               </span>
               <h1 className="text-5xl font-bold text-gray-900 mb-6">
                 Support Your Child's 
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
                   Learning Journey
                 </span>
               </h1>
@@ -136,7 +136,7 @@ export const ForParents: React.FC = () => {
                 with AIVO's parent-friendly tools and resources.
               </p>
               <div className="flex gap-4">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <Button className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
                   Get Started Free
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -152,11 +152,11 @@ export const ForParents: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl p-8 relative overflow-hidden">
+              <div className="bg-linear-to-br from-blue-100 to-purple-100 rounded-3xl p-8 relative overflow-hidden">
                 {/* Parent Dashboard Mockup */}
                 <div className="bg-white rounded-2xl p-6 shadow-xl">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                       <Heart className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -307,7 +307,7 @@ export const ForParents: React.FC = () => {
                 </div>
                 
                 <div className={index % 2 === 1 ? 'lg:col-start-1' : ''}>
-                  <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
+                  <div className="bg-linear-to-br from-blue-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
                     <div className="text-6xl">📱</div>
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export const ForParents: React.FC = () => {
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.name}
-                className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
+                className="bg-linear-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -355,7 +355,7 @@ export const ForParents: React.FC = () => {
                 </blockquote>
                 
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                     {testimonial.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -406,7 +406,7 @@ export const ForParents: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

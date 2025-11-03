@@ -70,7 +70,7 @@ export const HowItWorks: React.FC = () => {
           {/* Process Steps */}
           <div className="relative max-w-4xl mx-auto">
             {/* Connection Line - Desktop */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-purple-200 via-purple-400 to-purple-600 hidden lg:block"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-linear-to-b from-purple-200 via-purple-400 to-purple-600 hidden lg:block"></div>
             
             <div className="space-y-16">
               {steps.map((step, index) => (
@@ -122,9 +122,9 @@ export const HowItWorks: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="relative z-10 flex-shrink-0">
+                  <div className="relative z-10 shrink-0">
                     <div className="relative">
-                      <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white shadow-xl">
+                      <div className="w-20 h-20 bg-linear-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white shadow-xl">
                         <step.icon className="w-10 h-10" />
                       </div>
                       <div className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-purple-100">
@@ -142,7 +142,7 @@ export const HowItWorks: React.FC = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-gradient-to-b from-purple-50 to-white">
+      <section className="py-20 bg-linear-to-b from-purple-50 to-white">
         <div className="container mx-auto px-6">
           <motion.div 
             className="text-center mb-12"
@@ -188,7 +188,7 @@ export const HowItWorks: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-2">
+                <div className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600 mb-2">
                   {benefit.stat}
                 </div>
                 <div className="text-sm text-purple-600 mb-4">{benefit.statLabel}</div>
@@ -201,7 +201,7 @@ export const HowItWorks: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+      <section className="py-20 bg-linear-to-r from-purple-600 to-pink-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -49,7 +49,7 @@ const Research: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-20">
+    <div className="min-h-screen bg-linear-to-b from-purple-50 to-pink-50 py-20">
       {/* Hero Section */}
       <motion.section 
         className="container mx-auto px-6 text-center mb-20"
@@ -57,7 +57,7 @@ const Research: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+        <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
           Research & Development
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -84,7 +84,7 @@ const Research: React.FC = () => {
               whileHover={{ y: -5, scale: 1.02 }}
             >
               <div className="flex items-center mb-4">
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-2xl mr-4">
+                <div className="bg-linear-to-r from-purple-100 to-pink-100 p-3 rounded-2xl mr-4">
                   <area.icon className="h-8 w-8 text-purple-600" />
                 </div>
                 <div>
@@ -152,7 +152,7 @@ const Research: React.FC = () => {
           {futureGoals.map((goal, index) => (
             <motion.div
               key={index}
-              className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 text-center"
+              className="bg-linear-to-br from-purple-50 to-pink-50 rounded-3xl p-8 text-center"
               whileHover={{ y: -5, scale: 1.05 }}
             >
               <div className="bg-white p-4 rounded-2xl inline-block mb-6 shadow-md">
@@ -172,7 +172,7 @@ const Research: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.8 }}
       >
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white max-w-4xl mx-auto">
+        <div className="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-6">Platform Development Status</h2>
           <p className="text-xl mb-8 leading-relaxed">
             AIVO is currently in active development. We are building our platform with a strong focus on 
@@ -204,7 +204,7 @@ const Research: React.FC = () => {
             that share our commitment to evidence-based educational technology.
           </p>
           <motion.button 
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 inline-flex items-center space-x-2"
+            className="bg-linear-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 inline-flex items-center space-x-2"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

@@ -163,7 +163,7 @@ export const Enterprise: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-24">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-7xl">
@@ -235,7 +235,7 @@ export const Enterprise: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-900">{section.title}</h3>
-                  <div className={`px-3 py-1 bg-gradient-to-r ${section.gradient} text-white rounded-full text-sm font-semibold`}>
+                  <div className={`px-3 py-1 bg-linear-to-r ${section.gradient} text-white rounded-full text-sm font-semibold`}>
                     {section.percentage}
                   </div>
                 </div>
@@ -243,7 +243,7 @@ export const Enterprise: React.FC = () => {
                 <ul className="space-y-3">
                   {section.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                       <span className="text-gray-700 text-sm">{feature}</span>
                     </li>
                   ))}
@@ -292,7 +292,7 @@ export const Enterprise: React.FC = () => {
                 <ul className="space-y-3">
                   {feature.benefits.map((benefit, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0"></div>
                       <span className="text-gray-700 text-sm">{benefit}</span>
                     </li>
                   ))}
@@ -325,7 +325,7 @@ export const Enterprise: React.FC = () => {
             {deploymentOptions.map((option, index) => (
               <motion.div
                 key={option.title}
-                className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100 text-center"
+                className="bg-linear-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -353,7 +353,7 @@ export const Enterprise: React.FC = () => {
       {/* Tech Stack Details */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-6 max-w-7xl">
-          <div className="bg-gradient-to-r from-gray-900 to-black rounded-3xl p-12 text-white">
+          <div className="bg-linear-to-r from-gray-900 to-black rounded-3xl p-12 text-white">
             <motion.div 
               className="text-center mb-12"
               initial={{ opacity: 0, y: 20 }}
@@ -408,7 +408,7 @@ export const Enterprise: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

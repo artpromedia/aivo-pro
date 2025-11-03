@@ -105,7 +105,7 @@ export const ResumeSubmission: React.FC = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center px-6 pt-24">
+      <div className="min-h-screen bg-linear-to-br from-green-50 to-blue-50 flex items-center justify-center px-6 pt-24">
         <motion.div
           className="max-w-md mx-auto text-center bg-white rounded-2xl p-8 shadow-lg"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -130,7 +130,7 @@ export const ResumeSubmission: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Header */}
-      <section className="py-12 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
+      <section className="py-12 px-6 bg-linear-to-br from-blue-50 to-purple-50">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -346,7 +346,7 @@ export const ResumeSubmission: React.FC = () => {
               <Button
                 type="submit"
                 disabled={!uploadedFile || isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-linear-to-r from-blue-600 to-purple-600 text-white px-12 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>

@@ -27,7 +27,7 @@ export const Contact: React.FC = () => {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="py-24 bg-gradient-to-br from-purple-50 to-pink-50">
+      <section className="py-24 bg-linear-to-br from-purple-50 to-pink-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <motion.h1
@@ -120,7 +120,7 @@ export const Contact: React.FC = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3"
+                  className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white py-3"
                 >
                   Send Message
                   <Send className="ml-2 w-5 h-5" />

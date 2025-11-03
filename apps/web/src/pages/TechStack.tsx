@@ -82,7 +82,7 @@ export const TechStack: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-white to-gray-50 pt-24">
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-7xl">
           <motion.div 

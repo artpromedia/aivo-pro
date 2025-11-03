@@ -188,7 +188,7 @@ const Investors: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-white to-emerald-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -202,7 +202,7 @@ const Investors: React.FC = () => {
               Investor Relations
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Transforming <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">Special Education</span> at Scale
+              Transforming <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-blue-600">Special Education</span> at Scale
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               AIVO is revolutionizing special education through AI-powered personalized learning, 
@@ -211,7 +211,7 @@ const Investors: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={handleContactInvestors}
-                className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-linear-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <Mail className="w-5 h-5" />
                 Contact Investor Relations
@@ -253,7 +253,7 @@ const Investors: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl p-6 text-center"
+                className="bg-linear-to-br from-emerald-50 to-blue-50 rounded-2xl p-6 text-center"
               >
                 <div className="text-3xl font-bold text-gray-900 mb-2">{metric.value}</div>
                 <div className="text-lg font-semibold text-gray-700 mb-2">{metric.title}</div>
@@ -319,7 +319,7 @@ const Investors: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl p-8"
+              className="bg-linear-to-br from-emerald-50 to-blue-50 rounded-2xl p-8"
             >
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Competitive Advantages</h3>
               <div className="space-y-4">
@@ -332,7 +332,7 @@ const Investors: React.FC = () => {
                   "Scalable SaaS platform with high gross margins"
                 ].map((advantage, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
                     <span className="text-gray-700">{advantage}</span>
                   </div>
                 ))}
@@ -343,7 +343,7 @@ const Investors: React.FC = () => {
       </section>
 
       {/* Company Milestones */}
-      <section className="py-20 px-6 bg-gradient-to-r from-emerald-50 to-blue-50">
+      <section className="py-20 px-6 bg-linear-to-r from-emerald-50 to-blue-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -427,7 +427,7 @@ const Investors: React.FC = () => {
                 className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                  <div className="w-16 h-16 bg-linear-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {leader.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div className="flex-1">
@@ -461,7 +461,7 @@ const Investors: React.FC = () => {
               
               <div className="space-y-6">
                 {investors.map((investor, index) => (
-                  <div key={index} className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-6">
+                  <div key={index} className="bg-linear-to-r from-emerald-50 to-blue-50 rounded-xl p-6">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-bold text-gray-900">{investor.name}</h3>
                       <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium">
@@ -521,7 +521,7 @@ const Investors: React.FC = () => {
       {/* Contact CTA */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-gradient-to-r from-emerald-600 to-blue-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-linear-to-r from-emerald-600 to-blue-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

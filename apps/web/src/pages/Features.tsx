@@ -94,7 +94,7 @@ export const Features: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-white to-purple-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-7xl">
@@ -127,7 +127,7 @@ export const Features: React.FC = () => {
                 className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow"
               >
                 <div className="flex items-start gap-4 mb-6">
-                  <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                  <div className={`w-14 h-14 bg-linear-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shrink-0`}>
                     <feature.icon className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -144,7 +144,7 @@ export const Features: React.FC = () => {
                 <ul className="space-y-2">
                   {feature.specs.map((spec, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 shrink-0"></div>
                       <span className="text-sm text-gray-700">{spec}</span>
                     </li>
                   ))}
@@ -190,7 +190,7 @@ export const Features: React.FC = () => {
             </div>
             <div className="text-center mt-8">
               <Button 
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                className="bg-linear-to-r from-purple-600 to-blue-600 text-white"
                 onClick={handleAPIDocumentationClick}
               >
                 View API Documentation

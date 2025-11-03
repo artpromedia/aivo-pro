@@ -137,7 +137,7 @@ export const Blog: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <section className="py-20 px-6 bg-linear-to-br from-purple-50 via-white to-blue-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div 
             className="text-center mb-16"
@@ -192,7 +192,7 @@ export const Blog: React.FC = () => {
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <motion.div
-            className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-3xl p-12 text-white mb-20"
+            className="bg-linear-to-br from-purple-600 to-blue-600 rounded-3xl p-12 text-white mb-20"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -369,7 +369,7 @@ export const Blog: React.FC = () => {
                 placeholder="Enter your email address"
                 className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white whitespace-nowrap">
+              <Button className="bg-linear-to-r from-purple-600 to-blue-600 text-white whitespace-nowrap">
                 Subscribe
               </Button>
             </div>

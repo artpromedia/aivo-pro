@@ -186,7 +186,7 @@ export const Careers: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-20 px-6 bg-linear-to-br from-blue-50 via-white to-purple-50">
         <div className="container mx-auto max-w-6xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -197,7 +197,7 @@ export const Careers: React.FC = () => {
             </span>
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Join Our Mission to 
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="block text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
                 Transform Education
               </span>
             </h1>
@@ -209,7 +209,7 @@ export const Careers: React.FC = () => {
             <div className="flex gap-4 justify-center">
               <Button 
                 onClick={handleViewPositions}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                className="bg-linear-to-r from-blue-600 to-purple-600 text-white"
               >
                 View Open Positions
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -253,7 +253,7 @@ export const Careers: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <div className={`w-16 h-16 bg-gradient-to-br ${value.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                <div className={`w-16 h-16 bg-linear-to-br ${value.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
                   <value.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">{value.title}</h3>
@@ -296,7 +296,7 @@ export const Careers: React.FC = () => {
                 <ul className="space-y-3">
                   {category.items.map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
                       <span className="text-gray-600">{item}</span>
                     </li>
                   ))}
@@ -375,7 +375,7 @@ export const Careers: React.FC = () => {
                   <div className="flex items-center justify-end">
                     <Button 
                       onClick={() => handleApplyPosition(position.title)}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-full lg:w-auto"
+                      className="bg-linear-to-r from-blue-600 to-purple-600 text-white w-full lg:w-auto"
                     >
                       Apply Now
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -402,7 +402,7 @@ export const Careers: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

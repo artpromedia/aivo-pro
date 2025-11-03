@@ -51,7 +51,7 @@ export const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-purple-50 to-white">
+      <section className="py-20 px-6 bg-linear-to-b from-purple-50 to-white">
         <div className="container mx-auto max-w-4xl">
           <motion.div 
             className="text-center mb-12"
@@ -94,7 +94,7 @@ export const PrivacyPolicy: React.FC = () => {
                 <ul className="space-y-3">
                   {section.content.map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 shrink-0"></div>
                       <span className="text-gray-600">{item}</span>
                     </li>
                   ))}

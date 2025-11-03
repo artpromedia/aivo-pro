@@ -21,11 +21,11 @@ const stats = [
 
 export const StatsSection: React.FC = () => {
   return (
-    <section className="py-24 bg-gradient-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
+    <section className="py-24 bg-linear-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full blur-3xl animate-float-delayed" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-linear-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-linear-to-r from-pink-400/20 to-purple-400/20 rounded-full blur-3xl animate-float-delayed" />
       </div>
       
       <div className="container mx-auto px-6 relative z-10">
@@ -43,7 +43,7 @@ export const StatsSection: React.FC = () => {
                 <p className="text-sm font-semibold text-purple-600 mb-4 uppercase tracking-wide">
                   {stat.label}
                 </p>
-                <p className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+                <p className="text-5xl md:text-6xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
                   {stat.value}
                 </p>
                 <p className="text-gray-600 text-lg">

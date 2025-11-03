@@ -113,7 +113,7 @@ export const ForStudents: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-100 overflow-hidden relative">
+      <section className="py-20 px-6 bg-linear-to-br from-purple-100 via-pink-50 to-yellow-100 overflow-hidden relative">
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
             <motion.div
@@ -125,7 +125,7 @@ export const ForStudents: React.FC = () => {
               </span>
               <h1 className="text-6xl font-bold text-gray-900 mb-6">
                 Learning is
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-pink-600 to-yellow-500">
                   Super Fun!
                 </span>
               </h1>
@@ -133,7 +133,7 @@ export const ForStudents: React.FC = () => {
                 Play games, earn rewards, and become a learning superstar! 🚀
               </p>
               <div className="flex gap-4 justify-center">
-                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg px-8 py-4">
+                <Button className="bg-linear-to-r from-purple-500 to-pink-500 text-white text-lg px-8 py-4">
                   Start Playing Now!
                   <Play className="w-5 h-5 ml-2" />
                 </Button>
@@ -203,7 +203,7 @@ export const ForStudents: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 mx-auto`}>
+                <div className={`w-16 h-16 bg-linear-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 mx-auto`}>
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">{feature.title}</h3>
@@ -215,7 +215,7 @@ export const ForStudents: React.FC = () => {
       </section>
 
       {/* Learning Activities */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+      <section className="py-20 bg-linear-to-br from-blue-50 to-purple-50">
         <div className="container mx-auto px-6 max-w-6xl">
           <motion.div 
             className="text-center mb-16"
@@ -243,7 +243,7 @@ export const ForStudents: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-6 mb-6">
-                  <div className={`w-20 h-20 bg-gradient-to-br ${activity.gradient} rounded-2xl flex items-center justify-center text-3xl`}>
+                  <div className={`w-20 h-20 bg-linear-to-br ${activity.gradient} rounded-2xl flex items-center justify-center text-3xl`}>
                     {activity.emoji}
                   </div>
                   <div>
@@ -253,7 +253,7 @@ export const ForStudents: React.FC = () => {
                   </div>
                 </div>
                 <p className="text-lg text-gray-600 mb-6">{activity.description}</p>
-                <Button className={`bg-gradient-to-r ${activity.gradient} text-white w-full`}>
+                <Button className={`bg-linear-to-r ${activity.gradient} text-white w-full`}>
                   Start Playing! 🎮
                 </Button>
               </motion.div>
@@ -283,7 +283,7 @@ export const ForStudents: React.FC = () => {
             {achievements.map((achievement, index) => (
               <motion.div
                 key={achievement.name}
-                className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 text-center border-2 border-yellow-200 hover:shadow-lg transition-all cursor-pointer hover:scale-110"
+                className="bg-linear-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 text-center border-2 border-yellow-200 hover:shadow-lg transition-all cursor-pointer hover:scale-110"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -299,7 +299,7 @@ export const ForStudents: React.FC = () => {
       </section>
 
       {/* Student Testimonials */}
-      <section className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
+      <section className="py-20 bg-linear-to-br from-green-50 to-blue-50">
         <div className="container mx-auto px-6 max-w-6xl">
           <motion.div 
             className="text-center mb-16"
@@ -325,7 +325,7 @@ export const ForStudents: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <div className={`w-20 h-20 bg-gradient-to-br ${testimonial.color} rounded-full flex items-center justify-center text-4xl mx-auto mb-6`}>
+                <div className={`w-20 h-20 bg-linear-to-br ${testimonial.color} rounded-full flex items-center justify-center text-4xl mx-auto mb-6`}>
                   {testimonial.avatar}
                 </div>
                 <blockquote className="text-lg text-gray-700 mb-6 font-medium italic">
@@ -345,7 +345,7 @@ export const ForStudents: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500">
+      <section className="py-20 bg-linear-to-r from-purple-600 via-pink-600 to-yellow-500">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
