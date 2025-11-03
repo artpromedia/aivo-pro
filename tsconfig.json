@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "noEmit": true,
+    "incremental": true,
+    "paths": {
+      "@aivo/ui": ["./packages/ui/src"],
+      "@aivo/ui/*": ["./packages/ui/src/*"],
+      "@aivo/types": ["./packages/types/src"],
+      "@aivo/utils": ["./packages/utils/src"],
+      "@aivo/auth": ["./packages/auth/src"],
+      "@aivo/config": ["./packages/config/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".turbo"]
+}

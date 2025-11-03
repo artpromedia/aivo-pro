@@ -1,0 +1,71 @@
+services:
+  web:
+    build: ./apps/web
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+
+  parent-portal:
+    build: ./apps/parent-portal
+    ports:
+      - "5174:5174"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+
+  teacher-portal:
+    build: ./apps/teacher-portal
+    ports:
+      - "5175:5175"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+
+  learner-app:
+    build: ./apps/learner-app
+    ports:
+      - "5176:5176"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+
+  baseline-assessment:
+    build: ./apps/baseline-assessment
+    ports:
+      - "5179:5179"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+
+  mock-api:
+    build: ./services/mock-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    command: pnpm dev
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+
+networks:
+  default:
+    name: aivo-network

@@ -1,0 +1,4 @@
+# Git attributes for proper file handling
+*.md linguist-detectable=true
+*.md linguist-documentation=true
+.github/copilot-instructions.md linguist-language=Markdown

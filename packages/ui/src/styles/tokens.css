@@ -1,0 +1,43 @@
+@layer base {
+  :root {
+    /* Semantic color system matching the screenshots */
+    --color-background: 234 240 255; /* Light blue-gray background */
+    --color-surface: 255 255 255;
+    --color-surface-elevated: 255 255 255;
+    
+    /* Primary brand colors (coral/salmon from screenshots) */
+    --color-primary-50: 255 241 238;
+    --color-primary-100: 255 228 222;
+    --color-primary-200: 255 205 193;
+    --color-primary-300: 255 169 150;
+    --color-primary-400: 255 123 92; /* Main coral */
+    --color-primary-500: 255 99 71;  /* Tomato/coral */
+    --color-primary-600: 234 88 64;
+    
+    /* Accent gradient (pink/purple from AI assistant) */
+    --gradient-accent: linear-gradient(135deg, #FF6B9D 0%, #FEC8D8 50%, #FFDFD3 100%);
+    
+    /* Status colors */
+    --color-success: 34 197 94;
+    --color-warning: 251 146 60;
+    --color-error: 239 68 68;
+    --color-info: 59 130 246;
+    
+    /* Typography */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-display: 'Poppins', system-ui, sans-serif;
+    
+    /* Rounded corners (extra rounded like screenshots) */
+    --radius-sm: 0.75rem;
+    --radius-md: 1.25rem;
+    --radius-lg: 1.75rem;
+    --radius-xl: 2.25rem;
+    --radius-full: 9999px;
+    
+    /* Shadows (soft, colored shadows) */
+    --shadow-sm: 0 2px 8px rgba(255, 123, 92, 0.08);
+    --shadow-md: 0 4px 16px rgba(255, 123, 92, 0.12);
+    --shadow-lg: 0 8px 32px rgba(255, 123, 92, 0.16);
+    --shadow-xl: 0 16px 48px rgba(255, 123, 92, 0.20);
+  }
+}
