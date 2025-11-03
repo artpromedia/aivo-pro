@@ -5,6 +5,7 @@ A comprehensive mock backend service for the AIVO Learning Platform that provide
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 20.19.4+
 - pnpm (installed via Turborepo)
 
@@ -27,14 +28,16 @@ pnpm build
 pnpm start
 ```
 
-The API server will start on **http://localhost:3001** by default.
+The API server will start on **<http://localhost:3001>** by default.
 
 ## 📋 API Endpoints
 
 ### Health Check
+
 - `GET /health` - Server health status
 
 ### Authentication
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/mfa/setup` - Setup MFA
@@ -43,6 +46,7 @@ The API server will start on **http://localhost:3001** by default.
 - `POST /api/auth/refresh` - Refresh token
 
 ### Children Management
+
 - `GET /api/children` - Get all children for authenticated parent
 - `POST /api/children` - Create new child
 - `GET /api/children/:childId` - Get specific child
@@ -51,6 +55,7 @@ The API server will start on **http://localhost:3001** by default.
 - `GET /api/children/:childId/progress` - Get child progress
 
 ### Development Endpoints
+
 - `GET /api/courses` - Sample courses data
 - `GET /api/progress/:userId` - Sample progress data
 
@@ -65,10 +70,12 @@ Authorization: Bearer <jwt_token>
 ### Default Test Accounts
 
 **Admin Account:**
+
 - Email: `admin@aivo.ai`
 - Password: `admin123`
 
 **Parent Accounts:**
+
 - Email: `parent1@example.com` through `parent5@example.com`
 - Password: `password123`
 
@@ -96,6 +103,7 @@ The server provides real-time features via WebSocket connections at `ws://localh
 ### WebSocket Events
 
 **Client → Server:**
+
 ```javascript
 // Real-time focus tracking
 {
@@ -117,6 +125,7 @@ The server provides real-time features via WebSocket connections at `ws://localh
 ```
 
 **Server → Client:**
+
 ```javascript
 // Focus update broadcast
 {
@@ -139,7 +148,7 @@ The server provides real-time features via WebSocket connections at `ws://localh
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── server.ts              # Main server file
 ├── database/
@@ -166,33 +175,38 @@ NODE_ENV=development
 ### CORS Configuration
 
 The server is configured to accept requests from:
-- http://localhost:5173 (Web app)
-- http://localhost:5174 (Parent portal)
-- http://localhost:5175 (Teacher portal) 
-- http://localhost:5176 (Learner app)
-- http://localhost:5179 (Baseline assessment)
+
+- <http://localhost:5173> (Web app)
+- <http://localhost:5174> (Parent portal)
+- <http://localhost:5175> (Teacher portal)
+- <http://localhost:5176> (Learner app)
+- <http://localhost:5179> (Baseline assessment)
 
 ## 📈 Features
 
 ### 🎯 Adaptive Assessment Engine
+
 - **Baseline Assessments**: Grade-appropriate initial evaluations
 - **Skill Vector Tracking**: Detailed progress across 25+ skill areas
 - **Adaptive Questioning**: Dynamic difficulty adjustment
 - **Confidence Scoring**: Response time and focus metrics
 
 ### 👥 Multi-Role Support
+
 - **Parents**: Child management, progress tracking, learning profiles
 - **Teachers**: Student oversight, assessment creation
 - **Learners**: Personalized learning experiences
 - **Admins**: System-wide management
 
 ### 🎮 Personalized Learning
+
 - **Interest-Based Suggestions**: Activities tailored to child interests
 - **Learning Style Adaptation**: Visual, auditory, kinesthetic, mixed
 - **Focus Level Tracking**: Real-time engagement monitoring
 - **Motivation Mapping**: Achievement, social, exploration, mastery, creativity
 
 ### 📊 Real-Time Analytics
+
 - **Progress Tracking**: Daily learning metrics
 - **Focus Monitoring**: Distraction detection and engagement scoring
 - **Skill Development**: Granular progress across subjects
@@ -203,6 +217,7 @@ The server is configured to accept requests from:
 ### Manual Testing
 
 **Login Test:**
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
@@ -210,12 +225,14 @@ curl -X POST http://localhost:3001/api/auth/login \
 ```
 
 **Get Children Test:**
+
 ```bash
 curl -X GET http://localhost:3001/api/children \
   -H "Authorization: Bearer <token_from_login>"
 ```
 
 **Health Check:**
+
 ```bash
 curl http://localhost:3001/health
 ```
@@ -223,6 +240,7 @@ curl http://localhost:3001/health
 ### Response Examples
 
 **Login Success:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -241,6 +259,7 @@ curl http://localhost:3001/health
 ```
 
 **Children List:**
+
 ```json
 {
   "data": [
@@ -270,6 +289,7 @@ curl http://localhost:3001/health
 ## 🎨 Integration with Frontend
 
 ### Parent Portal Integration
+
 ```typescript
 // Login example
 const response = await fetch('http://localhost:3001/api/auth/login', {
@@ -283,6 +303,7 @@ localStorage.setItem('authToken', token);
 ```
 
 ### WebSocket Integration
+
 ```typescript
 const ws = new WebSocket('ws://localhost:3001?userId=parent-1');
 
@@ -305,16 +326,19 @@ ws.send(JSON.stringify({
 ## 📝 Development Notes
 
 ### Adding New Endpoints
+
 1. Add route handler in appropriate file (`routes/auth.ts`, `routes/children.ts`)
 2. Import and register route in `server.ts`
 3. Update this README with endpoint documentation
 
 ### Database Modifications
+
 - Modify interfaces in `database/types.ts`
 - Update seed data generation in `database/seed.ts`
 - Ensure migrations are handled for existing data
 
 ### Real-Time Features
+
 - Add new WebSocket message types in `handleWebSocketMessage`
 - Update client documentation for new events
 - Test with multiple concurrent connections
@@ -324,6 +348,7 @@ ws.send(JSON.stringify({
 ### Common Issues
 
 **Port Already in Use:**
+
 ```bash
 # Check what's using the port
 netstat -ano | findstr :3001
@@ -333,10 +358,12 @@ taskkill /PID <process_id> /F
 ```
 
 **CORS Errors:**
+
 - Verify frontend URL is in CORS whitelist
 - Check that requests include proper headers
 
 **Authentication Failures:**
+
 - Ensure JWT_SECRET matches across services
 - Check token expiration (7 days default)
 - Verify Authorization header format: `Bearer <token>`
@@ -360,6 +387,6 @@ When contributing to the mock API service:
 
 ---
 
-**🎯 Ready for Development!** 
+**🎯 Ready for Development!**
 
 The mock API provides a complete backend simulation for the AIVO Learning Platform with authentication, real-time features, and extensive test data. Perfect for frontend development and integration testing.
