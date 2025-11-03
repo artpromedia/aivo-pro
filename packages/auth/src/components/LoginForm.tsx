@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@aivo/ui';
+import { Button } from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
 import { Eye, EyeOff, Mail, Phone, Lock } from 'lucide-react';
 

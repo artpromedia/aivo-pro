@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@aivo/ui';
+import { Button } from './ui/Button';
 import { useMFA } from '../hooks/useMFA';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, Copy, Check, RefreshCw, Smartphone } from 'lucide-react';
