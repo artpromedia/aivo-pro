@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from './ui/Button';
+// Removed Button import - using custom styled buttons
 import { useMFA } from '../hooks/useMFA';
 import { Shield, ArrowLeft, Key } from 'lucide-react';
 
@@ -105,15 +105,17 @@ export const MFAVerification: React.FC<MFAVerificationProps> = ({
           </div>
 
           <div className="space-y-4">
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={loading}
-              className="w-full"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
             >
-              Verify & Continue
-            </Button>
+              {loading ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Verify Code'
+              )}
+            </button>
 
             <button
               type="button"

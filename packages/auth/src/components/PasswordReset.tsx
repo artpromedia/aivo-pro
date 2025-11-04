@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
-import { Mail, ArrowLeft, Eye, EyeOff, Lock, CheckCircle } from 'lucide-react';
+import { Mail, ArrowLeft, Eye, EyeOff, Lock, CheckCircle, Brain, ArrowRight } from 'lucide-react';
 
 const requestResetSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -111,58 +110,71 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-coral-500 to-pink-500 rounded-2xl mx-auto flex items-center justify-center mb-4">
-                <Mail className="w-8 h-8 text-white" />
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl flex items-center justify-center shadow-xl shadow-purple-300/30 animate-pulse">
+                  <Brain className="w-10 h-10 text-white" />
+                </div>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password?</h1>
-              <p className="text-gray-600">
-                Enter your email and we'll send you a link to reset your password
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+                Reset Password
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Enter your email and we'll send you a reset link
               </p>
             </div>
 
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800">
-                {error}
+              <div className="px-4 py-3 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-700 shadow-sm">
+                <p className="font-medium">{error}</p>
               </div>
             )}
 
             <form onSubmit={handleRequestSubmit(onRequestReset)} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Email Address</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-800">Email Address</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="w-4 h-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-purple-400" />
                   </div>
                   <input
                     {...registerRequest('email')}
                     type="email"
-                    placeholder="Enter your email address"
-                    className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                    placeholder="your.email@example.com"
+                    className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                      requestErrors.email 
+                        ? 'border-red-300 focus:border-red-500' 
+                        : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                    }`}
                     autoComplete="email"
                   />
                 </div>
                 {requestErrors.email && (
-                  <p className="text-sm text-red-600">{requestErrors.email.message}</p>
+                  <p className="text-sm text-red-600 font-medium">{requestErrors.email.message}</p>
                 )}
               </div>
 
-              <Button
+              <button
                 type="submit"
-                variant="primary"
-                size="lg"
-                loading={loading}
-                className="w-full"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
               >
-                Send Reset Link
-              </Button>
+                {loading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Send Reset Link
+                    <ArrowRight className="ml-3 h-5 w-5" />
+                  </>
+                )}
+              </button>
 
               {onBack && (
                 <button
                   type="button"
                   onClick={onBack}
-                  className="flex items-center justify-center w-full text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  className="flex items-center justify-center w-full text-sm text-purple-600 hover:text-purple-700 font-semibold hover:underline transition-colors"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to login
                 </button>
               )}
@@ -174,12 +186,16 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-coral-500 to-pink-500 rounded-2xl mx-auto flex items-center justify-center mb-4">
-                <Lock className="w-8 h-8 text-white" />
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl flex items-center justify-center shadow-xl shadow-purple-300/30 animate-pulse">
+                  <Lock className="w-10 h-10 text-white" />
+                </div>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Reset Password</h1>
-              <p className="text-gray-600">
-                Enter your new password below
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+                New Password
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Enter your new secure password below
               </p>
             </div>
 
@@ -205,67 +221,88 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">New Password</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-800">New Password</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="w-4 h-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-purple-400" />
                   </div>
                   <input
                     {...registerReset('password')}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your new password"
-                    className="block w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                    className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                      resetErrors.password 
+                        ? 'border-red-300 focus:border-red-500' 
+                        : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                    }`}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-purple-50 rounded-r-2xl transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                    ) : (
+                      <Eye className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                    )}
                   </button>
                 </div>
                 {resetErrors.password && (
-                  <p className="text-sm text-red-600">{resetErrors.password.message}</p>
+                  <p className="text-sm text-red-600 font-medium">{resetErrors.password.message}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-800">Confirm Password</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="w-4 h-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-purple-400" />
                   </div>
                   <input
                     {...registerReset('confirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm your new password"
-                    className="block w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                    className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                      resetErrors.confirmPassword 
+                        ? 'border-red-300 focus:border-red-500' 
+                        : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                    }`}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-purple-50 rounded-r-2xl transition-colors"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                    ) : (
+                      <Eye className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                    )}
                   </button>
                 </div>
                 {resetErrors.confirmPassword && (
-                  <p className="text-sm text-red-600">{resetErrors.confirmPassword.message}</p>
+                  <p className="text-sm text-red-600 font-medium">{resetErrors.confirmPassword.message}</p>
                 )}
               </div>
 
-              <Button
+              <button
                 type="submit"
-                variant="primary"
-                size="lg"
-                loading={loading}
-                className="w-full"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
               >
-                Reset Password
-              </Button>
+                {loading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Reset Password
+                    <ArrowRight className="ml-3 h-5 w-5" />
+                  </>
+                )}
+              </button>
             </form>
           </div>
         );
@@ -290,26 +327,24 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
             </div>
 
             {resetToken ? (
-              <Button
-                variant="primary"
-                size="lg"
+              <button
                 onClick={() => onSuccess?.()}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-lg shadow-purple-200/50 flex items-center justify-center"
               >
                 Continue to Login
-              </Button>
+                <ArrowRight className="ml-3 h-5 w-5" />
+              </button>
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
                   Didn't receive the email? Check your spam folder or try again.
                 </p>
-                <Button
-                  variant="outline"
+                <button
                   onClick={() => setStep('request')}
-                  className="w-full"
+                  className="w-full border-2 border-purple-500 text-purple-600 py-4 px-6 rounded-2xl font-bold text-lg hover:bg-purple-50 transition-all duration-200 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-sm hover:shadow-md"
                 >
                   Try Again
-                </Button>
+                </button>
               </div>
             )}
 
@@ -332,7 +367,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
   };
 
   return (
-    <div className={`w-full max-w-md bg-white rounded-2xl shadow-lg p-8 ${className}`}>
+    <div className={`w-full max-w-md bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl shadow-purple-200/50 p-8 border border-white/20 ${className}`}>
       {renderStep()}
     </div>
   );

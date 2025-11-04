@@ -4,10 +4,11 @@ export { useAuth } from './hooks/useAuth';
 
 // Component exports
 export { LoginForm } from './components/LoginForm';
+export { SignupForm } from './components/SignupForm';
+export { PasswordReset } from './components/PasswordReset';
 export { MFASetup } from './components/MFASetup';
 export { MFAVerification } from './components/MFAVerification';
-export { PasswordReset } from './components/PasswordReset';
-export { SignupForm } from './components/SignupForm';
+export { AuthContainer } from './components/AuthContainer';
 
 // Type exports
 export * from './types/auth.types';

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../utils/cn';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
   leftIcon?: React.ReactNode;
@@ -11,11 +11,12 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const getVariantClasses = (variant: string = 'primary') => {
   const variants = {
-    primary: 'bg-coral-500 text-white shadow-md hover:bg-coral-600 hover:shadow-lg',
-    secondary: 'bg-white text-gray-900 shadow-sm border border-gray-200 hover:bg-gray-50',
-    outline: 'border-2 border-coral-500 text-coral-500 hover:bg-coral-50',
-    ghost: 'hover:bg-gray-100 text-gray-700',
-    danger: 'bg-red-500 text-white hover:bg-red-600',
+    primary: 'bg-coral-500 text-white shadow-coral hover:bg-coral-600 hover:shadow-lg transform hover:scale-105',
+    secondary: 'bg-white text-gray-900 shadow-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md',
+    outline: 'border-2 border-coral-500 text-coral-500 hover:bg-coral-50 hover:shadow-coral',
+    ghost: 'hover:bg-gray-100 text-gray-700 hover:shadow-sm',
+    danger: 'bg-red-500 text-white hover:bg-red-600 hover:shadow-lg',
+    gradient: 'bg-gradient-to-r from-coral-500 to-purple-500 text-white shadow-lg hover:from-coral-600 hover:to-purple-600 hover:shadow-xl transform hover:scale-105',
   };
   return variants[variant as keyof typeof variants] || variants.primary;
 };
@@ -47,7 +48,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <span className="mr-2">⏳</span>
+          <div className="mr-2 animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
         ) : leftIcon ? (
           <span className="mr-2">{leftIcon}</span>
         ) : null}

@@ -6,9 +6,9 @@ class AuthService {
   private api: AxiosInstance;
   private refreshPromise: Promise<AuthTokens> | null = null;
 
-  constructor(baseURL: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:8000') {
+  constructor(baseURL: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:3001') {
     this.api = axios.create({
-      baseURL: `${baseURL}/v1/auth`,
+      baseURL: `${baseURL}/api/auth`,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',

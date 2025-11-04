@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
-import { Eye, EyeOff, Mail, Phone, Lock, User, Calendar } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone, Lock, User, Calendar, Brain, ArrowRight, UserPlus } from 'lucide-react';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -29,7 +28,7 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 interface SignupFormProps {
-  onSuccess?: (data: { email: string; requiresVerification: boolean }) => void;
+  onSuccess?: () => void;
   className?: string;
 }
 
@@ -59,10 +58,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     try {
       const { confirmPassword, termsAccepted, ...signupData } = data;
       await signup(signupData);
-      onSuccess?.({
-        email: data.email,
-        requiresVerification: true
-      });
+      onSuccess?.();
     } catch (error: any) {
       if (error.response?.status === 409) {
         setFormError('email', {
@@ -77,23 +73,30 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   };
 
   return (
-    <div className={`w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8 ${className}`}>
+    <div className={`w-full max-w-2xl bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl shadow-purple-200/50 p-8 border border-white/20 ${className}`}>
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Join AIVO Learning</h1>
-        <p className="text-gray-600">Create your account to get started</p>
+        <div className="flex items-center justify-center mb-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl flex items-center justify-center shadow-xl shadow-purple-300/30 animate-pulse">
+            <Brain className="w-10 h-10 text-white" />
+          </div>
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+          Join AIVO Learning
+        </h1>
+        <p className="text-gray-600 text-lg">Create your account to get started</p>
       </div>
 
       {error && (
-        <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800">
-          {error}
+        <div className="mb-6 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-700 shadow-sm">
+          <p className="font-medium">{error}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Role Selection */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700">I am a...</label>
-          <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-4">
+          <label className="text-sm font-semibold text-gray-800">I am a...</label>
+          <div className="grid grid-cols-3 gap-4">
             {[
               { value: 'parent', label: 'Parent', description: 'Supporting my child\'s learning' },
               { value: 'teacher', label: 'Teacher', description: 'Educating students' },
@@ -101,10 +104,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             ].map((role) => (
               <label
                 key={role.value}
-                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-colors ${
+                className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                   selectedRole === role.value
-                    ? 'border-coral-500 bg-coral-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-md shadow-purple-100 scale-105'
+                    : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/50'
                 }`}
               >
                 <input
@@ -114,214 +117,252 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                   className="sr-only"
                 />
                 <div className="text-center">
-                  <div className="text-lg font-medium text-gray-900">{role.label}</div>
-                  <div className="text-xs text-gray-600 mt-1">{role.description}</div>
+                  <div className={`text-lg font-semibold ${
+                    selectedRole === role.value ? 'text-purple-700' : 'text-gray-900'
+                  }`}>{role.label}</div>
+                  <div className={`text-xs mt-1 ${
+                    selectedRole === role.value ? 'text-purple-600' : 'text-gray-600'
+                  }`}>{role.description}</div>
                 </div>
               </label>
             ))}
           </div>
           {errors.role && (
-            <p className="text-sm text-red-600">{errors.role.message}</p>
+            <p className="text-sm text-red-600 font-medium">{errors.role.message}</p>
           )}
         </div>
 
         {/* Name Fields */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">First Name</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">First Name</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('firstName')}
                 type="text"
-                placeholder="First name"
-                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                placeholder="Your first name"
+                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.firstName 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="given-name"
               />
             </div>
             {errors.firstName && (
-              <p className="text-sm text-red-600">{errors.firstName.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.firstName.message}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Last Name</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">Last Name</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('lastName')}
                 type="text"
-                placeholder="Last name"
-                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                placeholder="Your last name"
+                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.lastName 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="family-name"
               />
             </div>
             {errors.lastName && (
-              <p className="text-sm text-red-600">{errors.lastName.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.lastName.message}</p>
             )}
           </div>
         </div>
 
         {/* Contact Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">Email Address</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('email')}
                 type="email"
-                placeholder="Enter your email"
-                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                placeholder="your.email@example.com"
+                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.email 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="email"
               />
             </div>
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.email.message}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Phone Number</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">Phone Number</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Phone className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Phone className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('phone')}
                 type="tel"
-                placeholder="Enter your phone number"
-                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                placeholder="+1 (555) 123-4567"
+                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.phone 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="tel"
               />
             </div>
             {errors.phone && (
-              <p className="text-sm text-red-600">{errors.phone.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.phone.message}</p>
             )}
           </div>
         </div>
 
         {/* Date of Birth */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Date of Birth</label>
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-800">Date of Birth</label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Calendar className="w-5 h-5 text-purple-400" />
             </div>
             <input
               {...register('dateOfBirth')}
               type="date"
-              className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+              className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                errors.dateOfBirth 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+              }`}
             />
           </div>
           {errors.dateOfBirth && (
-            <p className="text-sm text-red-600">{errors.dateOfBirth.message}</p>
+            <p className="text-sm text-red-600 font-medium">{errors.dateOfBirth.message}</p>
           )}
         </div>
 
         {/* Password Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Password</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">Password</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password"
-                className="block w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                placeholder="At least 8 characters"
+                className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.password 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-purple-50 rounded-r-2xl transition-colors"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                ) : (
+                  <Eye className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                )}
               </button>
             </div>
             {errors.password && (
-              <p className="text-sm text-red-600">{errors.password.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.password.message}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-800">Confirm Password</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="w-4 h-4 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="w-5 h-5 text-purple-400" />
               </div>
               <input
                 {...register('confirmPassword')}
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm your password"
-                className="block w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-coral-500 focus:ring-1 focus:ring-coral-500 focus:outline-none transition-colors"
+                className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
+                  errors.confirmPassword 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-purple-500 hover:border-purple-300'
+                }`}
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-purple-50 rounded-r-2xl transition-colors"
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                ) : (
+                  <Eye className="w-5 h-5 text-purple-500 hover:text-purple-700" />
+                )}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.confirmPassword.message}</p>
             )}
           </div>
         </div>
 
         {/* Terms and Conditions */}
-        <div className="space-y-2">
-          <label className="flex items-start space-x-3">
+        <div className="space-y-3">
+          <label className="flex items-start cursor-pointer">
             <input
               {...register('termsAccepted')}
               type="checkbox"
-              className="mt-1 rounded border-gray-300 text-coral-500 focus:ring-coral-500"
+              className="w-5 h-5 mt-0.5 rounded-lg border-2 border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2 focus:ring-offset-2"
             />
-            <span className="text-sm text-gray-600">
+            <span className="ml-3 text-sm text-gray-700 leading-relaxed">
               I agree to the{' '}
-              <a href="/terms" className="text-coral-500 hover:underline">
+              <a href="/terms" className="text-purple-600 hover:text-purple-700 font-semibold hover:underline">
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="/privacy" className="text-coral-500 hover:underline">
+              <a href="/privacy" className="text-purple-600 hover:text-purple-700 font-semibold hover:underline">
                 Privacy Policy
               </a>
             </span>
           </label>
           {errors.termsAccepted && (
-            <p className="text-sm text-red-600">{errors.termsAccepted.message}</p>
+            <p className="text-sm text-red-600 font-medium">{errors.termsAccepted.message}</p>
           )}
         </div>
 
         {/* Submit Button */}
-        <Button
+        <button
           type="submit"
-          variant="primary"
-          size="lg"
-          loading={loading}
-          className="w-full"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
         >
-          Create Account
-        </Button>
-
-        {/* Login Link */}
-        <p className="text-center text-gray-600">
-          Already have an account?{' '}
-          <a href="/login" className="text-coral-500 font-medium hover:underline">
-            Sign in here
-          </a>
-        </p>
+          {loading ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <UserPlus className="mr-3 h-5 w-5" />
+              Create Account
+              <ArrowRight className="ml-3 h-5 w-5" />
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

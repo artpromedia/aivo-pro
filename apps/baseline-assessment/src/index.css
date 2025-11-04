@@ -10,3 +10,47 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* AIVO Brand Gradients */
+.bg-aivo-gradient {
+  background: linear-gradient(135deg, #FF7B5C 0%, #FF636F 50%, #a855f7 100%);
+}
+
+.bg-aivo-gradient-soft {
+  background: linear-gradient(135deg, #fef7f0 0%, #fef2f2 50%, #faf5ff 100%);
+}
+
+/* Glass morphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #FF7B5C, #FF636F);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #FF636F, #a855f7);
+}
+
+/* Custom shadow utilities */
+.shadow-coral {
+  box-shadow: 0 10px 25px -5px rgba(255, 123, 92, 0.1), 0 10px 10px -5px rgba(255, 123, 92, 0.04);
+}
+
+.shadow-purple {
+  box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.1), 0 10px 10px -5px rgba(168, 85, 247, 0.04);
+}

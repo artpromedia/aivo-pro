@@ -2,6 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+/* AIVO Brand Gradients */
+.bg-aivo-gradient {
+  background: linear-gradient(135deg, #FF7B5C 0%, #FF636F 50%, #9333ea 100%);
+}
+
+.bg-aivo-purple {
+  background: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
+}
+
+.bg-aivo-coral {
+  background: linear-gradient(135deg, #FF7B5C 0%, #FF636F 100%);
+}
+
+/* Glass morphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #FF7B5C, #FF636F);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #e85d3d, #e11d48);
+}
+
+/* Focus styles */
+.focus-coral:focus {
+  outline: 2px solid #FF7B5C;
+  outline-offset: 2px;
+}
+
+/* Card shadows with brand colors */
+.shadow-coral {
+  box-shadow: 0 4px 14px -2px rgba(255, 123, 92, 0.2);
+}
+
+.shadow-purple {
+  box-shadow: 0 4px 14px -2px rgba(147, 51, 234, 0.2);
+}
+
+/* Animated backgrounds */
+.bg-animated-gradient {
+  background: linear-gradient(-45deg, #FF7B5C, #FF636F, #9333ea, #c084fc);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+/* AIVO Brand Gradients */
+.bg-aivo-gradient {
+  background: linear-gradient(135deg, #FF7B5C 0%, #FF636F 50%, #9333ea 100%);
+}
+
+.bg-aivo-purple {
+  background: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
+}
+
+.bg-aivo-coral {
+  background: linear-gradient(135deg, #FF7B5C 0%, #FF636F 100%);
+}
+
+/* Custom animations for AIVO */
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-gentle-bounce {
+  animation: gentle-bounce 3s ease-in-out infinite;
+}
+
+/* Glass morphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #FF7B5C, #FF636F);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #e85d3d, #e11d48);
+}
+
+/* Focus styles */
+.focus-coral:focus {
+  outline: 2px solid #FF7B5C;
+  outline-offset: 2px;
+}
+
+/* Card shadows with brand colors */
+.shadow-coral {
+  box-shadow: 0 4px 14px -2px rgba(255, 123, 92, 0.2);
+}
+
+.shadow-purple {
+  box-shadow: 0 4px 14px -2px rgba(147, 51, 234, 0.2);
+}
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

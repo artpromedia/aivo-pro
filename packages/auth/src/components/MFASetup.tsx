@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from './ui/Button';
+// Removed Button import - using custom styled buttons
 import { useMFA } from '../hooks/useMFA';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, Copy, Check, RefreshCw, Smartphone } from 'lucide-react';
@@ -163,22 +163,24 @@ export const MFASetup: React.FC<MFASetupProps> = ({
             )}
 
             <div className="flex space-x-4">
-              <Button
-                variant="outline"
+              <button
                 onClick={() => generateQRCode()}
-                loading={loading}
-                className="flex-1"
+                disabled={loading}
+                className="flex-1 border-2 border-purple-500 text-purple-600 py-3 px-4 rounded-xl font-bold hover:bg-purple-50 transition-all duration-200 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-sm hover:shadow-md flex items-center justify-center"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Regenerate
-              </Button>
-              <Button
-                variant="primary"
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  'Regenerate'
+                )}
+              </button>
+              <button
                 onClick={() => setStep('verify')}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-3 px-6 rounded-xl font-bold hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-lg shadow-purple-200/50"
               >
                 Continue
-              </Button>
+              </button>
             </div>
           </div>
         );
@@ -223,26 +225,28 @@ export const MFASetup: React.FC<MFASetupProps> = ({
               </div>
 
               <div className="flex space-x-4">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => {
                     setStep('generate');
                     reset();
                     clearError();
                   }}
-                  className="flex-1"
+                  className="flex-1 border-2 border-purple-500 text-purple-600 py-3 px-4 rounded-xl font-bold hover:bg-purple-50 transition-all duration-200 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-sm hover:shadow-md"
                 >
                   Back
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
-                  variant="primary"
-                  loading={loading}
-                  className="flex-1"
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-3 px-6 rounded-xl font-bold hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
                 >
-                  Verify
-                </Button>
+                  {loading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    'Verify'
+                  )}
+                </button>
               </div>
             </form>
           </div>
@@ -300,14 +304,12 @@ export const MFASetup: React.FC<MFASetupProps> = ({
               </div>
             )}
 
-            <Button
-              variant="primary"
+            <button
               onClick={handleComplete}
-              className="w-full"
-              size="lg"
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-lg shadow-purple-200/50"
             >
               Complete Setup
-            </Button>
+            </button>
           </div>
         );
 
@@ -327,14 +329,12 @@ export const MFASetup: React.FC<MFASetupProps> = ({
               </p>
             </div>
 
-            <Button
-              variant="primary"
+            <button
               onClick={onComplete}
-              className="w-full"
-              size="lg"
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 shadow-lg shadow-purple-200/50"
             >
               Continue to Dashboard
-            </Button>
+            </button>
           </div>
         );
 

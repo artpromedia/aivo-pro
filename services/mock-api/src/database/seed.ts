@@ -35,6 +35,25 @@ export const initializeDatabase = () => {
   };
   database.users.set(adminUser.id, adminUser);
 
+  // Create test parent user
+  const testParent: User = {
+    id: 'parent-test',
+    email: 'parent@example.com',
+    password: bcrypt.hashSync('password', 10),
+    role: 'parent',
+    profile: {
+      firstName: 'Maria',
+      lastName: 'Schmidt',
+      avatar: faker.image.avatar(),
+      phone: '+1-555-123-4567',
+      timezone: 'UTC-5'
+    },
+    children: [],
+    createdAt: new Date().toISOString(),
+    lastActive: new Date().toISOString()
+  };
+  database.users.set(testParent.id, testParent);
+
   // Create sample parent users
   for (let i = 1; i <= 5; i++) {
     const parentUser: User = {

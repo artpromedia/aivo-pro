@@ -44,20 +44,30 @@ router.post('/login', async (req: Request, res: Response) => {
       });
     }
 
-    // Generate token
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    // Generate tokens
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, JWT_SECRET, { expiresIn: '7d' });
     
     // Update last active
     user.lastActive = new Date().toISOString();
     
     res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
-        role: user.role,
-        profile: user.profile,
-        children: user.children
+        firstName: user.profile.firstName,
+        lastName: user.profile.lastName,
+        role: user.role.toUpperCase(),
+        emailVerified: true,
+        mfaEnabled: user.mfa?.enabled || false,
+        createdAt: user.createdAt,
+        avatar: user.profile.avatar
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 3600,
+        tokenType: 'Bearer'
       }
     });
   } catch (error) {
@@ -98,17 +108,27 @@ router.post('/register', async (req: Request, res: Response) => {
 
     database.users.set(userId, newUser);
 
-    // Generate token
-    const token = jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });
+    // Generate tokens
+    const accessToken = jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ userId, type: 'refresh' }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
-      token,
       user: {
         id: userId,
         email,
-        role,
-        profile: newUser.profile,
-        children: newUser.children
+        firstName,
+        lastName,
+        role: role.toUpperCase(),
+        emailVerified: true,
+        mfaEnabled: false,
+        createdAt: newUser.createdAt,
+        avatar: newUser.profile.avatar
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 3600,
+        tokenType: 'Bearer'
       }
     });
   } catch (error) {
@@ -183,20 +203,30 @@ router.post('/mfa/verify', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid MFA code' });
     }
 
-    // Generate final token
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    // Generate final tokens
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, JWT_SECRET, { expiresIn: '7d' });
     
     // Update last active
     user.lastActive = new Date().toISOString();
     
     res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
-        role: user.role,
-        profile: user.profile,
-        children: user.children
+        firstName: user.profile.firstName,
+        lastName: user.profile.lastName,
+        role: user.role.toUpperCase(),
+        emailVerified: true,
+        mfaEnabled: user.mfa?.enabled || false,
+        createdAt: user.createdAt,
+        avatar: user.profile.avatar
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 3600,
+        tokenType: 'Bearer'
       }
     });
   } catch (error) {
@@ -215,14 +245,15 @@ router.get('/me', authenticateToken, (req: Request, res: Response) => {
     }
 
     res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        profile: user.profile,
-        children: user.children,
-        mfaEnabled: user.mfa?.enabled || false
-      }
+      id: user.id,
+      email: user.email,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
+      role: user.role.toUpperCase(),
+      emailVerified: true,
+      mfaEnabled: user.mfa?.enabled || false,
+      createdAt: user.createdAt,
+      avatar: user.profile.avatar
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -230,14 +261,35 @@ router.get('/me', authenticateToken, (req: Request, res: Response) => {
 });
 
 // Refresh token
-router.post('/refresh', authenticateToken, (req: Request, res: Response) => {
+router.post('/refresh', (req: Request, res: Response) => {
   try {
-    const userId = (req as AuthenticatedRequest).user?.userId;
-    const role = (req as AuthenticatedRequest).user?.role;
+    const { refreshToken: oldRefreshToken } = req.body;
     
-    const newToken = jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });
+    if (!oldRefreshToken) {
+      return res.status(401).json({ error: 'Refresh token required' });
+    }
     
-    res.json({ token: newToken });
+    // Verify refresh token
+    const decoded = jwt.verify(oldRefreshToken, JWT_SECRET) as any;
+    if (decoded.type !== 'refresh') {
+      return res.status(401).json({ error: 'Invalid refresh token' });
+    }
+    
+    const user = database.users.get(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Generate new tokens
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({
+      accessToken,
+      refreshToken,
+      expiresIn: 3600,
+      tokenType: 'Bearer'
+    });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
