@@ -8,8 +8,8 @@ export const Hero: React.FC = () => {
   const navigate = useNavigate();
 
   const handleStartLearning = () => {
-    // Navigate to pricing page for now, could be signup in future
-    navigate('/pricing');
+    // Redirect to parent portal for signup/login
+    window.location.href = 'http://localhost:5174';
   };
 
   const handleLearnMore = () => {

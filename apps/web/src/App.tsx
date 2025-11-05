@@ -50,11 +50,10 @@ import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
-    // <AuthProvider>
-      <Router>
-        <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
+    <Router>
+      <Routes>
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<Home />} />
           <Route path="features" element={<Features />} />
           <Route path="aivo-pad" element={<AivoPad />} />
           <Route path="how-it-works" element={<HowItWorks />} />
@@ -96,15 +95,14 @@ function App() {
           <Route path="products/school-districts" element={<SchoolDistricts />} />
           <Route path="products/integrations" element={<Integrations />} />
           
-          {/* Auth Routes - Temporarily disabled */}
-          {/* <Route path="auth/*" element={<AuthPage />} />
+          {/* Auth Routes */}
+          <Route path="auth/*" element={<AuthPage />} />
           <Route path="login" element={<AuthPage />} />
           <Route path="signup" element={<AuthPage />} />
-          <Route path="dashboard" element={<Dashboard />} /> */}
+          <Route path="dashboard" element={<Dashboard />} />
         </Route>
       </Routes>
     </Router>
-    // </AuthProvider>
   )
 }
 

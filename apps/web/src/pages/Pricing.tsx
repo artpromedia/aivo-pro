@@ -8,7 +8,8 @@ export const Pricing: React.FC = () => {
   const navigate = useNavigate();
 
   const handleStartJourney = () => {
-    navigate('/signup');
+    // Redirect to parent portal for signup/login
+    window.location.href = 'http://localhost:5174';
   };
 
   const benefits = [

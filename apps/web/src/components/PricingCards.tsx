@@ -61,12 +61,12 @@ export const PricingCards: React.FC = () => {
   const [isYearly, setIsYearly] = useState(false);
   const navigate = useNavigate();
 
-  const handlePlanClick = (planName: string) => {
-    if (planName === 'Free') {
-      // For free plan, could navigate to signup or show current plan
-      navigate('/contact');
+  const handlePlanClick = (plan: string) => {
+    if (plan === 'Free') {
+      // Redirect to parent portal for free signup
+      window.location.href = 'http://localhost:5174';
     } else {
-      // For paid plans, navigate to contact for now (could be checkout in future)
+      // For paid plans, navigate to contact for sales inquiry
       navigate('/contact');
     }
   };

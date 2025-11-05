@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   FileText,
   Calendar,
@@ -163,6 +164,8 @@ const mockIEPData: IEPOverview = {
 };
 
 export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
+  const navigate = useNavigate();
+  const params = useParams();
   const [iepData, setIEPData] = useState<IEPOverview>(mockIEPData);
   const [activeTab, setActiveTab] = useState<'overview' | 'progress' | 'documents' | 'meetings' | 'evaluations' | 'consents' | 'sharing'>('overview');
 
@@ -205,7 +208,10 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
             <Button 
               variant="gradient"
               className="flex items-center gap-2"
-              onClick={() => {/* Navigate to auto-generate IEP */}}
+              onClick={() => {
+                // TODO: Navigate to baseline assessment or IEP generation page
+                alert('IEP Generation from Assessment - Feature coming soon!');
+              }}
             >
               <Plus className="w-4 h-4" />
               Generate IEP from Assessment
@@ -213,7 +219,10 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
           )}
           
           {iepData.activeIEP && (
-            <button className="inline-flex items-center gap-2 px-4 py-2 border border-coral-300 text-coral-600 rounded-full hover:bg-coral-50 transition-colors text-sm font-medium">
+            <button 
+              className="inline-flex items-center gap-2 px-4 py-2 border border-coral-300 text-coral-600 rounded-full hover:bg-coral-50 transition-colors text-sm font-medium"
+              onClick={() => setActiveTab('sharing')}
+            >
               <Share2 className="w-4 h-4" />
               Share IEP
             </button>
@@ -302,11 +311,20 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
                   </div>
 
                   <div className="mt-4 flex items-center gap-3">
-                    <button className="inline-flex items-center gap-2 px-4 py-2 border border-coral-300 text-coral-600 rounded-full hover:bg-coral-50 transition-colors text-sm font-medium">
+                    <button 
+                      className="inline-flex items-center gap-2 px-4 py-2 border border-coral-300 text-coral-600 rounded-full hover:bg-coral-50 transition-colors text-sm font-medium"
+                      onClick={() => setActiveTab('documents')}
+                    >
                       <Eye className="w-4 h-4" />
                       View Full IEP
                     </button>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-coral-500 text-white rounded-full hover:bg-coral-600 transition-colors text-sm font-medium">
+                    <button 
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-coral-500 text-white rounded-full hover:bg-coral-600 transition-colors text-sm font-medium"
+                      onClick={() => {
+                        // TODO: Implement PDF download functionality
+                        alert('PDF Download - Feature coming soon!');
+                      }}
+                    >
                       <Download className="w-4 h-4" />
                       Download PDF
                     </button>
@@ -329,7 +347,10 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
                     <Button 
                       variant="gradient"
                       className="flex items-center gap-2 mx-auto"
-                      onClick={() => {/* Generate IEP */}}
+                      onClick={() => {
+                        // TODO: Navigate to baseline assessment or IEP generation page
+                        alert('IEP Generation from Assessment - Feature coming soon!');
+                      }}
                     >
                       <Plus className="w-4 h-4" />
                       Generate IEP from Assessment
@@ -357,7 +378,10 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
                             <p className="text-sm text-gray-600">{consent.description}</p>
                             <p className="text-xs text-gray-500 mt-1">Due: {formatDate(consent.dueDate)}</p>
                           </div>
-                          <button className="px-4 py-2 bg-gradient-to-r from-coral-500 to-salmon-500 text-white rounded-full hover:from-coral-600 hover:to-salmon-600 transition-all text-sm font-medium">
+                          <button 
+                            className="px-4 py-2 bg-gradient-to-r from-coral-500 to-salmon-500 text-white rounded-full hover:from-coral-600 hover:to-salmon-600 transition-all text-sm font-medium"
+                            onClick={() => setActiveTab('consents')}
+                          >
                             Review & Sign
                           </button>
                         </div>
@@ -424,3 +448,11 @@ export const IEPDashboard: React.FC<IEPDashboardProps> = ({ childId }) => {
     </div>
   );
 };
+
+// Default export for router usage
+const IEPDashboardPage: React.FC = () => {
+  const { id } = useParams();
+  return <IEPDashboard childId={id || 'default'} />;
+};
+
+export default IEPDashboardPage;

@@ -8,7 +8,7 @@ import { AddChild } from './pages/Children/AddChild';
 import { ChildrenIndex } from './pages/Children';
 import { ChildProfile } from './pages/Children/ChildProfile';
 import { ChildSettings } from './pages/Children/ChildSettings';
-import { IEPDashboard } from './pages/Children/IEPDashboard';
+import IEPDashboard from './pages/Children/IEPDashboard';
 import { VirtualBrain } from './pages/VirtualBrain';
 import { Suggestions } from './pages/Suggestions';
 import { AccessManagement } from './pages/AccessManagement';

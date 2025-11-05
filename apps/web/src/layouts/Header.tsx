@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-// import { useAuth } from '@aivo/auth';
 import { Button } from '../components/Button';
 import { Menu, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,20 +17,21 @@ export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  // const { user, logout } = useAuth();
-  const user = null as { firstName?: string } | null; // Temporarily disable auth for testing
+  const user = null as { firstName?: string } | null; // For now, keep simple - can enable auth later
 
   const handleLoginClick = () => {
-    navigate('/login');
+    // Redirect to parent portal for login
+    window.location.href = 'http://localhost:5174';
   };
 
   const handleStartLearningClick = () => {
-    navigate('/signup');
+    // Redirect to parent portal for signup  
+    window.location.href = 'http://localhost:5174';
   };
 
   const handleLogoutClick = async () => {
     try {
-      // await logout();
+      // For now, just redirect to home
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
