@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertCircle, 
+  AlertTriangle,
   Calendar, 
+  ChevronDown,
+  ChevronUp,
   Clock, 
   FileText, 
   Plus, 
@@ -16,15 +20,18 @@ import {
   Phone,
   Mail,
   Download,
-  Bell
+  Bell,
+  Send
 } from 'lucide-react';
+import { Button } from '@aivo/ui';
 
 interface EvaluationRequest {
   id: string;
+  childId: string;
   type: 'psychological' | 'speech-language' | 'occupational' | 'physical' | 'educational' | 'behavioral';
   title: string;
   description: string;
-  status: 'draft' | 'submitted' | 'under-review' | 'approved' | 'scheduled' | 'in-progress' | 'completed' | 'declined';
+  status: 'draft' | 'submitted' | 'under-review' | 'approved' | 'scheduled' | 'in-progress' | 'completed' | 'declined' | 'pending' | 'responded' | 'expired';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   requestDate: string;
   dueDate: string;
@@ -36,6 +43,14 @@ interface EvaluationRequest {
   consentRequired: boolean;
   consentGiven?: boolean;
   consentDate?: string;
+  evaluationAreas: string[];
+  estimatedDuration?: string;
+  additionalNotes?: string;
+  parentResponse?: {
+    response: 'consent' | 'decline';
+    responseDate: string;
+    comments?: string;
+  };
   timeline: EvaluationTimeline[];
   documents: EvaluationDocument[];
   notifications: EvaluationNotification[];
@@ -392,13 +407,17 @@ const EvaluationRequestSystem: React.FC<EvaluationRequestSystemProps> = ({ child
     {
       id: '1',
       childId,
-      type: 'comprehensive',
+      type: 'educational',
       title: 'Comprehensive Educational Evaluation',
       description: 'A comprehensive evaluation to assess your child\'s academic and behavioral needs.',
       requestedBy: 'Ms. Sarah Thompson - Special Education Coordinator',
       requestDate: '2025-10-15',
       dueDate: '2025-11-30',
       status: 'pending',
+      priority: 'high',
+      reason: 'Annual review to determine continued eligibility and service needs.',
+      consentRequired: true,
+      consentGiven: false,
       evaluationAreas: [
         'Academic Achievement',
         'Cognitive Abilities',
@@ -407,8 +426,9 @@ const EvaluationRequestSystem: React.FC<EvaluationRequestSystemProps> = ({ child
       ],
       estimatedDuration: '4-6 weeks',
       additionalNotes: 'This evaluation will help determine appropriate educational services and supports.',
-      parentResponse: undefined,
-      documents: []
+      timeline: [],
+      documents: [],
+      notifications: []
     }
   ]);
 

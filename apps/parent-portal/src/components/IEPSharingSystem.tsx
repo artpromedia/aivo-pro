@@ -29,14 +29,14 @@ import { IEPDocument, IEPShare } from '../types/iep.types';
 interface IEPSharingSystemProps {
   iepDocument: IEPDocument;
   existingShares: IEPShare[];
-  onCreateShare: (shareData: Omit<IEPShare, 'id' | 'createdDate' | 'accessHistory'>) => void;
+  onCreateShare: (shareData: Omit<IEPShare, 'id' | 'createdDate' | 'accessHistory' | 'shareToken'>) => void;
   onUpdateShare: (shareId: string, updates: Partial<IEPShare>) => void;
   onRevokeShare: (shareId: string) => void;
   onClose: () => void;
 }
 
 interface ShareModalProps {
-  onSubmit: (shareData: Omit<IEPShare, 'id' | 'createdDate' | 'accessHistory'>) => void;
+  onSubmit: (shareData: Omit<IEPShare, 'id' | 'createdDate' | 'accessHistory' | 'shareToken'>) => void;
   onClose: () => void;
 }
 

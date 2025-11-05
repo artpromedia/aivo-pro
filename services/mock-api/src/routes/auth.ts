@@ -5,9 +5,9 @@ import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
-import { database } from '../database/seed';
-import { User } from '../database/types';
-import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
+import { database } from '../database/seed.js';
+import { User } from '../database/types.js';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'aivo-dev-secret-key';
@@ -18,7 +18,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
     
     // Find user
-    const user = Array.from(database.users.values()).find(u => u.email === email);
+    const user = Array.from(database.users.values()).find((u: User) => u.email === email) as User | undefined;
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -81,7 +81,7 @@ router.post('/register', async (req: Request, res: Response) => {
     const { email, password, firstName, lastName, role = 'parent' } = req.body;
     
     // Check if user exists
-    const existingUser = Array.from(database.users.values()).find(u => u.email === email);
+    const existingUser = Array.from(database.users.values()).find((u: User) => u.email === email) as User | undefined;
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }

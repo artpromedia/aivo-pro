@@ -40,7 +40,7 @@ import { ConversationOptionsModal } from '../components/ConversationOptionsModal
 
 interface Message {
   id: string;
-  sender: 'parent' | 'teacher' | 'system';
+  sender: 'parent' | 'teacher' | 'system' | 'caregiver';
   senderName: string;
   content: string;
   timestamp: string;
@@ -451,7 +451,8 @@ export const Messages: React.FC = () => {
               <button 
                 onClick={() => {
                   // Toggle search functionality
-                  document.querySelector('input[placeholder="Search conversations..."]')?.focus();
+                  const searchInput = document.querySelector<HTMLInputElement>('input[placeholder="Search conversations..."]');
+                  searchInput?.focus();
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Search in conversation"

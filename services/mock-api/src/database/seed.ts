@@ -6,7 +6,7 @@ import {
   Assessment, 
   LearningSession,
   ProgressEntry
-} from './types';
+} from './types.js';
 
 // In-memory database
 export const database = {

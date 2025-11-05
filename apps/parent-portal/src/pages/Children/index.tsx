@@ -4,7 +4,6 @@ import { Plus, User, Clock, Award, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useChildren } from '../../hooks/useChildren';
 import { ChildCard } from '../../components/ChildCard';
-import { Button } from '@aivo/ui';
 
 export const ChildrenIndex: React.FC = () => {
   const { children, isLoading } = useChildren();
@@ -124,11 +123,12 @@ export const ChildrenIndex: React.FC = () => {
             <p className="text-gray-600 mb-6">
               Start by adding your child's profile to create their personalized AI learning experience
             </p>
-            <Button variant="gradient" asChild>
-              <Link to="/children/add">
-                Add Child Profile
-              </Link>
-            </Button>
+            <Link
+              to="/children/add"
+              className="inline-flex items-center justify-center h-14 px-8 text-lg font-bold rounded-2xl bg-gradient-to-r from-coral-500 to-purple-500 text-white shadow-lg hover:from-coral-600 hover:to-purple-600 hover:shadow-xl transition-all duration-200"
+            >
+              Add Child Profile
+            </Link>
           </motion.div>
         ) : (
           <motion.div 

@@ -25,7 +25,7 @@ import {
   FileText
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@aivo/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { useChildren } from '../hooks/useChildren';
 import { useSuggestions } from '../hooks/useSuggestions';
 import { useMockWebSocket } from '../hooks/useWebSocket';

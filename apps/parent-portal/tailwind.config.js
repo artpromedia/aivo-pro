@@ -7,30 +7,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        coral: {
-          50: '#fdf5f3',
-          100: '#fde8e4',
-          200: '#fbd5ce',
-          300: '#f8b5a8',
-          400: '#f48773',
-          500: '#FF7B5C', // Primary coral
-          600: '#e85d3d',
-          700: '#d4452a',
-          800: '#b03823',
-          900: '#923024',
-        },
-        salmon: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#FF636F', // Primary salmon
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
-        },
         purple: {
           50: '#faf5ff',
           100: '#f3e8ff',
@@ -66,37 +42,12 @@ module.exports = {
         '3': '3px',
       },
       animation: {
-        'blob': 'blob 7s infinite',
         'float': 'float 3s ease-in-out infinite',
-        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-        'gentle-bounce': 'gentle-bounce 3s ease-in-out infinite',
       },
       keyframes: {
-        blob: {
-          '0%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
-          '33%': {
-            transform: 'translate(30px, -50px) scale(1.1)',
-          },
-          '66%': {
-            transform: 'translate(-20px, 20px) scale(0.9)',
-          },
-          '100%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
-        },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
-        },
-        'pulse-soft': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' },
-        },
-        'gentle-bounce': {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-5px)' },
         },
       },
     },

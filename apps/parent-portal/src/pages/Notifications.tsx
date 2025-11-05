@@ -14,7 +14,6 @@ import {
   MessageCircle,
   Settings,
   Filter,
-  MarkdownIcon,
   CheckCircle,
   XCircle,
   Trash2,
@@ -403,7 +402,7 @@ export const Notifications: React.FC = () => {
                         <button 
                           onClick={() => {
                             // Show detailed view or navigate to relevant page
-                            alert(`Notification Details:\n\nType: ${notification.type}\nTime: ${notification.time}\nMessage: ${notification.message}`);
+                            alert(`Notification Details:\n\nType: ${notification.type}\nTime: ${new Date(notification.timestamp).toLocaleString()}\nMessage: ${notification.message}`);
                           }}
                           className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:border-gray-300"
                         >

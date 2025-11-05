@@ -1,18 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   server: {
     port: 5176,
+    host: true
   },
-  resolve: {
-    alias: {
-      '@aivo/ui': '../../packages/ui/src',
-      '@aivo/types': '../../packages/types/src',
-      '@aivo/utils': '../../packages/utils/src',
-      '@aivo/auth': '../../packages/auth/src',
-    },
-  },
+  build: {
+    outDir: 'dist'
+  }
 })

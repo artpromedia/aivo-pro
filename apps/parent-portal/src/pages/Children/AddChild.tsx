@@ -403,7 +403,7 @@ export const AddChild: React.FC = () => {
               variant="primary"
               onClick={handleNext}
               disabled={!isStepValid()}
-              className="bg-aivo-gradient hover:shadow-lg"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-coral-500 to-purple-600 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-2xl hover:shadow-coral-500/25 transition-all duration-300 hover:scale-105 hover:from-coral-600 hover:to-purple-700 border border-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {step === steps.length ? (
                 <>

@@ -183,6 +183,13 @@ export interface BaselineAssessment {
   recommendations: string[];
   iepGenerated: boolean;
   generatedIepId?: string;
+  studentName?: string;
+  completedDate?: string;
+  overallScore?: number;
+  domains?: {
+    name: string;
+    score: number;
+  }[];
 }
 
 export interface IEPShareRequest {
@@ -201,4 +208,31 @@ export interface IEPShareRequest {
   accessLevel: 'full' | 'summary' | 'goals-only';
   status: 'sent' | 'viewed' | 'acknowledged';
   expirationDate?: string;
+}
+
+export interface IEPShare {
+  id: string;
+  iepId?: string;
+  shareToken: string;
+  recipientName: string;
+  recipientEmail: string;
+  recipientRole: 'teacher' | 'school-admin' | 'specialist' | 'other';
+  permissions: {
+    view: boolean;
+    download: boolean;
+    print: boolean;
+    share: boolean;
+  };
+  status: 'active' | 'paused' | 'revoked' | 'expired';
+  requireLogin: boolean;
+  notifyOnAccess: boolean;
+  message?: string;
+  accessLimit?: number;
+  expirationDate?: string;
+  createdDate: string;
+  lastAccessed?: string;
+  accessHistory: {
+    timestamp: string;
+    ipAddress: string;
+  }[];
 }

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -9,13 +8,22 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@aivo/ui': path.resolve(__dirname, '../../packages/ui/src'),
-      '@aivo/types': path.resolve(__dirname, '../../packages/types/src'),
-      '@aivo/utils': path.resolve(__dirname, '../../packages/utils/src'),
-      '@aivo/auth': path.resolve(__dirname, '../../packages/auth/src'),
+      '@aivo/ui': '../../packages/ui/src/index.ts',
+      '@aivo/types': '../../packages/types/src/index.ts',
+      '@aivo/utils': '../../packages/utils/src/index.ts',
+      '@aivo/auth': '../../packages/auth/dist/index.js',
     },
   },
-  optimizeDeps: {
-    include: ['lucide-react', 'framer-motion'],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
+    },
   },
 })

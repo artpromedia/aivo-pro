@@ -9,6 +9,7 @@ export { PasswordReset } from './components/PasswordReset';
 export { MFASetup } from './components/MFASetup';
 export { MFAVerification } from './components/MFAVerification';
 export { AuthContainer } from './components/AuthContainer';
+export { ProtectedRoute } from './components/ProtectedRoute';
 
 // Type exports
 export * from './types/auth.types';

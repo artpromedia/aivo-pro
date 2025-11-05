@@ -91,22 +91,32 @@ const NavItem: React.FC<{ icon: any; isActive?: boolean; to?: string; title?: st
   to,
   title 
 }) => {
-  const Component = to ? Link : 'button';
-  
-  return (
-    <Component 
-      to={to}
-      title={title}
-      className={`p-3.5 rounded-2xl transition-all group relative ${
-        isActive 
-          ? 'bg-white/20 text-white shadow-lg scale-110' 
-          : 'text-white/70 hover:text-white hover:bg-white/15 hover:scale-105'
-      }`}
-    >
+  const sharedClasses = `p-3.5 rounded-2xl transition-all group relative ${
+    isActive 
+      ? 'bg-white/20 text-white shadow-lg scale-110' 
+      : 'text-white/70 hover:text-white hover:bg-white/15 hover:scale-105'
+  }`;
+
+  const content = (
+    <>
       <Icon className="w-5 h-5 group-hover:animate-gentle-bounce" />
       {isActive && (
         <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-full shadow-sm"></div>
       )}
-    </Component>
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} title={title} className={sharedClasses}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" title={title} className={sharedClasses}>
+      {content}
+    </button>
   );
 };

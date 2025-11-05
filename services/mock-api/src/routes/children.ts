@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
-import { database } from '../database/seed';
-import { Child } from '../database/types';
-import { authenticateToken, AuthenticatedRequest, requireRole } from '../middleware/auth';
+import { database } from '../database/seed.js';
+import { Child } from '../database/types.js';
+import { authenticateToken, AuthenticatedRequest, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -17,7 +17,7 @@ router.get('/', authenticateToken, requireRole('parent'), (req: Request, res: Re
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const children = user.children?.map(childId => {
+    const children = user.children?.map((childId: string) => {
       const child = database.children.get(childId);
       return child;
     }).filter(Boolean) || [];
@@ -172,16 +172,16 @@ router.get('/:childId/progress', authenticateToken, (req: Request, res: Response
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
     const recentProgress = child.progressHistory.filter(
-      entry => new Date(entry.date) >= cutoffDate
+      (entry: any) => new Date(entry.date) >= cutoffDate
     );
 
     const progress = {
-      totalTimeSpent: recentProgress.reduce((sum, entry) => sum + entry.timeSpent, 0),
+      totalTimeSpent: recentProgress.reduce((sum: number, entry: any) => sum + entry.timeSpent, 0),
       averageFocusScore: recentProgress.length > 0 
-        ? recentProgress.reduce((sum, entry) => sum + entry.focusScore, 0) / recentProgress.length
+        ? recentProgress.reduce((sum: number, entry: any) => sum + entry.focusScore, 0) / recentProgress.length
         : 0,
-      skillsImproved: [...new Set(recentProgress.flatMap(entry => entry.skillsImproved))],
-      activitiesCompleted: recentProgress.reduce((sum, entry) => sum + entry.activitiesCompleted, 0),
+      skillsImproved: [...new Set(recentProgress.flatMap((entry: any) => entry.skillsImproved))],
+      activitiesCompleted: recentProgress.reduce((sum: number, entry: any) => sum + entry.activitiesCompleted, 0),
       progressTrend: calculateTrend(recentProgress),
       subjectBreakdown: calculateSubjectBreakdown(recentProgress),
       weeklyProgress: calculateWeeklyProgress(recentProgress)
@@ -213,7 +213,7 @@ const calculateTrend = (progress: any[]) => {
 const calculateSubjectBreakdown = (progress: any[]) => {
   const breakdown: Record<string, any> = {};
   
-  progress.forEach(entry => {
+  progress.forEach((entry: any) => {
     if (!breakdown[entry.subject]) {
       breakdown[entry.subject] = {
         timeSpent: 0,
@@ -240,7 +240,7 @@ const calculateSubjectBreakdown = (progress: any[]) => {
 const calculateWeeklyProgress = (progress: any[]) => {
   const weeks: Record<string, any> = {};
   
-  progress.forEach(entry => {
+  progress.forEach((entry: any) => {
     const date = new Date(entry.date);
     const weekStart = new Date(date);
     weekStart.setDate(date.getDate() - date.getDay()); // Start of week
