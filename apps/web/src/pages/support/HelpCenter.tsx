@@ -209,10 +209,13 @@ export const HelpCenter: React.FC = () => {
                 <ul className="space-y-3">
                   {category.articles.map((article, i) => (
                     <li key={i}>
-                      <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors flex items-center gap-2">
+                      <button 
+                        onClick={() => alert(`Opening article: ${article}`)}
+                        className="text-left text-gray-600 hover:text-purple-600 transition-colors flex items-center gap-2 w-full"
+                      >
                         <HelpCircle className="w-4 h-4 text-gray-400" />
                         {article}
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>

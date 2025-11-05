@@ -413,13 +413,13 @@ const EvaluationRequestSystem: React.FC<EvaluationRequestSystemProps> = ({ child
   ]);
 
   const handleResponseSubmit = (requestId: string, response: 'consent' | 'decline', comment?: string) => {
-    console.log('Response submitted:', { requestId, response, comment });
-    // Update request status logic here
+    // TODO: Implement actual request status update
+    alert(`${response === 'consent' ? 'Consent given' : 'Consent declined'} for request ${requestId}`);
   };
 
   const handleViewDetails = (requestId: string) => {
-    console.log('View details for:', requestId);
-    // Navigation or modal logic here
+    // TODO: Open detailed view modal or navigate to details page
+    alert(`Opening details for evaluation request ${requestId}`);
   };
 
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'responded' | 'expired'>('all');
