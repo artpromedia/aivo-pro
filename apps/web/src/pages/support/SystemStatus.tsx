@@ -189,7 +189,7 @@ const SystemStatus: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       {/* Header */}
-      <section className={`py-20 px-6 bg-linear-to-r ${getOverallStatusColor()}`}>
+      <section className={`py-20 px-6 bg-gradient-to-r ${getOverallStatusColor()}`}>
         <div className="container mx-auto max-w-6xl">
           <motion.div
             className="text-center text-white"

@@ -98,6 +98,34 @@ export interface PaginatedResponse<T> {
   hasPrev: boolean;
 }
 
+// IEP Types
+export interface IEPGoal {
+  id: string;
+  title: string;
+  description: string;
+  status: 'not-started' | 'in-progress' | 'completed';
+  progress: number; // 0-100 percentage
+  targetDate: string;
+  category: string;
+}
+
+export interface IEPMeeting {
+  date: string;
+  type: string;
+  participants: string[];
+}
+
+export interface IEPData {
+  childName: string;
+  grade: string;
+  studentId: string;
+  schoolYear: string;
+  activeGoals: IEPGoal[];
+  upcomingMeetings: IEPMeeting[];
+  accommodations: string[];
+  services: string[];
+}
+
 // Theme and UI Types
 export type Theme = 'K5' | 'MS' | 'HS';
 export type ColorMode = 'light' | 'dark';

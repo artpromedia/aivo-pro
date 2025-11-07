@@ -200,7 +200,7 @@ const CaseStudies: React.FC = () => {
   const featuredStudies = caseStudies.filter(study => study.featured);
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-blue-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -214,7 +214,7 @@ const CaseStudies: React.FC = () => {
               Real Results, Real Impact
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Success <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">Stories</span> That Inspire
+              Success <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Stories</span> That Inspire
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Discover how schools, districts, and families are transforming special education 
@@ -223,7 +223,7 @@ const CaseStudies: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={handleContactSales}
-                className="bg-linear-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <Target className="w-5 h-5" />
                 Start Your Success Story
@@ -272,7 +272,7 @@ const CaseStudies: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="bg-linear-to-br from-blue-50 to-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <stat.icon className="w-8 h-8 text-blue-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
@@ -338,7 +338,7 @@ const CaseStudies: React.FC = () => {
                 {/* Results Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {study.results.map((result, idx) => (
-                    <div key={idx} className="bg-linear-to-br from-blue-50 to-purple-50 rounded-xl p-4 text-center">
+                    <div key={idx} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 text-center">
                       <div className="text-2xl font-bold text-blue-600 mb-1">{result.metric}</div>
                       <div className="text-xs text-gray-600">{result.description}</div>
                     </div>
@@ -375,7 +375,7 @@ const CaseStudies: React.FC = () => {
       </section>
 
       {/* All Case Studies */}
-      <section className="py-20 px-6 bg-linear-to-r from-blue-50 to-purple-50">
+      <section className="py-20 px-6 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -426,7 +426,7 @@ const CaseStudies: React.FC = () => {
                     <p className="text-gray-500 text-xs">{study.location}</p>
                   </div>
                   {study.featured && (
-                    <div className="bg-linear-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                       <Star className="w-3 h-3" />
                       Featured
                     </div>
@@ -455,7 +455,7 @@ const CaseStudies: React.FC = () => {
                   ))}
                 </div>
 
-                <button className="w-full bg-linear-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all">
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all">
                   Read Full Case Study
                 </button>
               </motion.div>
@@ -467,7 +467,7 @@ const CaseStudies: React.FC = () => {
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-linear-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

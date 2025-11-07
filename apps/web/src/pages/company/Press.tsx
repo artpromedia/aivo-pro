@@ -144,7 +144,7 @@ export const Press: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-linear-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="container mx-auto max-w-6xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export const Press: React.FC = () => {
               Download press materials, read our latest news, and connect with our media team.
             </p>
             <div className="flex gap-4 justify-center">
-              <Button className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
                 Download Press Kit
                 <Download className="w-4 h-4 ml-2" />
               </Button>
@@ -218,7 +218,7 @@ export const Press: React.FC = () => {
                 key={release.title}
                 className={`rounded-2xl p-8 shadow-lg border ${
                   release.featured 
-                    ? 'bg-linear-to-br from-blue-50 to-purple-50 border-blue-200' 
+                    ? 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200' 
                     : 'bg-white border-gray-100'
                 } hover:shadow-xl transition-shadow`}
                 initial={{ opacity: 0, y: 20 }}
@@ -245,7 +245,7 @@ export const Press: React.FC = () => {
                     <h3 className="text-xl font-bold text-gray-900 mb-3">{release.title}</h3>
                     <p className="text-gray-600 mb-4 leading-relaxed">{release.excerpt}</p>
                     <div className="flex gap-4">
-                      <Button size="sm" className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
                         Read Full Release
                         <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
@@ -397,7 +397,7 @@ export const Press: React.FC = () => {
             {mediaContacts.map((contact, index) => (
               <motion.div
                 key={contact.name}
-                className="bg-linear-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
+                className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -446,7 +446,7 @@ export const Press: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -3,10 +3,36 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "../../packages/auth/src/**/*.{js,ts,jsx,tsx}",
+    "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
+        coral: {
+          50: '#fff5f3',
+          100: '#ffe8e3',
+          200: '#ffd5cc',
+          300: '#ffb5a5',
+          400: '#ff8a6e',
+          500: '#FF7B5C', // Primary coral
+          600: '#f55a38',
+          700: '#e63d1f',
+          800: '#c02f17',
+          900: '#9e2714',
+        },
+        salmon: {
+          50: '#fff3f4',
+          100: '#ffe5e7',
+          200: '#ffd0d4',
+          300: '#ffadb4',
+          400: '#ff7f8a',
+          500: '#FF636F', // Primary salmon
+          600: '#f5304a',
+          700: '#e11d3d',
+          800: '#bc1937',
+          900: '#9e1833',
+        },
         purple: {
           50: '#faf5ff',
           100: '#f3e8ff',

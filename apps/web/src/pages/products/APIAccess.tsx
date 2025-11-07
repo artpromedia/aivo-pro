@@ -284,9 +284,9 @@ async function example() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-24">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-linear-to-r from-purple-600 to-blue-600 text-white">
+      <section className="py-20 px-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
         <div className="container mx-auto max-w-7xl">
           <div className="max-w-4xl">
             <motion.div
@@ -454,7 +454,7 @@ async function example() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-linear-to-r from-gray-900 to-black text-white">
+      <section className="py-20 bg-gradient-to-r from-gray-900 to-black text-white">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -469,7 +469,7 @@ async function example() {
               Access our live API endpoints, real-time WebSocket connections, and comprehensive documentation.
             </p>
             <div className="flex gap-4 justify-center">
-              <Button className="bg-linear-to-r from-purple-600 to-blue-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                 <Code className="w-4 h-4 mr-2" />
                 Get API Access
               </Button>

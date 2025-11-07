@@ -214,7 +214,7 @@ const Webinars: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-purple-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -228,7 +228,7 @@ const Webinars: React.FC = () => {
               Expert-Led Learning
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Educational <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600">Webinars</span> & Training
+              Educational <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Webinars</span> & Training
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Join our expert-led webinars to master AIVO, learn best practices, and connect 
@@ -237,7 +237,7 @@ const Webinars: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={() => setActiveFilter('upcoming')}
-                className="bg-linear-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <Calendar className="w-5 h-5" />
                 View Upcoming Webinars
@@ -272,7 +272,7 @@ const Webinars: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="bg-linear-to-br from-purple-50 to-pink-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <stat.icon className="w-8 h-8 text-purple-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
@@ -373,7 +373,7 @@ const Webinars: React.FC = () => {
                     <>
                       <button 
                         onClick={() => handleRegisterWebinar(webinar.id)}
-                        className="flex-1 bg-linear-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
                       >
                         Register Now
                       </button>
@@ -385,7 +385,7 @@ const Webinars: React.FC = () => {
                     <>
                       <button 
                         onClick={() => handleWatchRecording(webinar.id)}
-                        className="flex-1 bg-linear-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all inline-flex items-center justify-center gap-2"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all inline-flex items-center justify-center gap-2"
                       >
                         <Play className="w-5 h-5" />
                         Watch Now
@@ -403,7 +403,7 @@ const Webinars: React.FC = () => {
       </section>
 
       {/* All Webinars */}
-      <section className="py-20 px-6 bg-linear-to-r from-purple-50 to-pink-50">
+      <section className="py-20 px-6 bg-gradient-to-r from-purple-50 to-pink-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -464,7 +464,7 @@ const Webinars: React.FC = () => {
                     {getCategoryName(webinar.category)}
                   </span>
                   {webinar.featured && (
-                    <div className="bg-linear-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                       <Star className="w-3 h-3" />
                     </div>
                   )}
@@ -522,7 +522,7 @@ const Webinars: React.FC = () => {
       {/* Newsletter CTA */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

@@ -26,6 +26,7 @@ import { HintSystem } from '../components/HintSystem';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { RewardAnimation } from '../components/RewardAnimation';
 import { WritingPad } from '../components/WritingPad';
+import { AITeacher } from '../components/AITeacher';
 import { useAdaptiveLearning } from '../hooks/useAdaptiveLearning';
 import { useTaskGeneration, GeneratedTask } from '../hooks/useTaskGeneration';
 
@@ -73,6 +74,18 @@ export const SubjectLearning: React.FC = () => {
   const [streak, setStreak] = useState(0);
   const [showWritingPad, setShowWritingPad] = useState(false);
   const [startTime, setStartTime] = useState(() => Date.now());
+  const [mode, setMode] = useState<'lesson' | 'practice'>('lesson');
+  const [currentTopic, setCurrentTopic] = useState<string>(() => {
+    // Generate topic based on subject
+    const topics = {
+      math: ['addition', 'subtraction', 'multiplication', 'fractions'],
+      reading: ['phonics', 'comprehension', 'vocabulary'],
+      writing: ['storytelling', 'grammar', 'creative-writing'],
+      science: ['plants', 'animals', 'weather', 'space']
+    };
+    const subjectTopics = topics[subject] || ['basics'];
+    return subjectTopics[Math.floor(Math.random() * subjectTopics.length)];
+  });
 
   const adaptiveLearning = useAdaptiveLearning();
   const { generateTasks } = useTaskGeneration();
@@ -223,6 +236,11 @@ export const SubjectLearning: React.FC = () => {
     });
   };
 
+  const handleLessonComplete = () => {
+    setMode('practice');
+    setStartTime(Date.now());
+  };
+
   const renderTask = () => {
     if (!currentTask) return null;
 
@@ -265,6 +283,18 @@ export const SubjectLearning: React.FC = () => {
     );
   }
 
+  // Show AI Teacher lesson first
+  if (mode === 'lesson') {
+    return (
+      <AITeacher
+        subject={subject}
+        topic={currentTopic}
+        theme={theme}
+        onLessonComplete={handleLessonComplete}
+      />
+    );
+  }
+
   // Show error if no tasks could be generated
   if (!currentTask) {
     return (
@@ -297,6 +327,14 @@ export const SubjectLearning: React.FC = () => {
             </button>
 
             <div className="flex items-center gap-6">
+              <button
+                onClick={() => setMode('lesson')}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-coral-500 to-coral-600 text-white rounded-xl font-medium hover:from-coral-600 hover:to-coral-700 transition-all"
+              >
+                <Brain className="w-4 h-4" />
+                Review Lesson
+              </button>
+
               <ProgressIndicator current={currentTaskIndex + 1} total={tasks.length} />
 
               <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 px-4 py-2 rounded-xl">
@@ -341,7 +379,7 @@ export const SubjectLearning: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800 capitalize">
-                  {currentTask?.subject} challenge
+                  {currentTask?.subject} Practice • {currentTopic}
                 </h2>
                 <p className="text-sm text-gray-500">
                   Question {currentTaskIndex + 1} of {tasks.length}

@@ -50,6 +50,8 @@ const AuthPage: React.FC = () => {
             <LoginForm
               onSuccess={handleLoginSuccess}
               onMFARequired={handleMFARequired}
+              onSignUp={() => setAuthFlow('signup')}
+              onForgotPassword={() => setAuthFlow('reset')}
             />
             <div className="text-center space-y-3">
               <button
@@ -57,13 +59,6 @@ const AuthPage: React.FC = () => {
                 className="text-sm text-purple-600 hover:underline font-medium"
               >
                 Don't have an account? Sign up for free
-              </button>
-              <br />
-              <button
-                onClick={() => setAuthFlow('reset')}
-                className="text-sm text-gray-600 hover:text-purple-600 hover:underline"
-              >
-                Forgot your password?
               </button>
             </div>
           </motion.div>
@@ -156,7 +151,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24">
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

@@ -43,7 +43,7 @@ export const Pricing: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-purple-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-4xl text-center">
@@ -110,7 +110,7 @@ export const Pricing: React.FC = () => {
       <section className="py-20 px-6 bg-white">
         <div className="container mx-auto max-w-4xl">
           <motion.div
-            className="text-center bg-linear-to-r from-purple-50 to-pink-50 rounded-3xl p-12"
+            className="text-center bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -181,7 +181,7 @@ export const Pricing: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-linear-to-r from-purple-600 to-pink-600">
+      <section className="py-20 px-6 bg-gradient-to-r from-purple-600 to-pink-600">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

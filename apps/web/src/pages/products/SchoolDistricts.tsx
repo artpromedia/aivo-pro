@@ -448,7 +448,7 @@ const SchoolDistricts: React.FC = () => {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-20 px-6 bg-linear-to-r from-blue-600 to-purple-600">
+      <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

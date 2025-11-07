@@ -20,13 +20,13 @@ export const Header: React.FC = () => {
   const user = null as { firstName?: string } | null; // For now, keep simple - can enable auth later
 
   const handleLoginClick = () => {
-    // Redirect to parent portal for login
-    window.location.href = 'http://localhost:5174';
+    // Navigate to auth page with login mode
+    navigate('/auth?mode=login');
   };
 
   const handleStartLearningClick = () => {
-    // Redirect to parent portal for signup  
-    window.location.href = 'http://localhost:5174';
+    // Navigate to auth page with signup mode
+    navigate('/auth?mode=signup');
   };
 
   const handleLogoutClick = async () => {
@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
           <Link to="/" className="-m-1.5 p-1.5">
             <span className="sr-only">AIVO Learning</span>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-linear-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
                   <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
@@ -87,7 +87,7 @@ export const Header: React.FC = () => {
             >
               {item.name}
               {item.badge && (
-                <span className="absolute -top-2 -right-3 bg-linear-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="absolute -top-2 -right-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full">
                   {item.badge}
                 </span>
               )}
@@ -119,7 +119,7 @@ export const Header: React.FC = () => {
               <Button 
                 size="sm"
                 onClick={handleStartLearningClick}
-                className="bg-linear-to-r from-purple-600 to-pink-600 text-white"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
               >
                 Start Learning
               </Button>
@@ -148,7 +148,7 @@ export const Header: React.FC = () => {
               <div className="flex items-center justify-between">
                 <Link to="/" className="-m-1.5 p-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-linear-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                       <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
                         <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
@@ -185,7 +185,7 @@ export const Header: React.FC = () => {
                       >
                         {item.name}
                         {item.badge && (
-                          <span className="absolute top-1 right-3 bg-linear-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="absolute top-1 right-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full">
                             {item.badge}
                           </span>
                         )}
@@ -230,7 +230,7 @@ export const Header: React.FC = () => {
                           Log in
                         </Button>
                         <Button 
-                          className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white"
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white"
                           onClick={() => {
                             handleStartLearningClick();
                             setMobileMenuOpen(false);

@@ -82,7 +82,7 @@ export const TechStack: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-gray-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-7xl">
           <motion.div 
@@ -139,7 +139,7 @@ export const TechStack: React.FC = () => {
           </div>
 
           {/* Monorepo Structure */}
-          <div className="mb-16 bg-linear-to-r from-purple-50 to-blue-50 rounded-3xl p-12">
+          <div className="mb-16 bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-12">
             <motion.h2 
               className="text-3xl font-bold mb-8 text-center"
               initial={{ opacity: 0, y: 20 }}
@@ -314,7 +314,7 @@ export const TechStack: React.FC = () => {
             </p>
             <button
               onClick={handleLearnMore}
-              className="bg-linear-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
             >
               Explore Our Platform
             </button>

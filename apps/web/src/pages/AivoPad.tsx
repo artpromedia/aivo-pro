@@ -71,7 +71,7 @@ export const AivoPad: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-purple-50 to-white pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-7xl">
@@ -85,7 +85,7 @@ export const AivoPad: React.FC = () => {
             </span>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               The First Tablet Built for
-              <span className="block text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                 Neurodiverse Learning
               </span>
             </h1>
@@ -116,9 +116,9 @@ export const AivoPad: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="relative bg-linear-to-br from-purple-100 to-pink-100 rounded-3xl p-8">
+              <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-8">
                 <div className="w-full aspect-4/3 bg-gray-900 rounded-2xl relative overflow-hidden shadow-2xl">
-                  <div className="absolute inset-4 bg-linear-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+                  <div className="absolute inset-4 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
                     <Tablet className="w-24 h-24 text-white" />
                   </div>
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-700 rounded-full"></div>
@@ -168,7 +168,7 @@ export const AivoPad: React.FC = () => {
               <div className="flex gap-4 pt-4">
                 <Button 
                   onClick={handleJoinWaitlistClick}
-                  className="bg-linear-to-r from-purple-600 to-pink-600 text-white"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
                 >
                   Join Waitlist - $199
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -331,7 +331,7 @@ export const AivoPad: React.FC = () => {
       </section>
 
       {/* Pre-order CTA */}
-      <section className="py-20 bg-linear-to-r from-purple-600 to-pink-600">
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

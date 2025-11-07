@@ -13,6 +13,7 @@ import {
   Shield,
   CheckCircle
 } from 'lucide-react';
+import { exportConsentFormToPdf, type ConsentFormData } from '@aivo/utils';
 
 interface ConsentForm {
   id: string;
@@ -227,6 +228,30 @@ The need for ESY services was determined based on:
     setShowSignatureModal(false);
   };
 
+  const handleExportPdf = async (form: ConsentForm) => {
+    try {
+      const consentFormData: ConsentFormData = {
+        id: form.id,
+        title: form.title,
+        description: form.description,
+        type: form.type,
+        content: form.content,
+        studentName: 'Student Name', // Would come from context/props
+        parentName: form.signerName || 'Parent Name', // Would come from auth context
+        signedDate: form.signedDate,
+        signature: form.requiredSignatures[0]?.signature,
+        status: form.status,
+        dueDate: form.dueDate,
+        createdDate: form.createdDate,
+      };
+
+      await exportConsentFormToPdf(consentFormData);
+    } catch (error) {
+      console.error('Failed to export consent form PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -325,7 +350,7 @@ The need for ESY services was determined based on:
                     View
                   </button>
                   <button 
-                    onClick={() => alert('PDF Download - Feature coming soon!')}
+                    onClick={() => handleExportPdf(form)}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 border border-coral-300 text-coral-600 rounded-full hover:bg-coral-50 transition-colors text-sm font-medium"
                   >
                     <Download className="w-4 h-4" />

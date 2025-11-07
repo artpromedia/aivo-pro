@@ -170,3 +170,7 @@ export function getThemeColors(theme: 'K5' | 'MS' | 'HS') {
   
   return themes[theme];
 }
+
+// PDF Export utilities
+export { exportIepToPdf, type IEPData, type IEPGoal, type IEPMeeting } from './pdf/iepExport';
+export { exportConsentFormToPdf, type ConsentFormData } from './pdf/consentFormExport';

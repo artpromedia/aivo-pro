@@ -173,7 +173,7 @@ const Integrations: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-purple-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl text-center">
@@ -187,7 +187,7 @@ const Integrations: React.FC = () => {
               Connect Your Favorite Tools
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Powerful <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600">Integrations</span> for Seamless Learning
+              Powerful <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Integrations</span> for Seamless Learning
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Connect AIVO with your existing tools and platforms. Our extensive integration 
@@ -196,7 +196,7 @@ const Integrations: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={handleExploreAPI}
-                className="bg-linear-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
               >
                 <Zap className="w-5 h-5" />
                 Explore API Access
@@ -303,7 +303,7 @@ const Integrations: React.FC = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-6 bg-linear-to-r from-purple-50 to-pink-50">
+      <section className="py-20 px-6 bg-gradient-to-r from-purple-50 to-pink-50">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -364,7 +364,7 @@ const Integrations: React.FC = () => {
       {/* API & Custom Integrations */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

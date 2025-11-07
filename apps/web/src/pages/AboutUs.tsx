@@ -77,7 +77,7 @@ export const AboutUs: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-purple-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 pt-24">
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
@@ -104,8 +104,8 @@ export const AboutUs: React.FC = () => {
               whileHover={{ y: -5 }}
             >
               <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="w-32 h-32 rounded-full bg-linear-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-2xl">
                     OO
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export const AboutUs: React.FC = () => {
                   whileHover={{ y: -5 }}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-blue-600 font-bold text-lg">
                       {advisor.name.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     <div>
@@ -206,7 +206,7 @@ export const AboutUs: React.FC = () => {
       </section>
 
       {/* Mission Statement */}
-      <section className="py-20 bg-linear-to-r from-purple-600 to-pink-600">
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

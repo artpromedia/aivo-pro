@@ -164,7 +164,7 @@ export const Footer: React.FC = () => {
               <div className="mt-4 sm:ml-4 sm:mt-0 sm:shrink-0">
                 <Button 
                   type="submit"
-                  className="bg-linear-to-r from-purple-600 to-pink-600 text-white"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
                 >
                   Subscribe
                 </Button>
@@ -214,7 +214,7 @@ export const Footer: React.FC = () => {
           </div>
           <div className="mt-8 md:order-1 md:mt-0 flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-linear-to-r from-purple-600 to-pink-600 rounded flex items-center justify-center">
+              <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
                   <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
