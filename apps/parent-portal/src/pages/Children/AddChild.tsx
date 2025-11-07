@@ -57,9 +57,12 @@ export const AddChild: React.FC = () => {
     const childId = await createChildProfile(formData);
     console.log('Child profile created:', { childId, ...formData });
     
-    // Redirect to baseline assessment for this child
-    // The assessment will use the ZIP code to select appropriate curriculum
-    window.open(`http://localhost:5179/assessment/${childId}?source=parent-portal`, '_blank');
+    // Generate a simple session token for the assessment
+    const token = window.btoa(`${childId}_${Date.now()}`);
+    
+    // Redirect to baseline assessment for this child with proper query parameters
+    const assessmentUrl = `http://localhost:5179?childId=${childId}&token=${token}&source=parent&childName=${encodeURIComponent(formData.firstName + ' ' + formData.lastName)}&grade=${formData.grade}`;
+    window.open(assessmentUrl, '_blank');
     
     // Navigate back to dashboard
     navigate('/dashboard');

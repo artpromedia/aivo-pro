@@ -17,6 +17,10 @@ interface SessionData {
 interface AssessmentContextType {
   sessionData: SessionData;
   assessmentResults?: any;
+  currentQuestion: number;
+  answers: Record<number, any>;
+  setCurrentQuestion: (q: number) => void;
+  setAnswers: (answers: Record<number, any>) => void;
   updateResults: (results: any) => void;
 }
 
@@ -37,13 +41,23 @@ interface AssessmentProviderProps {
 
 export const AssessmentProvider: React.FC<AssessmentProviderProps> = ({ sessionData, children }) => {
   const [assessmentResults, setAssessmentResults] = useState<any>(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, any>>({});
 
   const updateResults = (results: any) => {
     setAssessmentResults(results);
   };
 
   return (
-    <AssessmentContext.Provider value={{ sessionData, assessmentResults, updateResults }}>
+    <AssessmentContext.Provider value={{ 
+      sessionData, 
+      assessmentResults, 
+      currentQuestion,
+      answers,
+      setCurrentQuestion,
+      setAnswers,
+      updateResults 
+    }}>
       {children}
     </AssessmentContext.Provider>
   );

@@ -20,11 +20,35 @@ export const Complete: React.FC = () => {
   const proceedToModelCloning = () => {
     setRedirecting(true);
     
-    // In production, this would call an API to complete the assessment
-    // and generate a token for model cloning
+    // Prepare assessment data to pass to model cloning
+    const assessmentData = {
+      totalQuestions: assessmentResults?.totalQuestions || 15,
+      answers: assessmentResults?.answers || {},
+      duration: assessmentResults?.duration || '25',
+      completedAt: new Date().toISOString(),
+    };
+    
+    // Build URL with all required parameters for model cloning
+    const params = new URLSearchParams({
+      childId: sessionData.childId,
+      childName: sessionData.childName,
+      grade: sessionData.grade.toString(),
+      enrolledBy: sessionData.enrolledBy,
+      source: 'baseline-assessment',
+      assessmentData: encodeURIComponent(JSON.stringify(assessmentData)),
+    });
+    
+    // Add optional parameters if available
+    if (sessionData.parentEmail) {
+      params.append('parentEmail', sessionData.parentEmail);
+    }
+    if (sessionData.districtLicense) {
+      params.append('districtLicense', sessionData.districtLicense);
+    }
+    
     setTimeout(() => {
-      // Redirect to model cloning app with token
-      const modelCloningUrl = `http://localhost:5180/clone?childId=${sessionData.childId}&token=mock_token&source=${sessionData.enrolledBy}`;
+      // Redirect to model cloning app
+      const modelCloningUrl = `http://localhost:5180?${params.toString()}`;
       window.location.href = modelCloningUrl;
     }, 1000);
   };

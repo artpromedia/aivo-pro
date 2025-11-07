@@ -6,9 +6,7 @@ import { useAssessment } from '../providers/AssessmentProvider';
 
 export const Assessment: React.FC = () => {
   const navigate = useNavigate();
-  const { sessionData, updateResults } = useAssessment();
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, any>>({});
+  const { sessionData, currentQuestion, setCurrentQuestion, answers, setAnswers, updateResults } = useAssessment();
   
   // Mock questions - replace with real questions from API
   const questions = [
@@ -26,11 +24,109 @@ export const Assessment: React.FC = () => {
       options: ['Sad', 'Joyful', 'Angry', 'Tired'],
       correctAnswer: 'Joyful',
     },
-    // Add more questions...
+    {
+      id: 3,
+      subject: 'Math',
+      question: 'If you have 12 apples and eat 4, how many do you have left?',
+      options: ['6', '7', '8', '9'],
+      correctAnswer: '8',
+    },
+    {
+      id: 4,
+      subject: 'Science',
+      question: 'What do plants need to grow?',
+      options: ['Only water', 'Only sunlight', 'Water, sunlight, and air', 'Only soil'],
+      correctAnswer: 'Water, sunlight, and air',
+    },
+    {
+      id: 5,
+      subject: 'Reading',
+      question: 'What is the main idea of a story?',
+      options: ['The first sentence', 'What the story is mostly about', 'The last word', 'The title'],
+      correctAnswer: 'What the story is mostly about',
+    },
+    {
+      id: 6,
+      subject: 'Math',
+      question: 'What is 7 × 3?',
+      options: ['18', '21', '24', '27'],
+      correctAnswer: '21',
+    },
+    {
+      id: 7,
+      subject: 'Science',
+      question: 'Which of these is a mammal?',
+      options: ['Eagle', 'Shark', 'Dolphin', 'Snake'],
+      correctAnswer: 'Dolphin',
+    },
+    {
+      id: 8,
+      subject: 'Reading',
+      question: 'What does the word "enormous" mean?',
+      options: ['Very small', 'Very large', 'Very fast', 'Very slow'],
+      correctAnswer: 'Very large',
+    },
+    {
+      id: 9,
+      subject: 'Math',
+      question: 'What is the value of the 5 in the number 2,573?',
+      options: ['5', '50', '500', '5,000'],
+      correctAnswer: '500',
+    },
+    {
+      id: 10,
+      subject: 'Social Studies',
+      question: 'Which of these is a continent?',
+      options: ['Canada', 'Europe', 'New York', 'California'],
+      correctAnswer: 'Europe',
+    },
+    {
+      id: 11,
+      subject: 'Math',
+      question: 'What fraction is equal to one half?',
+      options: ['1/4', '2/4', '3/5', '3/6'],
+      correctAnswer: '2/4',
+    },
+    {
+      id: 12,
+      subject: 'Science',
+      question: 'What causes day and night on Earth?',
+      options: ['The moon', 'Earth rotating', 'The sun moving', 'Clouds'],
+      correctAnswer: 'Earth rotating',
+    },
+    {
+      id: 13,
+      subject: 'Reading',
+      question: 'What is a verb?',
+      options: ['A person, place, or thing', 'An action word', 'A describing word', 'A connecting word'],
+      correctAnswer: 'An action word',
+    },
+    {
+      id: 14,
+      subject: 'Math',
+      question: 'If a rectangle has a length of 8 cm and width of 3 cm, what is its perimeter?',
+      options: ['11 cm', '22 cm', '24 cm', '26 cm'],
+      correctAnswer: '22 cm',
+    },
+    {
+      id: 15,
+      subject: 'Critical Thinking',
+      question: 'If all roses are flowers, and some flowers are red, which statement must be true?',
+      options: ['All roses are red', 'Some roses might be red', 'No roses are red', 'All flowers are roses'],
+      correctAnswer: 'Some roses might be red',
+    },
   ];
 
   const handleAnswer = (answer: string) => {
-    setAnswers({ ...answers, [currentQuestion]: answer });
+    const newAnswers = { ...answers, [currentQuestion]: answer };
+    setAnswers(newAnswers);
+    
+    // Show break screen halfway through (after question 7)
+    if (currentQuestion === 6) {
+      setCurrentQuestion(7); // Save progress to resume after break
+      navigate('/break');
+      return;
+    }
     
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -38,7 +134,7 @@ export const Assessment: React.FC = () => {
       // Assessment complete
       updateResults({
         totalQuestions: questions.length,
-        answers,
+        answers: newAnswers,
         duration: '25', // Calculate actual duration
       });
       navigate('/complete');

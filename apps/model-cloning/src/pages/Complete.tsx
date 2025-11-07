@@ -43,14 +43,30 @@ export default function Complete() {
 
   const handleLaunchLearnerApp = () => {
     // Redirect to learner app with all necessary parameters
+    const gradeString = sessionData.grade.toString();
     const params = new URLSearchParams({
       childId: sessionData.childId,
       childName: sessionData.childName,
+      age: calculateAgeFromGrade(gradeString),
+      grade: gradeString,
       modelId: cloningResults?.modelId || `model_${sessionData.childId}`,
       source: 'model-cloning',
+      baselineComplete: 'true',
     });
 
     window.location.href = `http://localhost:5176?${params.toString()}`;
+  };
+
+  // Helper to calculate approximate age from grade
+  const calculateAgeFromGrade = (grade: string): string => {
+    const gradeMatch = grade.match(/\d+/);
+    if (gradeMatch) {
+      const gradeNumber = parseInt(gradeMatch[0]);
+      // Typical age range: Kindergarten (5), Grade 1 (6), Grade 2 (7), etc.
+      const age = gradeNumber <= 0 ? 5 : gradeNumber + 5;
+      return age.toString();
+    }
+    return '8'; // Default fallback age
   };
 
   return (

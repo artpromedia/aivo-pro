@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
-import { Eye, EyeOff, Mail, Phone, Lock, User, Calendar, Brain, ArrowRight, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone, Lock, User, Calendar, Brain, ArrowRight, UserPlus, Key } from 'lucide-react';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -14,15 +14,25 @@ const signupSchema = z.object({
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number'),
   confirmPassword: z.string(),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
-  role: z.enum(['parent', 'teacher', 'student'], {
+  role: z.enum(['parent', 'teacher'], {
     errorMap: () => ({ message: 'Please select a role' })
   }),
+  licenseCode: z.string().optional(),
   termsAccepted: z.boolean().refine(val => val === true, {
     message: 'You must accept the terms and conditions'
   }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  // Validate license code is required for teachers
+  if (data.role === 'teacher' && (!data.licenseCode || data.licenseCode.trim().length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "District license code is required for teacher accounts",
+  path: ["licenseCode"],
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
@@ -57,12 +67,22 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
     try {
       const { confirmPassword, termsAccepted, ...signupData } = data;
-      await signup(signupData);
+      
+      // Include license code for teachers, exclude for parents
+      const finalData = data.role === 'teacher' 
+        ? signupData 
+        : { ...signupData, licenseCode: undefined };
+      
+      await signup(finalData);
       onSuccess?.();
     } catch (error: any) {
       if (error.response?.status === 409) {
         setFormError('email', {
           message: 'An account with this email already exists',
+        });
+      } else if (error.response?.status === 403 && data.role === 'teacher') {
+        setFormError('licenseCode', {
+          message: 'Invalid or expired district license code',
         });
       } else {
         setFormError('root', {
@@ -96,11 +116,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         {/* Role Selection */}
         <div className="space-y-4">
           <label className="text-sm font-semibold text-gray-800">I am a...</label>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {[
               { value: 'parent', label: 'Parent', description: 'Supporting my child\'s learning' },
-              { value: 'teacher', label: 'Teacher', description: 'Educating students' },
-              { value: 'student', label: 'Student', description: 'Learning and growing' },
+              { value: 'teacher', label: 'Teacher', description: 'Educating students with district license' },
             ].map((role) => (
               <label
                 key={role.value}
@@ -131,6 +150,43 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             <p className="text-sm text-red-600 font-medium">{errors.role.message}</p>
           )}
         </div>
+
+        {/* District License Code - Only for Teachers */}
+        {selectedRole === 'teacher' && (
+          <div className="space-y-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200">
+            <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+              <Key className="w-4 h-4 text-blue-600" />
+              District License Code
+            </label>
+            <p className="text-xs text-gray-600 mb-3">
+              Enter the license code provided by your school district administrator
+            </p>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Key className="w-5 h-5 text-blue-400" />
+              </div>
+              <input
+                {...register('licenseCode')}
+                type="text"
+                placeholder="XXXX-XXXX-XXXX-XXXX"
+                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white shadow-sm font-mono tracking-wide ${
+                  errors.licenseCode 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-blue-200 focus:border-blue-500 hover:border-blue-300'
+                }`}
+              />
+            </div>
+            {errors.licenseCode && (
+              <p className="text-sm text-red-600 font-medium">{errors.licenseCode.message}</p>
+            )}
+            <div className="mt-3 p-3 bg-white rounded-xl border border-blue-200">
+              <p className="text-xs text-gray-700">
+                <strong>Don't have a license code?</strong> Contact your school district administrator 
+                or email <a href="mailto:districts@aivo.com" className="text-blue-600 hover:underline font-semibold">districts@aivo.com</a>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Name Fields */}
         <div className="grid grid-cols-2 gap-4">

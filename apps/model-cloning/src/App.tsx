@@ -1,11 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CloningProvider } from './providers/CloningProvider';
 import DualConsent from './pages/DualConsent';
 import ModelConfiguration from './pages/ModelConfiguration';
 import CloningProcess from './pages/CloningProcess';
 import ValidationResults from './pages/ValidationResults';
 import Complete from './pages/Complete';
+import { useEffect, useState } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,39 +30,55 @@ interface SessionData {
   assessmentResults?: any;
 }
 
-// Validate and parse session from URL params
-function validateSession(): SessionData | null {
-  const params = new URLSearchParams(window.location.search);
-  
-  const childId = params.get('childId');
-  const childName = params.get('childName');
-  const grade = params.get('grade');
-  const enrolledBy = params.get('enrolledBy') as 'parent' | 'teacher';
-  const source = params.get('source');
-  
-  if (!childId || !childName || !grade || !enrolledBy || source !== 'baseline-assessment') {
-    return null;
-  }
-
-  return {
-    childId,
-    childName,
-    grade: parseInt(grade, 10),
-    enrolledBy,
-    districtLicense: params.get('districtLicense') || undefined,
-    parentEmail: params.get('parentEmail') || undefined,
-    teacherEmail: params.get('teacherEmail') || undefined,
-    teacherName: params.get('teacherName') || undefined,
-    schoolName: params.get('schoolName') || undefined,
-    assessmentResults: params.get('assessmentData') 
-      ? JSON.parse(decodeURIComponent(params.get('assessmentData')!))
-      : undefined,
-  };
-}
-
 function AppContent() {
-  const location = useLocation();
-  const sessionData = validateSession();
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Validate and parse session from URL params on mount
+    const params = new URLSearchParams(window.location.search);
+    
+    const childId = params.get('childId');
+    const childName = params.get('childName');
+    const grade = params.get('grade');
+    const enrolledBy = params.get('enrolledBy') as 'parent' | 'teacher';
+    const source = params.get('source');
+    
+    if (!childId || !childName || !grade || !enrolledBy || source !== 'baseline-assessment') {
+      setSessionData(null);
+      setLoading(false);
+      return;
+    }
+
+    const session: SessionData = {
+      childId,
+      childName,
+      grade: parseInt(grade, 10),
+      enrolledBy,
+      districtLicense: params.get('districtLicense') || undefined,
+      parentEmail: params.get('parentEmail') || undefined,
+      teacherEmail: params.get('teacherEmail') || undefined,
+      teacherName: params.get('teacherName') || undefined,
+      schoolName: params.get('schoolName') || undefined,
+      assessmentResults: params.get('assessmentData') 
+        ? JSON.parse(decodeURIComponent(params.get('assessmentData')!))
+        : undefined,
+    };
+
+    setSessionData(session);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!sessionData) {
     return (
@@ -109,3 +126,4 @@ function App() {
 }
 
 export default App;
+
