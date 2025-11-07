@@ -7,7 +7,7 @@ import { StudentDetail } from './pages/Students/StudentDetail';
 import { StudentAIModel } from './pages/Students/StudentAIModel';
 import { IEPs } from './pages/IEPs';
 import { IEPDetail } from './pages/IEPs/IEPDetail';
-import { CreateIEP } from './pages/IEPs/CreateIEP.tsx';
+import { CreateIEP } from './pages/IEPs/CreateIEP';
 import { Integrations } from './pages/Integrations';
 import { LicenseManagement } from './pages/Licenses';
 import { PurchaseLicense } from './pages/Licenses/PurchaseLicense';

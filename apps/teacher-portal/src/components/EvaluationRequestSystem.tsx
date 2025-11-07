@@ -7,16 +7,11 @@ import {
   ChevronDown,
   ChevronUp,
   Clock, 
-  FileText, 
-  Plus, 
-  Search, 
-  Filter,
+  FileText,
   Eye,
-  MessageSquare,
   CheckCircle,
   XCircle,
   X,
-  Play,
   User,
   Phone,
   Mail,
@@ -586,7 +581,7 @@ const EvaluationRequestSystem: React.FC<EvaluationRequestSystemProps> = ({ child
         ].map(({ key, label, count }) => (
           <button
             key={key}
-            onClick={() => setFilterStatus(key as 'all' | 'pending' | 'scheduled' | 'completed')}
+            onClick={() => setFilterStatus(key as 'all' | 'pending' | 'responded' | 'expired')}
             className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-colors ${
               filterStatus === key
                 ? 'text-coral-600 border-b-2 border-coral-600 bg-coral-50'

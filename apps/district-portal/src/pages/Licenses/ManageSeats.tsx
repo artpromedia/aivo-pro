@@ -106,8 +106,7 @@ export const ManageSeats: React.FC = () => {
   const [filterRole, setFilterRole] = useState<'all' | 'student' | 'teacher'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'available'>('all');
   const [showFilters, setShowFilters] = useState(false);
-  // @ts-expect-error - Modal to be implemented
-  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [_showAssignModal, setShowAssignModal] = useState(false);
   const [showUnassignModal, setShowUnassignModal] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState<typeof mockSeatsData[0] | null>(null);
   const [bulkMode, setBulkMode] = useState(false);

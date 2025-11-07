@@ -195,16 +195,13 @@ const mockStudentData = {
 };
 
 export const StudentAIModel: React.FC = () => {
-  // @ts-expect-error - Will be used when connected to API
-  const { studentId } = useParams<{ studentId: string }>();
+  const { studentId: _studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'insights' | 'training' | 'privacy'>('overview');
-  // @ts-expect-error - Modals to be implemented
-  const [showRetrainingModal, setShowRetrainingModal] = useState(false);
-  // @ts-expect-error - Modals to be implemented
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [_showRetrainingModal, setShowRetrainingModal] = useState(false);
+  const [_showExportModal, setShowExportModal] = useState(false);
 
-  const student = mockStudentData; // In real app, fetch using studentId
+  const student = mockStudentData; // In real app, fetch using _studentId
   const model = student.aiModel;
 
   const getStatusColor = (status: string) => {
@@ -879,7 +876,7 @@ export const StudentAIModel: React.FC = () => {
                   <XAxis 
                     dataKey="date" 
                     stroke="#888"
-                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    tickFormatter={(date: string) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   />
                   <YAxis stroke="#888" domain={[80, 100]} />
                   <Tooltip />

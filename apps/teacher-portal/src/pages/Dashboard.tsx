@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -8,20 +8,11 @@ import {
   Award, 
   MessageCircle, 
   Bell, 
-  Calendar, 
-  User, 
-  Settings,
+  Calendar,
   Brain,
   Users,
-  Target,
-  BookOpen,
-  Eye,
-  ChevronRight,
   AlertCircle,
   Sparkles,
-  Activity,
-  Heart,
-  Star,
   FileText
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -31,10 +22,7 @@ import { useSuggestions } from '../hooks/useSuggestions';
 import { useMockWebSocket } from '../hooks/useWebSocket';
 import { ChildCard } from '../components/ChildCard';
 import { ActivityFeed } from '../components/ActivityFeed';
-import { SuggestionAlert } from '../components/SuggestionAlert';
-import { WeeklyProgressChart } from '../components/WeeklyProgressChart';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
 
 interface DashboardStats {
   avgProgress: number;
@@ -550,7 +538,22 @@ export const Dashboard: React.FC = () => {
 
 // Helper Components
 
-const EnhancedChildCard: React.FC<{ child: { id: string; name: string; age: number; grade: number; avatar?: string; progress: number; learningStreak: number; activeMinutes: number; lastActive: string } }> = ({ child }) => (
+const _EnhancedChildCard: React.FC<{ child: { 
+  id: string; 
+  name: string; 
+  age: number; 
+  grade: number; 
+  avatar?: string; 
+  progress: number; 
+  learningStreak: number; 
+  activeMinutes: number; 
+  lastActive: string;
+  weeklyStats?: {
+    hoursLearned: number;
+    skillsMastered: number;
+    streakDays?: number;
+  }
+} }> = ({ child }) => (
   <motion.div
     className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all hover:scale-[1.02] group"
     whileHover={{ y: -2 }}
@@ -570,7 +573,7 @@ const EnhancedChildCard: React.FC<{ child: { id: string; name: string; age: numb
         </div>
       </div>
       <div className="text-right">
-        <p className="text-2xl font-bold text-coral-600">{child.progress?.overall || 0}%</p>
+        <p className="text-2xl font-bold text-coral-600">{child.progress || 0}%</p>
         <p className="text-xs text-gray-500">Overall Progress</p>
       </div>
     </div>
@@ -641,7 +644,7 @@ const ScheduleItem: React.FC<{
 );
 
 const StatItem: React.FC<{
-  icon: any;
+  icon: React.ElementType;
   label: string;
   value: string;
   color: 'green' | 'blue' | 'purple';
