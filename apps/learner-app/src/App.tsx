@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { K5Dashboard } from './pages/K5Dashboard';
 import { MSDashboard } from './pages/MSDashboard';
@@ -8,6 +9,16 @@ import { SubjectLearning } from './pages/SubjectLearning';
 import { ProfileInsights } from './pages/ProfileInsights';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ProfileMenu } from './components/ProfileMenu';
+
+// Create a query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
 export type AgeGroup = 'K5' | 'MS' | 'HS';
 
@@ -265,24 +276,26 @@ function AppRouter() {
   }
 
   return (
-    <ThemeProvider theme={currentTheme}>
-      <div className="min-h-screen relative">
-        {/* Profile Menu - Fixed position */}
-        <div className="fixed top-6 right-6 z-50">
-          <ProfileMenu 
-            childProfile={childProfile} 
-            onProfileUpdate={handleProfileUpdate}
-            onLogout={handleLogout}
-          />
-        </div>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={currentTheme}>
+        <div className="min-h-screen relative">
+          {/* Profile Menu - Fixed position */}
+          <div className="fixed top-6 right-6 z-50">
+            <ProfileMenu 
+              childProfile={childProfile} 
+              onProfileUpdate={handleProfileUpdate}
+              onLogout={handleLogout}
+            />
+          </div>
 
-        <Routes>
-          <Route path="/" element={getDashboardComponent()} />
-          <Route path="/learn/:subject" element={<SubjectLearning childProfile={childProfile} />} />
-          <Route path="/profile-insights" element={<ProfileInsights childProfile={childProfile} onBack={() => window.history.back()} />} />
-        </Routes>
-      </div>
-    </ThemeProvider>
+          <Routes>
+            <Route path="/" element={getDashboardComponent()} />
+            <Route path="/learn/:subject" element={<SubjectLearning />} />
+            <Route path="/profile-insights" element={<ProfileInsights childProfile={childProfile} onBack={() => window.history.back()} />} />
+          </Routes>
+        </div>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

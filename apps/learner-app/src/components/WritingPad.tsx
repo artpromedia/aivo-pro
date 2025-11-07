@@ -8,8 +8,10 @@ import {
   Grid, Maximize2, Minimize2, Settings
 } from 'lucide-react';
 import { useTheme } from '../providers/ThemeProvider';
+import { useToast } from '../hooks/useToast';
+import { ToastContainer } from './Toast';
 
-interface WritingPadProps {
+interface AdvancedWritingPadProps {
   onClose: () => void;
   childName: string;
   isFullscreen?: boolean;
@@ -44,13 +46,14 @@ interface TextElement {
   fontFamily: string;
 }
 
-export const WritingPad: React.FC<WritingPadProps> = ({
+export const AdvancedWritingPad: React.FC<AdvancedWritingPadProps> = ({
   onClose,
   childName,
   isFullscreen = false,
   initialContent = '',
 }) => {
   const { theme } = useTheme();
+  const { toasts, removeToast, showSuccess } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -341,13 +344,14 @@ export const WritingPad: React.FC<WritingPadProps> = ({
       created: new Date().toISOString(),
     };
 
-    setSavedDrawings(prev => [...prev, drawingData]);
+    const updatedDrawings = [...savedDrawings, drawingData];
+    setSavedDrawings(updatedDrawings);
     
     // Save to localStorage
-    localStorage.setItem('aivoWritingPadDrawings', JSON.stringify([...savedDrawings, drawingData]));
+    localStorage.setItem('aivoWritingPadDrawings', JSON.stringify(updatedDrawings));
     
-    alert('Drawing saved successfully!');
-  }, [childName, layers, textElements, canvasSize, savedDrawings]);
+    showSuccess('Drawing saved successfully!');
+  }, [childName, layers, textElements, canvasSize, savedDrawings, showSuccess]);
 
   // Download as image
   const downloadImage = useCallback(() => {
@@ -706,6 +710,138 @@ export const WritingPad: React.FC<WritingPadProps> = ({
           <Settings className="w-5 h-5" />
         </motion.button>
       )}
+      
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </div>
+  );
+};
+
+interface WritingPadProps {
+  onSave: (dataUrl: string) => void;
+  onClose?: () => void;
+  width?: number;
+  height?: number;
+  strokeColor?: string;
+}
+
+export const WritingPad: React.FC<WritingPadProps> = ({
+  onSave,
+  onClose,
+  width = 640,
+  height = 360,
+  strokeColor = '#1f2937',
+}) => {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const isDrawingRef = React.useRef(false);
+  const lastPointRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+  }, [width, height]);
+
+  const getPoint = React.useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return { x: 0, y: 0 };
+    }
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  }, []);
+
+  const startDrawing = React.useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    isDrawingRef.current = true;
+    lastPointRef.current = getPoint(event);
+  }, [getPoint]);
+
+  const draw = React.useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawingRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext('2d');
+    if (!context || !lastPointRef.current) return;
+
+    context.strokeStyle = strokeColor;
+    context.lineWidth = 4;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+
+    const currentPoint = getPoint(event);
+    context.beginPath();
+    context.moveTo(lastPointRef.current.x, lastPointRef.current.y);
+    context.lineTo(currentPoint.x, currentPoint.y);
+    context.stroke();
+
+    lastPointRef.current = currentPoint;
+  }, [getPoint, strokeColor]);
+
+  const stopDrawing = React.useCallback(() => {
+    isDrawingRef.current = false;
+    lastPointRef.current = null;
+  }, []);
+
+  const handleClear = React.useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+  }, [height, width]);
+
+  const handleSave = React.useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    onSave(canvas.toDataURL('image/png'));
+  }, [onSave]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleClear}
+            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-3 py-2 bg-primary-500 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-primary-600 transition-colors"
+          >
+            Save Work
+          </button>
+        </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+          >
+            Close
+          </button>
+        )}
+      </div>
+
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        className="border-2 border-dashed border-gray-200 rounded-2xl bg-white shadow-inner"
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
+      />
     </div>
   );
 };

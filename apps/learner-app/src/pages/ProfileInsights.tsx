@@ -34,8 +34,6 @@ export const ProfileInsights: React.FC<ProfileInsightsProps> = ({ childProfile, 
   const [activeTab, setActiveTab] = useState<'overview' | 'progress' | 'goals' | 'insights'>('insights');
   const [showBrainMap, setShowBrainMap] = useState(false);
 
-  console.log('ProfileInsights render - showBrainMap:', showBrainMap);
-
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
     { id: 'progress', label: 'Progress', icon: BarChart3 },
@@ -47,7 +45,6 @@ export const ProfileInsights: React.FC<ProfileInsightsProps> = ({ childProfile, 
   const growthAreas = childProfile.baselineResults?.needsImprovement || ['Reading Comprehension', 'Focus Duration', 'Science Vocabulary'];
   
   const handleViewBrainMap = () => {
-    console.log('handleViewBrainMap called');
     setShowBrainMap(true);
   };
 
@@ -276,10 +273,7 @@ export const ProfileInsights: React.FC<ProfileInsightsProps> = ({ childProfile, 
               {/* Brain Map Button */}
               <button
                 onClick={() => {
-                  console.log('Brain map button clicked! Current state:', showBrainMap);
-                  alert('Button clicked - opening brain map');
                   setShowBrainMap(true);
-                  console.log('showBrainMap set to true');
                 }}
                 className="w-full px-8 py-6 bg-gradient-to-r from-orange-400 via-pink-400 to-purple-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer active:scale-95"
                 type="button"

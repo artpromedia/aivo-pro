@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@aivo/ui": ["../../packages/ui/src"],
+      "@aivo/ui/*": ["../../packages/ui/src/*"],
+      "@aivo/types": ["../../packages/types/src"],
+      "@aivo/types/*": ["../../packages/types/src/*"],
+      "@aivo/utils": ["../../packages/utils/src"],
+      "@aivo/utils/*": ["../../packages/utils/src/*"]
+    }
+  },
+  "include": ["src"]
+}

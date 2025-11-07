@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { FocusMonitor } from '../components/FocusMonitor';
 import { HomeworkHelper } from '../pages/HomeworkHelper';
-import { WritingPad } from '../components/WritingPad';
+import { AdvancedWritingPad } from '../components/WritingPad';
 import { GameBreak } from '../pages/GameBreak';
 import { TestCenter } from '../pages/TestCenter';
 
@@ -497,7 +497,7 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
       )}
 
       {showWritingPad && (
-        <WritingPad
+        <AdvancedWritingPad
           childName={childProfile.name}
           onClose={() => setShowWritingPad(false)}
         />

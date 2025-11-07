@@ -14,7 +14,7 @@ import {
 import confetti from 'canvas-confetti';
 import { FocusMonitor } from '../components/FocusMonitor';
 import { HomeworkHelper } from '../pages/HomeworkHelper';
-import { WritingPad } from '../components/WritingPad';
+import { AdvancedWritingPad } from '../components/WritingPad';
 import { GameBreak } from '../pages/GameBreak';
 
 
@@ -693,7 +693,7 @@ export const K5Dashboard: React.FC<K5DashboardProps> = ({ childProfile }) => {
       )}
 
       {showWritingPad && (
-        <WritingPad
+        <AdvancedWritingPad
           childName={childProfile.name}
           onClose={() => setShowWritingPad(false)}
         />

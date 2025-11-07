@@ -1,5 +1,10 @@
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   plugins: [react()],
@@ -8,10 +13,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@aivo/ui': '../../packages/ui/src/index.ts',
-      '@aivo/types': '../../packages/types/src/index.ts',
-      '@aivo/utils': '../../packages/utils/src/index.ts',
-      '@aivo/auth': '../../packages/auth/dist/index.js',
+      '@aivo/ui': path.resolve(__dirname, '../../packages/ui/src/index.ts'),
+      '@aivo/types': path.resolve(__dirname, '../../packages/types/src/index.ts'),
+      '@aivo/utils': path.resolve(__dirname, '../../packages/utils/src/index.ts'),
+      '@aivo/auth': path.resolve(__dirname, '../../packages/auth/dist/index.js'),
     },
   },
   build: {

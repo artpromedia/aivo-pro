@@ -1,18 +1,34 @@
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   server: {
     port: 5175,
   },
   resolve: {
     alias: {
-      '@aivo/ui': '../../packages/ui/src',
-      '@aivo/types': '../../packages/types/src',
-      '@aivo/utils': '../../packages/utils/src',
-      '@aivo/auth': '../../packages/auth/src',
+      '@aivo/ui': path.resolve(__dirname, '../../packages/ui/src/index.ts'),
+      '@aivo/types': path.resolve(__dirname, '../../packages/types/src/index.ts'),
+      '@aivo/utils': path.resolve(__dirname, '../../packages/utils/src/index.ts'),
+      '@aivo/auth': path.resolve(__dirname, '../../packages/auth/dist/index.js'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
     },
   },
 })
