@@ -4,6 +4,27 @@ A production-ready Turborepo monorepo for the AIVO Learning Platform built with 
 
 ## 🚀 Quick Start
 
+### Local Development (With Docker + Local AI)
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Start all services with local AI (no API keys needed!)
+docker-compose up -d
+
+# 3. Setup local AI models
+.\scripts\setup-local-ai.ps1
+
+# 4. Verify everything works
+.\scripts\test-local-ai.ps1
+
+# 5. Start developing!
+# Visit http://localhost:5176 (Learner App)
+```
+
+### Traditional Development (Without Docker)
+
 ```bash
 # Install dependencies
 pnpm install
@@ -20,6 +41,16 @@ pnpm test
 # Lint code
 pnpm lint
 ```
+
+### 🧠 Local AI Testing (Zero Cost!)
+
+Run the entire platform locally using Docker Hub models - no API keys or cloud costs:
+
+- **Ollama**: Primary LLM service (Llama, Mistral, Gemma)
+- **LocalAI**: OpenAI-compatible inference
+- **vLLM**: Production-grade performance testing
+
+See [LOCAL_AI_GUIDE.md](./LOCAL_AI_GUIDE.md) for complete setup instructions.
 
 ## 📁 Project Structure
 
@@ -103,12 +134,30 @@ cd services/mock-api && pnpm dev
 ### Docker Development
 
 ```bash
-# Start all services with Docker
-docker-compose up
+# Start all services with Docker (local AI included)
+docker-compose up -d
+
+# CPU-only mode (no GPU required)
+docker-compose -f docker-compose.yml -f docker-compose.cpu.yml up -d
 
 # Start specific service
 docker-compose up web
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
 ```
+
+**Available Endpoints:**
+- Web App: http://localhost:5173
+- Parent Portal: http://localhost:5174
+- Teacher Portal: http://localhost:5175
+- Learner App: http://localhost:5176
+- Ollama API: http://localhost:11434
+- Ollama Web UI: http://localhost:3000
+- LocalAI: http://localhost:8080
 
 ## 🧪 Testing
 

@@ -215,6 +215,85 @@ services:
               capabilities: [gpu]
 
   # ============================================================================
+  # LOCAL AI MODEL SERVICES (For Testing Without API Keys)
+  # ============================================================================
+
+  # Ollama - Primary local LLM service (Llama, Mistral, Gemma, etc.)
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Ollama Web UI - Interface for managing local models
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=your-secret-key-change-this
+    volumes:
+      - ollama_webui_data:/app/backend/data
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # LocalAI - Alternative local AI with OpenAI-compatible API
+  localai:
+    image: quay.io/go-skynet/local-ai:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - localai_models:/models
+      - localai_data:/build/models
+    environment:
+      - DEBUG=true
+      - CONTEXT_SIZE=4096
+      - THREADS=4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # vLLM - High-performance inference server (optional, for production testing)
+  vllm:
+    image: vllm/vllm-openai:latest
+    ports:
+      - "8081:8000"
+    environment:
+      - MODEL_NAME=facebook/opt-125m
+      - MAX_MODEL_LEN=2048
+    volumes:
+      - vllm_cache:/root/.cache/huggingface
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ============================================================================
   # INFRASTRUCTURE SERVICES
   # ============================================================================
 
@@ -269,6 +348,16 @@ volumes:
   redis_data:
     driver: local
   minio_data:
+    driver: local
+  ollama_data:
+    driver: local
+  ollama_webui_data:
+    driver: local
+  localai_models:
+    driver: local
+  localai_data:
+    driver: local
+  vllm_cache:
     driver: local
 
 networks:
