@@ -1,0 +1,19 @@
+{
+  "name": "@aivo/notification-svc",
+  "version": "1.0.0",
+  "description": "Notification Agent for AIVO - Multi-channel communications",
+  "main": "src/main.py",
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8012",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8012",
+    "lint": "pylint src/",
+    "format": "black src/"
+  },
+  "keywords": [
+    "aivo",
+    "notification",
+    "sendgrid",
+    "twilio",
+    "firebase"
+  ]
+}

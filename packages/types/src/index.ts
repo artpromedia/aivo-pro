@@ -136,3 +136,6 @@ export interface UIConfig {
   enableAnimations: boolean;
   enableFocusMode: boolean;
 }
+
+// Export Agent Service Types
+export * from './agent-services';

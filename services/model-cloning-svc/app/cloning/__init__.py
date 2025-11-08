@@ -1,0 +1,3 @@
+"""
+Cloning module
+"""

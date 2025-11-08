@@ -1,0 +1,12 @@
+{
+  "name": "@aivo/translator-svc",
+  "version": "1.0.0",
+  "description": "Language Translator Agent - Multi-language support for AIVO Learning Platform",
+  "main": "src/main.py",
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --port 8010",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8010",
+    "test": "pytest tests/"
+  },
+  "keywords": ["translation", "i18n", "multi-language", "education", "rtl"]
+}

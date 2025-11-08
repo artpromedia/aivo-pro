@@ -66,6 +66,211 @@ services:
       - NODE_ENV=development
       - PORT=8000
 
+  # ============================================================================
+  # AI AGENT SERVICES
+  # ============================================================================
+
+  # Training & Alignment Agent - Responsible AI governance
+  training-alignment:
+    build: ./services/training-alignment-svc
+    ports:
+      - "8009:8009"
+    environment:
+      - SERVICE_NAME=training-alignment-svc
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - BIAS_THRESHOLD=0.10
+      - DRIFT_THRESHOLD=0.15
+      - ENABLE_AUTO_RETRAINING=true
+      - ENABLE_BIAS_MITIGATION=true
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  # Language Translator Agent - Multi-language support (50+ languages)
+  translator:
+    build: ./services/translator-svc
+    ports:
+      - "8010:8010"
+    environment:
+      - SERVICE_NAME=translator-svc
+      - GOOGLE_TRANSLATE_API_KEY=${GOOGLE_TRANSLATE_API_KEY}
+      - GOOGLE_CLOUD_TTS_KEY=${GOOGLE_CLOUD_TTS_KEY}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/1}
+      - LOG_LEVEL=INFO
+      - CACHE_TTL=3600
+      - ENABLE_AUDIO_TRANSLATION=true
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Business Model Agent - Subscriptions and licensing
+  business-model:
+    build: ./services/business-model-svc
+    ports:
+      - "8011:8011"
+    environment:
+      - SERVICE_NAME=business-model-svc
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - LOG_LEVEL=INFO
+      - CHURN_THRESHOLD=0.70
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Notification Agent - Multi-channel communications
+  notification:
+    build: ./services/notification-svc
+    ports:
+      - "8012:8012"
+    environment:
+      - SERVICE_NAME=notification-svc
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - FIREBASE_CONFIG=${FIREBASE_CONFIG}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Analytics & Insights Agent - Platform analytics
+  analytics-insights:
+    build: ./services/analytics-insights-svc
+    ports:
+      - "8013:8013"
+    environment:
+      - SERVICE_NAME=analytics-insights-svc
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/3}
+      - LOG_LEVEL=INFO
+      - CACHE_TTL=3600
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  # ============================================================================
+  # ACTUAL AI SERVICES - NOT MOCKS!
+  # ============================================================================
+
+  # AIVO Main Brain - ACTUAL Foundation Model (requires GPU)
+  aivo-brain:
+    build: ./services/aivo-brain-svc
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVICE_NAME=aivo-brain-svc
+      - BASE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+      - FALLBACK_MODEL=TinyLlama/TinyLlama-1.1B-Chat-v1.0
+      - USE_4BIT_QUANTIZATION=true
+      - DEVICE=cuda
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=4
+      - LOG_LEVEL=INFO
+    depends_on:
+      - redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Model Cloning Service - Creates personalized AI for each student
+  model-cloning:
+    build: ./services/model-cloning-svc
+    ports:
+      - "8014:8014"
+    environment:
+      - SERVICE_NAME=model-cloning-svc
+      - AIVO_BRAIN_URL=http://aivo-brain:8001
+      - REDIS_URL=redis://redis:6379/5
+      - S3_BUCKET=aivo-student-models
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - LOG_LEVEL=INFO
+    depends_on:
+      - aivo-brain
+      - redis
+      - minio
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ============================================================================
+  # INFRASTRUCTURE SERVICES
+  # ============================================================================
+
+  # MinIO - S3-compatible storage for models (development only)
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=aivo
+      - POSTGRES_USER=aivo
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aivo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
 networks:
   default:
     name: aivo-network

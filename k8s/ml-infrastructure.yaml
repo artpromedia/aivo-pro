@@ -1,0 +1,360 @@
+# Kubernetes ML Infrastructure for AIVO
+# Deploys GPU-enabled AIVO Brain and Model Cloning services
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aivo-ml
+  labels:
+    name: aivo-ml
+    environment: production
+
+---
+# ConfigMap for ML Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-config
+  namespace: aivo-ml
+data:
+  GPU_TYPE: "nvidia-tesla-t4"
+  CUDA_VERSION: "11.8"
+  BASE_MODEL: "mistralai/Mistral-7B-Instruct-v0.2"
+  REDIS_HOST: "redis-service.aivo-ml.svc.cluster.local"
+  S3_BUCKET: "aivo-student-models"
+
+---
+# AIVO Brain Deployment with GPU
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aivo-brain
+  namespace: aivo-ml
+  labels:
+    app: aivo-brain
+    tier: ml
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: aivo-brain
+  template:
+    metadata:
+      labels:
+        app: aivo-brain
+        tier: ml
+    spec:
+      nodeSelector:
+        nvidia.com/gpu: "true"
+      containers:
+      - name: aivo-brain
+        image: aivo/brain-model:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+          name: http
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "32Gi"
+            cpu: "8"
+          requests:
+            nvidia.com/gpu: 1
+            memory: "16Gi"
+            cpu: "4"
+        env:
+        - name: BASE_MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: BASE_MODEL
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: REDIS_HOST
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        - name: PYTORCH_CUDA_ALLOC_CONF
+          value: "max_split_size_mb:512"
+        - name: TRANSFORMERS_CACHE
+          value: "/cache"
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        - name: cache-storage
+          mountPath: /cache
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-storage-pvc
+      - name: cache-storage
+        emptyDir:
+          sizeLimit: 50Gi
+
+---
+# Model Cloning Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-cloning
+  namespace: aivo-ml
+  labels:
+    app: model-cloning
+    tier: ml
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: model-cloning
+  template:
+    metadata:
+      labels:
+        app: model-cloning
+        tier: ml
+    spec:
+      nodeSelector:
+        nvidia.com/gpu: "true"
+      containers:
+      - name: model-cloning
+        image: aivo/model-cloning:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8014
+          name: http
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "24Gi"
+            cpu: "6"
+          requests:
+            nvidia.com/gpu: 1
+            memory: "12Gi"
+            cpu: "3"
+        env:
+        - name: AIVO_BRAIN_URL
+          value: "http://aivo-brain-service:8001"
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: REDIS_HOST
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: S3_BUCKET
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        - name: cloned-models
+          mountPath: /cloned_models
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8014
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8014
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-storage-pvc
+      - name: cloned-models
+        persistentVolumeClaim:
+          claimName: cloned-models-pvc
+
+---
+# Persistent Volume Claim for Model Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-storage-pvc
+  namespace: aivo-ml
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 500Gi
+
+---
+# PVC for Cloned Models
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cloned-models-pvc
+  namespace: aivo-ml
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 1Ti
+
+---
+# Service for AIVO Brain
+apiVersion: v1
+kind: Service
+metadata:
+  name: aivo-brain-service
+  namespace: aivo-ml
+  labels:
+    app: aivo-brain
+spec:
+  type: LoadBalancer
+  selector:
+    app: aivo-brain
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+      name: http
+  sessionAffinity: ClientIP
+
+---
+# Service for Model Cloning
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-cloning-service
+  namespace: aivo-ml
+  labels:
+    app: model-cloning
+spec:
+  type: ClusterIP
+  selector:
+    app: model-cloning
+  ports:
+    - protocol: TCP
+      port: 8014
+      targetPort: 8014
+      name: http
+
+---
+# HorizontalPodAutoscaler for AIVO Brain
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aivo-brain-hpa
+  namespace: aivo-ml
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aivo-brain
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+
+---
+# Redis for Caching
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: aivo-ml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: aivo-ml
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

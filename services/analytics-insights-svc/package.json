@@ -1,0 +1,19 @@
+{
+  "name": "@aivo/analytics-insights-svc",
+  "version": "1.0.0",
+  "description": "Analytics & Insights Agent for AIVO - Platform analytics and KPIs",
+  "main": "src/main.py",
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8013",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8013",
+    "lint": "pylint src/",
+    "format": "black src/"
+  },
+  "keywords": [
+    "aivo",
+    "analytics",
+    "insights",
+    "kpis",
+    "metrics"
+  ]
+}
