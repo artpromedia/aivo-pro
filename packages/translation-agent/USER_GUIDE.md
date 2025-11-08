@@ -164,21 +164,21 @@ console.log(translation);
 
 View the translation quality dashboard:
 
-1. Start the super-admin app:
+**Step 1:** Start the super-admin app
 
 ```bash
 pnpm dev --filter super-admin
 ```
 
-2. Navigate to Translation Dashboard
+**Step 2:** Navigate to Translation Dashboard
 
-3. See real-time metrics:
+**Step 3:** See real-time metrics
 
-   - Average quality score across all languages
-   - Language count
-   - Total issues to review
+- Average quality score across all languages
+- Language count
+- Total issues to review
 
-4. Click on any language to see detailed issues
+**Step 4:** Click on any language to see detailed issues
 
 ## Best Practices
 
@@ -279,7 +279,7 @@ Remove the key or add it to the reference locale (English).
 
 ## Adding New Languages
 
-1. Add locale configuration to `packages/translation-agent/src/locales.ts`:
+**Step 1:** Add locale configuration to `packages/translation-agent/src/locales.ts`
 
 ```typescript
 pt: {
@@ -292,17 +292,17 @@ pt: {
 },
 ```
 
-2. Create translation file `apps/learner-app/src/locales/pt.ts`
+**Step 2:** Create translation file `apps/learner-app/src/locales/pt.ts`
 
-3. Add to available locales in `App.tsx`:
+**Step 3:** Add to available locales in `App.tsx`
 
 ```typescript
 availableLocales={['en', 'es', 'fr', 'zh', 'ar', 'pt']}
 ```
 
-4. Update validation script to include new locale
+**Step 4:** Update validation script to include new locale
 
-5. Run validation:
+**Step 5:** Run validation
 
 ```bash
 pnpm validate:translations
