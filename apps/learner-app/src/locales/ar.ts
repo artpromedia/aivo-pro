@@ -1,0 +1,75 @@
+/**
+ * Arabic translations
+ */
+
+export const ar = {
+  common: {
+    welcome: 'مرحباً',
+    hello: 'مرحبا',
+    goodbye: 'وداعاً',
+    yes: 'نعم',
+    no: 'لا',
+    save: 'حفظ',
+    cancel: 'إلغاء',
+    delete: 'حذف',
+    edit: 'تعديل',
+    close: 'إغلاق',
+    loading: 'جاري التحميل...',
+    error: 'خطأ',
+    success: 'نجاح',
+  },
+  nav: {
+    home: 'الرئيسية',
+    dashboard: 'لوحة التحكم',
+    courses: 'الدورات',
+    progress: 'التقدم',
+    settings: 'الإعدادات',
+    profile: 'الملف الشخصي',
+    logout: 'تسجيل الخروج',
+  },
+  dashboard: {
+    title: 'لوحة التحكم',
+    welcome: 'مرحباً بعودتك، {name}!',
+    continueLesson: 'متابعة الدرس',
+    recentActivity: 'النشاط الأخير',
+    achievements: 'الإنجازات',
+    stats: {
+      lessonsCompleted: 'الدروس المكتملة',
+      hoursLearned: 'ساعات التعلم',
+      streakDays: 'أيام متتالية',
+    },
+  },
+  courses: {
+    title: 'دوراتي',
+    allCourses: 'جميع الدورات',
+    inProgress: 'قيد التقدم',
+    completed: 'مكتمل',
+    startCourse: 'بدء الدورة',
+    continueCourse: 'متابعة',
+    viewDetails: 'عرض التفاصيل',
+  },
+  lessons: {
+    title: 'الدرس',
+    next: 'الدرس التالي',
+    previous: 'الدرس السابق',
+    complete: 'إكمال الدرس',
+    quiz: 'خذ الاختبار',
+    resources: 'الموارد',
+  },
+  profile: {
+    title: 'الملف الشخصي',
+    personalInfo: 'المعلومات الشخصية',
+    name: 'الاسم',
+    email: 'البريد الإلكتروني',
+    language: 'اللغة',
+    timezone: 'المنطقة الزمنية',
+    updateProfile: 'تحديث الملف الشخصي',
+  },
+  settings: {
+    title: 'الإعدادات',
+    notifications: 'الإشعارات',
+    appearance: 'المظهر',
+    privacy: 'الخصوصية',
+    language: 'اللغة والمنطقة',
+  },
+};

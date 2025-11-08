@@ -1,0 +1,75 @@
+/**
+ * English translations
+ */
+
+export const en = {
+  common: {
+    welcome: 'Welcome',
+    hello: 'Hello',
+    goodbye: 'Goodbye',
+    yes: 'Yes',
+    no: 'No',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    close: 'Close',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+  },
+  nav: {
+    home: 'Home',
+    dashboard: 'Dashboard',
+    courses: 'Courses',
+    progress: 'Progress',
+    settings: 'Settings',
+    profile: 'Profile',
+    logout: 'Logout',
+  },
+  dashboard: {
+    title: 'Dashboard',
+    welcome: 'Welcome back, {name}!',
+    continueLesson: 'Continue Lesson',
+    recentActivity: 'Recent Activity',
+    achievements: 'Achievements',
+    stats: {
+      lessonsCompleted: 'Lessons Completed',
+      hoursLearned: 'Hours Learned',
+      streakDays: 'Day Streak',
+    },
+  },
+  courses: {
+    title: 'My Courses',
+    allCourses: 'All Courses',
+    inProgress: 'In Progress',
+    completed: 'Completed',
+    startCourse: 'Start Course',
+    continueCourse: 'Continue',
+    viewDetails: 'View Details',
+  },
+  lessons: {
+    title: 'Lesson',
+    next: 'Next Lesson',
+    previous: 'Previous Lesson',
+    complete: 'Complete Lesson',
+    quiz: 'Take Quiz',
+    resources: 'Resources',
+  },
+  profile: {
+    title: 'Profile',
+    personalInfo: 'Personal Information',
+    name: 'Name',
+    email: 'Email',
+    language: 'Language',
+    timezone: 'Timezone',
+    updateProfile: 'Update Profile',
+  },
+  settings: {
+    title: 'Settings',
+    notifications: 'Notifications',
+    appearance: 'Appearance',
+    privacy: 'Privacy',
+    language: 'Language & Region',
+  },
+};

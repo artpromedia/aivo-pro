@@ -1,0 +1,75 @@
+/**
+ * Chinese (Simplified) translations
+ */
+
+export const zh = {
+  common: {
+    welcome: '欢迎',
+    hello: '你好',
+    goodbye: '再见',
+    yes: '是',
+    no: '否',
+    save: '保存',
+    cancel: '取消',
+    delete: '删除',
+    edit: '编辑',
+    close: '关闭',
+    loading: '加载中...',
+    error: '错误',
+    success: '成功',
+  },
+  nav: {
+    home: '首页',
+    dashboard: '仪表板',
+    courses: '课程',
+    progress: '进度',
+    settings: '设置',
+    profile: '个人资料',
+    logout: '登出',
+  },
+  dashboard: {
+    title: '仪表板',
+    welcome: '欢迎回来，{name}！',
+    continueLesson: '继续课程',
+    recentActivity: '最近活动',
+    achievements: '成就',
+    stats: {
+      lessonsCompleted: '已完成课程',
+      hoursLearned: '学习小时',
+      streakDays: '连续天数',
+    },
+  },
+  courses: {
+    title: '我的课程',
+    allCourses: '所有课程',
+    inProgress: '进行中',
+    completed: '已完成',
+    startCourse: '开始课程',
+    continueCourse: '继续',
+    viewDetails: '查看详情',
+  },
+  lessons: {
+    title: '课程',
+    next: '下一课',
+    previous: '上一课',
+    complete: '完成课程',
+    quiz: '参加测验',
+    resources: '资源',
+  },
+  profile: {
+    title: '个人资料',
+    personalInfo: '个人信息',
+    name: '姓名',
+    email: '电子邮件',
+    language: '语言',
+    timezone: '时区',
+    updateProfile: '更新资料',
+  },
+  settings: {
+    title: '设置',
+    notifications: '通知',
+    appearance: '外观',
+    privacy: '隐私',
+    language: '语言和地区',
+  },
+};

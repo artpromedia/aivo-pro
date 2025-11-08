@@ -1,0 +1,75 @@
+/**
+ * Spanish translations
+ */
+
+export const es = {
+  common: {
+    welcome: 'Bienvenido',
+    hello: 'Hola',
+    goodbye: 'Adiós',
+    yes: 'Sí',
+    no: 'No',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    delete: 'Eliminar',
+    edit: 'Editar',
+    close: 'Cerrar',
+    loading: 'Cargando...',
+    error: 'Error',
+    success: 'Éxito',
+  },
+  nav: {
+    home: 'Inicio',
+    dashboard: 'Panel',
+    courses: 'Cursos',
+    progress: 'Progreso',
+    settings: 'Configuración',
+    profile: 'Perfil',
+    logout: 'Cerrar sesión',
+  },
+  dashboard: {
+    title: 'Panel',
+    welcome: '¡Bienvenido de nuevo, {name}!',
+    continueLesson: 'Continuar Lección',
+    recentActivity: 'Actividad Reciente',
+    achievements: 'Logros',
+    stats: {
+      lessonsCompleted: 'Lecciones Completadas',
+      hoursLearned: 'Horas Aprendidas',
+      streakDays: 'Días de Racha',
+    },
+  },
+  courses: {
+    title: 'Mis Cursos',
+    allCourses: 'Todos los Cursos',
+    inProgress: 'En Progreso',
+    completed: 'Completado',
+    startCourse: 'Iniciar Curso',
+    continueCourse: 'Continuar',
+    viewDetails: 'Ver Detalles',
+  },
+  lessons: {
+    title: 'Lección',
+    next: 'Siguiente Lección',
+    previous: 'Lección Anterior',
+    complete: 'Completar Lección',
+    quiz: 'Hacer Cuestionario',
+    resources: 'Recursos',
+  },
+  profile: {
+    title: 'Perfil',
+    personalInfo: 'Información Personal',
+    name: 'Nombre',
+    email: 'Correo Electrónico',
+    language: 'Idioma',
+    timezone: 'Zona Horaria',
+    updateProfile: 'Actualizar Perfil',
+  },
+  settings: {
+    title: 'Configuración',
+    notifications: 'Notificaciones',
+    appearance: 'Apariencia',
+    privacy: 'Privacidad',
+    language: 'Idioma y Región',
+  },
+};

@@ -1,0 +1,68 @@
+import type { LocaleConfig } from './types';
+
+export const SUPPORTED_LOCALES: Record<string, LocaleConfig> = {
+  en: {
+    code: 'en',
+    name: 'English',
+    nativeName: 'English',
+    direction: 'ltr',
+    formalityLevel: 'neutral',
+    culturalContext: ['western', 'individualistic'],
+  },
+  es: {
+    code: 'es',
+    name: 'Spanish',
+    nativeName: 'Español',
+    direction: 'ltr',
+    formalityLevel: 'neutral',
+    culturalContext: ['western', 'latin', 'formal-informal-distinction'],
+  },
+  fr: {
+    code: 'fr',
+    name: 'French',
+    nativeName: 'Français',
+    direction: 'ltr',
+    formalityLevel: 'formal',
+    culturalContext: ['western', 'formal-informal-distinction'],
+  },
+  zh: {
+    code: 'zh',
+    name: 'Chinese (Simplified)',
+    nativeName: '中文',
+    direction: 'ltr',
+    formalityLevel: 'neutral',
+    culturalContext: ['eastern', 'collectivistic', 'high-context'],
+  },
+  ar: {
+    code: 'ar',
+    name: 'Arabic',
+    nativeName: 'العربية',
+    direction: 'rtl',
+    formalityLevel: 'formal',
+    culturalContext: ['eastern', 'middle-eastern', 'high-context', 'religious'],
+  },
+  de: {
+    code: 'de',
+    name: 'German',
+    nativeName: 'Deutsch',
+    direction: 'ltr',
+    formalityLevel: 'formal',
+    culturalContext: ['western', 'formal-informal-distinction'],
+  },
+  ja: {
+    code: 'ja',
+    name: 'Japanese',
+    nativeName: '日本語',
+    direction: 'ltr',
+    formalityLevel: 'formal',
+    culturalContext: ['eastern', 'collectivistic', 'high-context', 'hierarchical'],
+  },
+  pt: {
+    code: 'pt',
+    name: 'Portuguese',
+    nativeName: 'Português',
+    direction: 'ltr',
+    formalityLevel: 'neutral',
+    culturalContext: ['western', 'latin'],
+  },
+};

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, User, Edit3, LogOut, Brain, FileText } from 'lucide-react';
+import { Settings, User, Edit3, LogOut, Brain, FileText, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface ChildProfile {
   id: string;
@@ -182,6 +183,15 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   <Settings className="w-5 h-5 text-orange-600" />
                   <span className="font-medium text-gray-700">⚡ Performance Monitoring</span>
                 </motion.button>
+                
+                {/* Language Switcher */}
+                <div className="p-3 rounded-xl border border-gray-200 bg-gray-50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">Language</span>
+                  </div>
+                  <LanguageSwitcher />
+                </div>
                 
                 <motion.button
                   onClick={() => setIsEditing(true)}

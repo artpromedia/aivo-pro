@@ -21,11 +21,10 @@ export interface LocaleSwitcherProps {
   buttonClassName?: string;
 }
 
-const localeNames: Record<Locale, string> = {
+const LOCALE_NAMES: Record<Locale, string> = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
-  de: 'Deutsch',
   zh: '中文',
   ar: 'العربية',
 };
@@ -45,7 +44,7 @@ export function LocaleSwitcher({ className = '', buttonClassName = '' }: LocaleS
     >
       {availableLocales.map((loc) => (
         <option key={loc} value={loc}>
-          {localeNames[loc]}
+          {LOCALE_NAMES[loc]}
         </option>
       ))}
     </select>
@@ -67,16 +66,16 @@ export function LocaleButtons({ className = '', buttonClassName = '' }: LocaleBu
           key={loc}
           onClick={() => setLocale(loc)}
           className={`
-            px-3 py-1.5 rounded-lg transition-colors
+            px-4 py-2 rounded-lg font-medium transition-colors
             ${
               locale === loc
-                ? 'bg-coral text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-coral text-white shadow-sm'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }
             ${buttonClassName}
           `}
         >
-          {localeNames[loc]}
+          {LOCALE_NAMES[loc]}
         </button>
       ))}
     </div>

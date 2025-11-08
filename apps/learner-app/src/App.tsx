@@ -5,10 +5,12 @@ import { PortalErrorBoundary, useNetworkStatus } from '@aivo/error-handling';
 import { PortalProvider, useAuth, useUI, useStudents, PortalType } from '@aivo/state';
 import { PWAProvider } from '@aivo/pwa';
 import { AnimatePresence } from '@aivo/animations';
+import { I18nProvider } from '@aivo/i18n';
 import type { ErrorInfo } from 'react';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ProfileMenu } from './components/ProfileMenu';
+import { en, es, fr, zh, ar } from './locales';
 
 // Lazy load pages for code splitting
 const K5Dashboard = lazy(() => import('./pages/K5Dashboard').then(m => ({ default: m.K5Dashboard })));
@@ -341,21 +343,27 @@ function App() {
         console.error('Learner App Error:', error, errorInfo);
       }}
     >
-      <PWAProvider
-        enableInstallPrompt={true}
-        enableUpdatePrompt={true}
-        enableNetworkStatus={true}
-        config={{
-          installPromptDelay: 5000,
-          maxCacheAge: 24 * 60 * 60 * 1000 // 24 hours
-        }}
+      <I18nProvider
+        defaultLocale="en"
+        locales={{ en, es, fr, zh, ar }}
+        availableLocales={['en', 'es', 'fr', 'zh', 'ar']}
       >
-        <PortalProvider portalType={PortalType.LEARNER_APP}>
-          <Router>
-            <AppRouter />
-          </Router>
-        </PortalProvider>
-      </PWAProvider>
+        <PWAProvider
+          enableInstallPrompt={true}
+          enableUpdatePrompt={true}
+          enableNetworkStatus={true}
+          config={{
+            installPromptDelay: 5000,
+            maxCacheAge: 24 * 60 * 60 * 1000 // 24 hours
+          }}
+        >
+          <PortalProvider portalType={PortalType.LEARNER_APP}>
+            <Router>
+              <AppRouter />
+            </Router>
+          </PortalProvider>
+        </PWAProvider>
+      </I18nProvider>
     </PortalErrorBoundary>
   );
 }

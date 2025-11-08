@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { IntlProvider as ReactIntlProvider } from 'react-intl';
 
-export type Locale = 'en' | 'es' | 'fr' | 'de' | 'zh' | 'ar';
+export type Locale = 'en' | 'es' | 'fr' | 'zh' | 'ar';
 
 export interface Messages {
   [key: string]: string | Messages;
