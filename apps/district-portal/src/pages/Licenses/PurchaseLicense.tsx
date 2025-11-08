@@ -496,7 +496,13 @@ export const PurchaseLicense: React.FC = () => {
                         <h3 className="text-2xl font-bold mb-1">Need More Than 1000 Licenses?</h3>
                         <p className="text-purple-100">Custom enterprise solutions available</p>
                       </div>
-                      <button className="px-6 py-3 bg-white text-purple-600 rounded-xl hover:bg-purple-50 transition-all font-semibold whitespace-nowrap">
+                      <button 
+                        onClick={() => {
+                          // Open contact form modal or redirect to contact page
+                          window.open('mailto:sales@aivo.edu?subject=Enterprise%20License%20Inquiry&body=Hi%2C%0A%0AI%27m%20interested%20in%20enterprise%20licensing%20for%20more%20than%201000%20users.%20Please%20contact%20me%20with%20more%20information.%0A%0AThank%20you%21', '_blank');
+                        }}
+                        className="px-6 py-3 bg-white text-purple-600 rounded-xl hover:bg-purple-50 transition-all font-semibold whitespace-nowrap"
+                      >
                         Contact Sales
                       </button>
                     </div>

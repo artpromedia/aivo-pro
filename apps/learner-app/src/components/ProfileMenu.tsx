@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, User, Edit3, LogOut, Brain } from 'lucide-react';
+import { Settings, User, Edit3, LogOut, Brain, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ChildProfile {
@@ -133,6 +133,54 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 >
                   <Brain className="w-5 h-5 text-purple-600" />
                   <span className="font-medium text-gray-700">AI Insights & Brain Map</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => {
+                    navigate('/editor-demo');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 text-left rounded-xl hover:bg-pink-50 border border-pink-200"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <FileText className="w-5 h-5 text-pink-600" />
+                  <span className="font-medium text-gray-700">✍️ Rich Content Editor</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => {
+                    navigate('/state-demo');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 text-left rounded-xl hover:bg-green-50 border border-green-200"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Settings className="w-5 h-5 text-green-600" />
+                  <span className="font-medium text-gray-700">🌐 Global State Demo</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => {
+                    navigate('/pwa-demo');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 text-left rounded-xl hover:bg-blue-50 border border-blue-200"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Settings className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-700">📱 PWA Features Demo</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => {
+                    navigate('/performance-demo');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 text-left rounded-xl hover:bg-orange-50 border border-orange-200"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Settings className="w-5 h-5 text-orange-600" />
+                  <span className="font-medium text-gray-700">⚡ Performance Monitoring</span>
                 </motion.button>
                 
                 <motion.button

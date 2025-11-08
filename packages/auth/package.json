@@ -1,21 +1,25 @@
 {
   "name": "@aivo/auth",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Advanced authentication with biometric, MFA, and SSO support",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest",
-    "lint": "eslint . --ext ts,tsx"
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "eslint . --ext ts,tsx",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@aivo/types": "workspace:*",
@@ -35,11 +39,16 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-  "@types/qrcode": "^1.5.6",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "eslint": "^9.0.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   }
 }

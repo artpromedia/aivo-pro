@@ -1,14 +1,30 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, useSearchParams, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PortalErrorBoundary, useNetworkStatus } from '@aivo/error-handling';
+import { PortalProvider, useAuth, useUI, useStudents, PortalType } from '@aivo/state';
+import { PWAProvider } from '@aivo/pwa';
+import { AnimatePresence } from '@aivo/animations';
+import type { ErrorInfo } from 'react';
 import { ThemeProvider } from './providers/ThemeProvider';
-import { K5Dashboard } from './pages/K5Dashboard';
-import { MSDashboard } from './pages/MSDashboard';
-import { HSDashboard } from './pages/HSDashboard';
-import { SubjectLearning } from './pages/SubjectLearning';
-import { ProfileInsights } from './pages/ProfileInsights';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ProfileMenu } from './components/ProfileMenu';
+
+// Lazy load pages for code splitting
+const K5Dashboard = lazy(() => import('./pages/K5Dashboard').then(m => ({ default: m.K5Dashboard })));
+const MSDashboard = lazy(() => import('./pages/MSDashboard').then(m => ({ default: m.MSDashboard })));
+const HSDashboard = lazy(() => import('./pages/HSDashboard').then(m => ({ default: m.HSDashboard })));
+const SubjectLearning = lazy(() => import('./pages/SubjectLearning').then(m => ({ default: m.SubjectLearning })));
+const ProfileInsights = lazy(() => import('./pages/ProfileInsights').then(m => ({ default: m.ProfileInsights })));
+
+// Lazy load demo pages
+const ErrorHandlingDemo = lazy(() => import('./components/ErrorHandlingDemo').then(m => ({ default: m.ErrorHandlingDemo })));
+const GlobalStateDemo = lazy(() => import('./components/GlobalStateDemo').then(m => ({ default: m.GlobalStateDemo })));
+const PWADemo = lazy(() => import('./components/PWADemo').then(m => ({ default: m.PWADemo })));
+const VisualizationShowcase = lazy(() => import('./components/VisualizationShowcase').then(m => ({ default: m.VisualizationShowcase })));
+const EditorDemo = lazy(() => import('./components/EditorDemo').then(m => ({ default: m.EditorDemo })));
+const PerformanceDemo = lazy(() => import('./pages/PerformanceDemo'));
+const EnhancementShowcase = lazy(() => import('./pages/EnhancementShowcase').then(m => ({ default: m.EnhancementShowcase })));
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -52,6 +68,7 @@ function AppRouter() {
   const [currentTheme, setCurrentTheme] = useState<AgeGroup>('K5');
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
+  const { isOnline } = useNetworkStatus();
 
   // Auto-determine theme based on age
   const getThemeFromAge = (age: number): AgeGroup => {
@@ -279,8 +296,15 @@ function AppRouter() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={currentTheme}>
         <div className="min-h-screen relative">
+          {/* Offline notification */}
+          {!isOnline && (
+            <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-2 z-50">
+              You're offline. Some features may be limited.
+            </div>
+          )}
+          
           {/* Profile Menu - Fixed position */}
-          <div className="fixed top-6 right-6 z-50">
+          <div className={`fixed top-6 right-6 z-40 ${!isOnline ? 'mt-10' : ''}`}>
             <ProfileMenu 
               childProfile={childProfile} 
               onProfileUpdate={handleProfileUpdate}
@@ -288,11 +312,20 @@ function AppRouter() {
             />
           </div>
 
-          <Routes>
-            <Route path="/" element={getDashboardComponent()} />
-            <Route path="/learn/:subject" element={<SubjectLearning />} />
-            <Route path="/profile-insights" element={<ProfileInsights childProfile={childProfile} onBack={() => window.history.back()} />} />
-          </Routes>
+          <Suspense fallback={<LoadingScreen message="Loading page..." />}>
+            <Routes>
+              <Route path="/" element={getDashboardComponent()} />
+              <Route path="/learn/:subject" element={<SubjectLearning />} />
+              <Route path="/profile-insights" element={<ProfileInsights childProfile={childProfile} onBack={() => window.history.back()} />} />
+              <Route path="/error-demo" element={<ErrorHandlingDemo />} />
+              <Route path="/state-demo" element={<GlobalStateDemo childProfile={childProfile} />} />
+              <Route path="/pwa-demo" element={<PWADemo />} />
+              <Route path="/visualizations" element={<VisualizationShowcase />} />
+              <Route path="/editor-demo" element={<EditorDemo />} />
+              <Route path="/performance-demo" element={<PerformanceDemo />} />
+              <Route path="/enhancements" element={<EnhancementShowcase />} />
+            </Routes>
+          </Suspense>
         </div>
       </ThemeProvider>
     </QueryClientProvider>
@@ -301,9 +334,29 @@ function AppRouter() {
 
 function App() {
   return (
-    <Router>
-      <AppRouter />
-    </Router>
+    <PortalErrorBoundary
+      portalName="learner-app"
+      resetKeys={[]} // Add relevant reset keys here
+      onError={(error: Error, errorInfo: ErrorInfo) => {
+        console.error('Learner App Error:', error, errorInfo);
+      }}
+    >
+      <PWAProvider
+        enableInstallPrompt={true}
+        enableUpdatePrompt={true}
+        enableNetworkStatus={true}
+        config={{
+          installPromptDelay: 5000,
+          maxCacheAge: 24 * 60 * 60 * 1000 // 24 hours
+        }}
+      >
+        <PortalProvider portalType={PortalType.LEARNER_APP}>
+          <Router>
+            <AppRouter />
+          </Router>
+        </PortalProvider>
+      </PWAProvider>
+    </PortalErrorBoundary>
   );
 }
 

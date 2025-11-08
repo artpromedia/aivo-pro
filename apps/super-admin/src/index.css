@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: theme('colors.gray.800');
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-gray-950 text-white antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+@layer components {
+  .status-indicator {
+    @apply inline-flex items-center gap-2;
+  }
+  
+  .status-operational {
+    @apply text-green-400;
+  }
+  
+  .status-degraded {
+    @apply text-yellow-400;
+  }
+  
+  .status-down {
+    @apply text-red-400;
+  }
+  
+  .status-checking {
+    @apply text-gray-400;
+  }
+  
+  .metric-card {
+    @apply bg-gray-900 rounded-xl border border-gray-800 p-6 hover:border-gray-700 transition-colors cursor-pointer;
+  }
+  
+  .command-palette {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-32;
+  }
+  
+  .alert-banner {
+    @apply px-4 py-2 rounded-lg text-sm font-medium;
+  }
+  
+  .alert-critical {
+    @apply bg-red-900/50 text-red-200 border border-red-500;
+  }
+  
+  .alert-warning {
+    @apply bg-yellow-900/50 text-yellow-200 border border-yellow-500;
+  }
+  
+  .alert-info {
+    @apply bg-blue-900/50 text-blue-200 border border-blue-500;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #ff7b5c, #ff636f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

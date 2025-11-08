@@ -1,0 +1,53 @@
+{
+  "name": "@aivo/state",
+  "version": "1.0.0",
+  "description": "Global state management system for AIVO platform with cross-portal synchronization",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zustand": "^4.4.7",
+    "immer": "^10.0.3",
+    "idb": "^7.1.1",
+    "broadcast-channel": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.3",
+    "tsup": "^8.5.0",
+    "eslint": "^9.15.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artpromedia/aivo-pro.git",
+    "directory": "packages/state"
+  },
+  "license": "MIT"
+}

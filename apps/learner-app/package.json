@@ -9,9 +9,18 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@aivo/accessibility": "workspace:*",
+    "@aivo/animations": "workspace:*",
+    "@aivo/collaboration": "workspace:*",
+    "@aivo/editor": "workspace:^",
+    "@aivo/error-handling": "workspace:*",
+    "@aivo/performance": "workspace:*",
+    "@aivo/pwa": "workspace:*",
+    "@aivo/state": "workspace:*",
     "@aivo/types": "workspace:*",
     "@aivo/ui": "workspace:*",
     "@aivo/utils": "workspace:*",
+    "@aivo/visualizations": "workspace:*",
     "@tanstack/react-query": "^5.90.6",
     "canvas-confetti": "^1.9.3",
     "express": "^4.19.2",

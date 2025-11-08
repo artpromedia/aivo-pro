@@ -11,7 +11,10 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@aivo/accessibility": "workspace:*",
+    "@aivo/animations": "workspace:*",
     "@aivo/auth": "workspace:*",
+    "@aivo/collaboration": "workspace:*",
     "@aivo/types": "workspace:*",
     "@aivo/ui": "workspace:*",
     "@aivo/utils": "workspace:*",
