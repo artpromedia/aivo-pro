@@ -1,6 +1,7 @@
 # 🧠 AIVO Local AI Testing Guide
 
-This guide explains how to run the entire AIVO platform locally using Docker Hub models, **without any API keys or cloud costs**.
+This guide explains how to run the entire AIVO platform locally using Docker Hub
+models, **without any API keys or cloud costs**.
 
 ## 🎯 What's Included
 

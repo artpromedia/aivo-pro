@@ -1,6 +1,7 @@
 # AIVO Learning Platform
 
-A production-ready Turborepo monorepo for the AIVO Learning Platform built with React 19, TypeScript 5.6+, Vite 7.0.0, and Tailwind CSS 4.0.0-beta.
+A production-ready Turborepo monorepo for the AIVO Learning Platform built
+with React 19, TypeScript 5.6+, Vite 7.0.0, and Tailwind CSS 4.0.0-beta.
 
 ## 🚀 Quick Start
 
