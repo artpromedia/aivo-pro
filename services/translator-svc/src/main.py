@@ -2,7 +2,7 @@
 Language Translator Agent Service
 Multi-language support with 50+ languages for AIVO Learning Platform
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
@@ -255,7 +255,7 @@ async def get_iep_terminology():
 
 
 @app.post("/v1/translate/detect")
-async def detect_language(text: str = Field(..., min_length=1)):
+async def detect_language(text: str = Body(..., min_length=1, embed=True)):
     """
     Detect the language of input text
     
