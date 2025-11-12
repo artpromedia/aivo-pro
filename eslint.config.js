@@ -41,6 +41,7 @@ export default [
         URL: 'readonly',
         URLSearchParams: 'readonly',
         Blob: 'readonly',
+        File: 'readonly',
         FormData: 'readonly',
         HTMLElement: 'readonly',
         HTMLDivElement: 'readonly',

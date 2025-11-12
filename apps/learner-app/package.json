@@ -11,6 +11,7 @@
   "dependencies": {
     "@aivo/accessibility": "workspace:*",
     "@aivo/animations": "workspace:*",
+    "@aivo/api": "workspace:*",
     "@aivo/collaboration": "workspace:*",
     "@aivo/editor": "workspace:^",
     "@aivo/error-handling": "workspace:*",

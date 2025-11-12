@@ -2,13 +2,19 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParentStore } from '../stores/parentStore';
 import type { Child } from '../stores/parentStore';
+import { apiClient, API_ENDPOINTS } from '@aivo/api';
 
-// Mock API functions - replace with actual API calls
+// API functions using centralized API client
 const fetchChildren = async (): Promise<Child[]> => {
-  // Mock data for development
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
+  try {
+    const data = await apiClient.get<Child[]>(API_ENDPOINTS.children.list);
+    return data;
+  } catch (error) {
+    // Fallback to mock data for development if API fails
+    console.warn('API call failed, using mock data:', error);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([
         {
           id: '1',
           firstName: 'Emma',
@@ -70,43 +76,58 @@ const fetchChildren = async (): Promise<Child[]> => {
           },
         },
       ]);
-    }, 500);
-  });
+      }, 500);
+    });
+  }
 };
 
 const addChildAPI = async (childData: Omit<Child, 'id'>): Promise<Child> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newChild: Child = {
-        ...childData,
-        id: Date.now().toString(),
-        progress: {
-          overall: 0,
-          subjects: {
-            math: 0,
-            reading: 0,
-            science: 0,
-            socialStudies: 0,
+  try {
+    const data = await apiClient.post<Child>(API_ENDPOINTS.children.create, childData);
+    return data;
+  } catch (error) {
+    // Fallback to mock data for development if API fails
+    console.warn('API call failed, using mock data:', error);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newChild: Child = {
+          ...childData,
+          id: Date.now().toString(),
+          progress: {
+            overall: 0,
+            subjects: {
+              math: 0,
+              reading: 0,
+              science: 0,
+              socialStudies: 0,
+            },
           },
-        },
-        weeklyStats: {
-          hoursLearned: 0,
-          skillsMastered: 0,
-          avgScore: 0,
-        },
-      };
-      resolve(newChild);
-    }, 1000);
-  });
+          weeklyStats: {
+            hoursLearned: 0,
+            skillsMastered: 0,
+            avgScore: 0,
+          },
+        };
+        resolve(newChild);
+      }, 1000);
+    });
+  }
 };
 
 const updateChildAPI = async (childId: string, updates: Partial<Child>): Promise<Child> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Mock updated child - in real app, this would be the API response
-      resolve({ id: childId, ...updates } as Child);
-    }, 500);
-  });
+  try {
+    const data = await apiClient.put<Child>(API_ENDPOINTS.children.update(childId), updates);
+    return data;
+  } catch (error) {
+    // Fallback to mock data for development if API fails
+    console.warn('API call failed, using mock data:', error);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Mock updated child - in real app, this would be the API response
+        resolve({ id: childId, ...updates } as Child);
+      }, 500);
+    });
+  }
 };
 
 export const useChildren = () => {

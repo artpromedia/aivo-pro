@@ -11,6 +11,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@aivo/api": "workspace:*",
     "@aivo/types": "workspace:*",
     "@aivo/ui": "workspace:*",
     "@aivo/utils": "workspace:*",

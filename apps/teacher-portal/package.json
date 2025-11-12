@@ -13,6 +13,7 @@
   "dependencies": {
     "@aivo/accessibility": "workspace:*",
     "@aivo/animations": "workspace:*",
+    "@aivo/api": "workspace:*",
     "@aivo/auth": "workspace:*",
     "@aivo/collaboration": "workspace:*",
     "@aivo/types": "workspace:*",
