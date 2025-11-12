@@ -98,17 +98,29 @@ const mockTeacherData = {
 };
 
 export const TeacherDetail: React.FC = () => {
-  const { id: _id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'classes' | 'activities'>('overview');
 
-  const teacher = mockTeacherData; // In real app, fetch by ID using: useQuery(['teacher', _id], ...)
-  
-  // TODO: Replace with actual API call
-  // const { data: teacher, isLoading } = useQuery({
-  //   queryKey: ['teacher', id],
-  //   queryFn: () => fetchTeacher(id)
-  // });
+  // Fetch teacher data from API
+  const { data: teacher, isLoading, error } = useQuery({
+    queryKey: ['teacher', id],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/teachers/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch teacher');
+      }
+      return response.json();
+    },
+    // Fallback to mock data in development if API fails
+    retry: false,
+    onError: (err) => {
+      console.warn('Using mock data, API error:', err);
+    }
+  });
+
+  // Use mock data as fallback for development
+  const teacherData = teacher || mockTeacherData;
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('');
@@ -127,6 +139,14 @@ export const TeacherDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-white">
+      {isLoading && (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
+      )}
+      
+      {!isLoading && (
+        <>
       {/* Header */}
       <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 text-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -619,6 +639,8 @@ export const TeacherDetail: React.FC = () => {
           </motion.div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 };

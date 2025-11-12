@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { LoginForm, SignupForm, MFAVerification, PasswordReset } from '@aivo/auth';
+import { LoginForm, SignupForm, MFAVerification, PasswordReset, useAuth } from '@aivo/auth';
+import { UserRole } from '@aivo/auth';
 
 type AuthFlow = 'login' | 'signup' | 'mfa' | 'reset' | 'success';
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const initialFlow = searchParams.get('mode') as AuthFlow || 'login';
   
@@ -15,8 +17,23 @@ const AuthPage: React.FC = () => {
   const [resetToken, setResetToken] = useState<string>(searchParams.get('token') || '');
 
   const handleLoginSuccess = () => {
-    // Redirect based on user role - for now, go to appropriate portal
-    navigate('/dashboard'); // This could be dynamic based on user role
+    // Redirect to appropriate portal based on user role
+    const rolePortalMap: Record<string, string> = {
+      [UserRole.PARENT]: 'http://localhost:5174',
+      [UserRole.TEACHER]: 'http://localhost:5175',
+      [UserRole.STUDENT]: 'http://localhost:5176',
+      [UserRole.DISTRICT_ADMIN]: 'http://localhost:5177',
+      [UserRole.SYSTEM_ADMIN]: 'http://localhost:5181',
+    };
+
+    // Get the user role from auth context
+    const userRole = user?.role;
+    const portalUrl = userRole ? rolePortalMap[userRole] : 'http://localhost:5174';
+    
+    console.log('🔄 Redirecting to portal:', { userRole, portalUrl });
+    
+    // Redirect to the appropriate portal
+    window.location.href = portalUrl;
   };
 
   const handleSignupSuccess = () => {
@@ -29,7 +46,18 @@ const AuthPage: React.FC = () => {
   };
 
   const handleMFASuccess = () => {
-    navigate('/dashboard');
+    // Same portal redirect logic as login
+    const rolePortalMap: Record<string, string> = {
+      [UserRole.PARENT]: 'http://localhost:5174',
+      [UserRole.TEACHER]: 'http://localhost:5175',
+      [UserRole.STUDENT]: 'http://localhost:5176',
+      [UserRole.DISTRICT_ADMIN]: 'http://localhost:5177',
+      [UserRole.SYSTEM_ADMIN]: 'http://localhost:5181',
+    };
+
+    const userRole = user?.role;
+    const portalUrl = userRole ? rolePortalMap[userRole] : 'http://localhost:5174';
+    window.location.href = portalUrl;
   };
 
   const handlePasswordResetSuccess = () => {

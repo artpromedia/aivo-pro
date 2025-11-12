@@ -1,70 +1,223 @@
 services:
-  web:
-    build: ./apps/web
-    ports:
-      - "5173:5173"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
-    environment:
-      - NODE_ENV=development
+  # ============================================================================
+  # FRONTEND APPS - Run via pnpm dev (not Docker)
+  # ============================================================================
+  # Commented out: web, parent-portal, teacher-portal, learner-app
+  # These are handled by the monorepo dev task (pnpm dev)
 
-  parent-portal:
-    build: ./apps/parent-portal
-    ports:
-      - "5174:5174"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
-    environment:
-      - NODE_ENV=development
+  # ============================================================================
+  # CORE SERVICES
+  # ============================================================================
 
-  teacher-portal:
-    build: ./apps/teacher-portal
+  # API Gateway - Enterprise authentication with MFA, SSO, COPPA compliance
+  api-gateway:
+    build: ./services/api-gateway
     ports:
-      - "5175:5175"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
+      - "8001:8001"
     environment:
-      - NODE_ENV=development
+      - SERVICE_NAME=api-gateway
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_auth
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-jwt-key-change-this-in-production-min-32-chars}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - HIBP_API_KEY=${HIBP_API_KEY}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  learner-app:
-    build: ./apps/learner-app
-    ports:
-      - "5176:5176"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
-    environment:
-      - NODE_ENV=development
-
+  # Baseline Assessment - IRT-based adaptive testing
   baseline-assessment:
-    build: ./apps/baseline-assessment
+    build: ./services/baseline-assessment-svc
     ports:
-      - "5179:5179"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
+      - "8003:8003"
     environment:
-      - NODE_ENV=development
+      - SERVICE_NAME=baseline-assessment-svc
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo
+      - REDIS_URL=redis://redis:6379/6
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  mock-api:
-    build: ./services/mock-api
+  # Learning Session - Adaptive learning with Bayesian Knowledge Tracing
+  learning-session:
+    build: ./services/learning-session-svc
     ports:
-      - "8000:8000"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    command: pnpm dev
+      - "8004:8004"
     environment:
-      - NODE_ENV=development
-      - PORT=8000
+      - SERVICE_NAME=learning-session-svc
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_learning
+      - REDIS_URL=redis://redis:6379/2
+      - BKT_DEFAULT_P_INIT=0.3
+      - BKT_DEFAULT_P_LEARN=0.1
+      - BKT_DEFAULT_P_GUESS=0.2
+      - BKT_DEFAULT_P_SLIP=0.1
+      - MASTERY_THRESHOLD=0.8
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Focus Monitor - Attention tracking with educational games
+  focus-monitor:
+    build: ./services/focus-monitor-svc
+    ports:
+      - "8005:8005"
+    environment:
+      - SERVICE_NAME=focus-monitor-svc
+      - REDIS_URL=redis://redis:6379/3
+      - IDLE_THRESHOLD_MS=30000
+      - FOCUS_SCORE_THRESHOLD=0.4
+      - LOG_LEVEL=INFO
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Curriculum Content - Comprehensive K-12 content all subjects/systems
+  curriculum-content:
+    build: ./services/curriculum-content-svc
+    ports:
+      - "8006:8006"
+    environment:
+      - SERVICE_NAME=curriculum-content-svc
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_curriculum
+      - REDIS_URL=redis://redis:6379/4
+      - AI_PROVIDER=localai
+      - LOCALAI_BASE_URL=http://localai:8080
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CONTENT_MODEL=llama3.2:3b
+      - USE_LOCAL_MODELS=true
+      - SUBJECTS=math,science,english,social_studies,languages,arts,pe,cs
+      - ENABLE_US_COMMON_CORE=true
+      - ENABLE_UK_NATIONAL=true
+      - ENABLE_IB=true
+      - ENABLE_CHINESE_NATIONAL=true
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+      - localai
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Homework Helper - Socratic tutoring with OCR (LocalAI-powered)
+  homework-helper:
+    build: ./services/homework-helper-svc
+    ports:
+      - "8007:8007"
+    environment:
+      - SERVICE_NAME=homework-helper-svc
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_homework
+      - REDIS_URL=redis://redis:6379/5
+      - AI_PROVIDER=localai
+      - LOCALAI_BASE_URL=http://localai:8080
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CHAT_MODEL=llama3.2:3b
+      - MATH_MODEL=codellama:7b
+      - VISION_MODEL=llava:7b
+      - USE_LOCAL_MODELS=true
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
+      - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
+      - TESSERACT_PATH=/usr/bin/tesseract
+      - OCR_LANGUAGES=eng
+      - OCR_DPI=300
+      - HANDWRITING_DETECTION=true
+      - MATH_CONFIDENCE_THRESHOLD=0.85
+      - ENABLE_LATEX_CONVERSION=true
+      - MAX_HINT_LEVEL=6
+      - ENABLE_METACOGNITIVE_PROMPTS=true
+      - MIN_THINK_TIME_SECONDS=5
+      - MAX_FILE_SIZE_MB=10
+      - ALLOWED_FILE_TYPES=pdf,png,jpg,jpeg
+      - SESSION_TIMEOUT_MINUTES=120
+      - CONVERSATION_HISTORY_LIMIT=50
+      - MAX_UPLOADS_PER_HOUR=10
+      - MAX_CHAT_MESSAGES_PER_MINUTE=20
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./google-credentials.json:/app/google-credentials.json:ro
+    depends_on:
+      - postgres
+      - redis
+      - localai
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # IEP Assistant - SMART goal generation and progress tracking
+  iep-assistant:
+    build: ./services/iep-assistant-svc
+    ports:
+      - "8008:8008"
+    environment:
+      - SERVICE_NAME=iep-assistant-svc
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_iep
+      - REDIS_URL=redis://redis:6379/6
+      - AI_PROVIDER=localai
+      - LOCALAI_BASE_URL=http://localai:8080
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - IEP_MODEL=llama3.2:3b
+      - ANALYSIS_MODEL=codellama:7b
+      - USE_LOCAL_MODELS=true
+      - ENABLE_SMART_VALIDATION=true
+      - MIN_CONFIDENCE_SCORE=0.7
+      - MAX_GOALS_PER_AREA=3
+      - DATA_COLLECTION_FREQUENCY=weekly
+      - TREND_ANALYSIS_MIN_POINTS=3
+      - ALERT_THRESHOLD_REGRESSION=-0.15
+      - ALERT_THRESHOLD_AT_RISK=0.4
+      - ENABLE_FERPA_COMPLIANCE=true
+      - ENABLE_IDEA_VALIDATION=true
+      - REQUIRE_SIGNATURES=true
+      - MAX_GOAL_GENERATIONS_PER_HOUR=20
+      - MAX_DATA_POINTS_PER_DAY=100
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+      - redis
+      - localai
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ============================================================================
   # AI AGENT SERVICES
@@ -161,40 +314,44 @@ services:
   # ACTUAL AI SERVICES - NOT MOCKS!
   # ============================================================================
 
-  # AIVO Main Brain - ACTUAL Foundation Model (requires GPU)
+  # AIVO Main Brain - Connected to LocalAI (CPU-friendly)
   aivo-brain:
     build: ./services/aivo-brain-svc
     ports:
       - "8001:8001"
     environment:
       - SERVICE_NAME=aivo-brain-svc
-      - BASE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
-      - FALLBACK_MODEL=TinyLlama/TinyLlama-1.1B-Chat-v1.0
-      - USE_4BIT_QUANTIZATION=true
-      - DEVICE=cuda
+      - AI_PROVIDER=localai
+      - LOCALAI_BASE_URL=http://localai:8080
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - PRIMARY_MODEL=llama3.2:3b
+      - FALLBACK_MODEL=tinyllama:1.1b
+      - EMBEDDING_MODEL=nomic-embed-text
+      - USE_LOCAL_MODELS=true
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=4
       - LOG_LEVEL=INFO
     depends_on:
       - redis
+      - localai
+      - ollama
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
-  # Model Cloning Service - Creates personalized AI for each student
+  # Model Cloning Service - Creates personalized AI for each student (LocalAI-powered)
   model-cloning:
     build: ./services/model-cloning-svc
     ports:
-      - "8014:8014"
+      - "8002:8002"
     environment:
       - SERVICE_NAME=model-cloning-svc
+      - AI_PROVIDER=localai
       - AIVO_BRAIN_URL=http://aivo-brain:8001
+      - LOCALAI_BASE_URL=http://localai:8080
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CLONING_MODEL=llama3.2:3b
+      - PERSONALIZATION_MODEL=codellama:7b
+      - USE_LOCAL_MODELS=true
       - REDIS_URL=redis://redis:6379/5
       - S3_BUCKET=aivo-student-models
       - MINIO_ENDPOINT=http://minio:9000
@@ -205,14 +362,9 @@ services:
       - aivo-brain
       - redis
       - minio
+      - localai
+      - ollama
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
   # ============================================================================
   # LOCAL AI MODEL SERVICES (For Testing Without API Keys)
@@ -257,16 +409,17 @@ services:
 
   # LocalAI - Alternative local AI with OpenAI-compatible API
   localai:
-    image: quay.io/go-skynet/local-ai:latest
+    build: ./docker/localai
     ports:
       - "8080:8080"
     volumes:
       - localai_models:/models
-      - localai_data:/build/models
+      - ./docker/localai:/config
     environment:
       - DEBUG=true
       - CONTEXT_SIZE=4096
       - THREADS=4
+      - MODELS_PATH=/models
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
@@ -342,6 +495,48 @@ services:
       timeout: 3s
       retries: 5
 
+  # Speech Therapy Service
+  speech-therapy-svc:
+    build: ./services/speech-therapy-svc
+    ports:
+      - "8016:8016"
+    environment:
+      - SERVICE_NAME=speech-therapy-svc
+      - PORT=8016
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres/aivo_speech_therapy
+      - API_GATEWAY_URL=http://api-gateway:8001
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8016/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Social-Emotional Learning Service
+  sel-agent-svc:
+    build: ./services/sel-agent-svc
+    ports:
+      - "8015:8015"
+    environment:
+      - SERVICE_NAME=sel-agent-svc
+      - PORT=8015
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres/aivo_sel
+      - API_GATEWAY_URL=http://api-gateway:8001
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8015/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   postgres_data:
     driver: local
@@ -363,3 +558,4 @@ volumes:
 networks:
   default:
     name: aivo-network
+    external: true

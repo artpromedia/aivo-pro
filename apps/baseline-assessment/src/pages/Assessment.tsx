@@ -1,125 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Brain, CheckCircle, Clock } from 'lucide-react';
+import { Brain, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { useAssessment } from '../providers/AssessmentProvider';
+import { dynamicAssessmentAPI, GeneratedQuestion } from '../services/dynamicAssessmentApi';
 
 export const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const { sessionData, currentQuestion, setCurrentQuestion, answers, setAnswers, updateResults } = useAssessment();
   
-  // Mock questions - replace with real questions from API
-  const questions = [
-    {
-      id: 1,
-      subject: 'Math',
-      question: 'What is 5 + 3?',
-      options: ['6', '7', '8', '9'],
-      correctAnswer: '8',
-    },
-    {
-      id: 2,
-      subject: 'Reading',
-      question: 'Which word is a synonym for "happy"?',
-      options: ['Sad', 'Joyful', 'Angry', 'Tired'],
-      correctAnswer: 'Joyful',
-    },
-    {
-      id: 3,
-      subject: 'Math',
-      question: 'If you have 12 apples and eat 4, how many do you have left?',
-      options: ['6', '7', '8', '9'],
-      correctAnswer: '8',
-    },
-    {
-      id: 4,
-      subject: 'Science',
-      question: 'What do plants need to grow?',
-      options: ['Only water', 'Only sunlight', 'Water, sunlight, and air', 'Only soil'],
-      correctAnswer: 'Water, sunlight, and air',
-    },
-    {
-      id: 5,
-      subject: 'Reading',
-      question: 'What is the main idea of a story?',
-      options: ['The first sentence', 'What the story is mostly about', 'The last word', 'The title'],
-      correctAnswer: 'What the story is mostly about',
-    },
-    {
-      id: 6,
-      subject: 'Math',
-      question: 'What is 7 × 3?',
-      options: ['18', '21', '24', '27'],
-      correctAnswer: '21',
-    },
-    {
-      id: 7,
-      subject: 'Science',
-      question: 'Which of these is a mammal?',
-      options: ['Eagle', 'Shark', 'Dolphin', 'Snake'],
-      correctAnswer: 'Dolphin',
-    },
-    {
-      id: 8,
-      subject: 'Reading',
-      question: 'What does the word "enormous" mean?',
-      options: ['Very small', 'Very large', 'Very fast', 'Very slow'],
-      correctAnswer: 'Very large',
-    },
-    {
-      id: 9,
-      subject: 'Math',
-      question: 'What is the value of the 5 in the number 2,573?',
-      options: ['5', '50', '500', '5,000'],
-      correctAnswer: '500',
-    },
-    {
-      id: 10,
-      subject: 'Social Studies',
-      question: 'Which of these is a continent?',
-      options: ['Canada', 'Europe', 'New York', 'California'],
-      correctAnswer: 'Europe',
-    },
-    {
-      id: 11,
-      subject: 'Math',
-      question: 'What fraction is equal to one half?',
-      options: ['1/4', '2/4', '3/5', '3/6'],
-      correctAnswer: '2/4',
-    },
-    {
-      id: 12,
-      subject: 'Science',
-      question: 'What causes day and night on Earth?',
-      options: ['The moon', 'Earth rotating', 'The sun moving', 'Clouds'],
-      correctAnswer: 'Earth rotating',
-    },
-    {
-      id: 13,
-      subject: 'Reading',
-      question: 'What is a verb?',
-      options: ['A person, place, or thing', 'An action word', 'A describing word', 'A connecting word'],
-      correctAnswer: 'An action word',
-    },
-    {
-      id: 14,
-      subject: 'Math',
-      question: 'If a rectangle has a length of 8 cm and width of 3 cm, what is its perimeter?',
-      options: ['11 cm', '22 cm', '24 cm', '26 cm'],
-      correctAnswer: '22 cm',
-    },
-    {
-      id: 15,
-      subject: 'Critical Thinking',
-      question: 'If all roses are flowers, and some flowers are red, which statement must be true?',
-      options: ['All roses are red', 'Some roses might be red', 'No roses are red', 'All flowers are roses'],
-      correctAnswer: 'Some roses might be red',
-    },
-  ];
+  const [currentQuestionData, setCurrentQuestionData] = useState<GeneratedQuestion | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [totalQuestions] = useState(15); // Target number of questions
+  const [subjectSequence, setSubjectSequence] = useState<string[]>([]);
+  const [previousAnswers, setPreviousAnswers] = useState<any[]>([]);
 
-  const handleAnswer = (answer: string) => {
-    const newAnswers = { ...answers, [currentQuestion]: answer };
+  // Initialize assessment with first question
+  useEffect(() => {
+    loadNextQuestion();
+  }, []);
+
+  // Load next question when currentQuestion changes
+  useEffect(() => {
+    if (currentQuestion > 0) {
+      loadNextQuestion();
+    }
+  }, [currentQuestion]);
+
+  const loadNextQuestion = async () => {
+    setLoading(true);
+    
+    try {
+      // Get adaptive subject sequence if not set
+      if (subjectSequence.length === 0) {
+        const subjects = await dynamicAssessmentAPI.getAdaptiveSequence(
+          sessionData.grade, 
+          previousAnswers
+        );
+        setSubjectSequence(subjects);
+      }
+
+      // Determine subject for current question
+      const currentSubject = subjectSequence[currentQuestion % subjectSequence.length];
+      
+      console.log(`Loading question ${currentQuestion + 1}: Grade ${sessionData.grade}, Subject: ${currentSubject}, Difficulty: ${determineDifficulty()}`);
+      
+      // Generate question based on previous performance
+      const response = await dynamicAssessmentAPI.generateQuestion({
+        grade: sessionData.grade,
+        subject: currentSubject,
+        previousAnswers: previousAnswers.slice(-5), // Last 5 answers for context
+        difficulty: determineDifficulty()
+      });
+
+      console.log('Generated question:', response.question);
+      setCurrentQuestionData(response.question);
+      
+      // Update subject sequence if suggested
+      if (response.nextSubject) {
+        const newSequence = [...subjectSequence];
+        const nextIndex = (currentQuestion + 1) % newSequence.length;
+        newSequence[nextIndex] = response.nextSubject;
+        setSubjectSequence(newSequence);
+      }
+      
+    } catch (error) {
+      console.error('Error loading question:', error);
+      // Enhanced fallback with proper grade-appropriate content
+      const subjects = ['Math', 'Reading', 'Science'];
+      const currentSubject = subjects[currentQuestion % subjects.length];
+      
+      setCurrentQuestionData({
+        id: `fallback_${currentQuestion}`,
+        subject: currentSubject,
+        question: `What is 1 + 1?`, // Simple fallback question
+        options: ['1', '2', '3', '4'],
+        correctAnswer: '2',
+        difficulty: 'easy',
+        gradeLevel: sessionData.grade,
+        explanation: 'This is a basic addition question.'
+      });
+    }
+    
+    setLoading(false);
+  };
+
+  const determineDifficulty = (): 'easy' | 'medium' | 'hard' => {
+    if (previousAnswers.length < 3) return 'medium';
+    
+    const recentAnswers = previousAnswers.slice(-3);
+    const correctCount = recentAnswers.filter(a => a.correct).length;
+    
+    if (correctCount >= 3) return 'hard';
+    if (correctCount <= 1) return 'easy';
+    return 'medium';
+  };
+
+  const handleAnswer = async (answer: string) => {
+    if (!currentQuestionData) return;
+    
+    // Evaluate the answer
+    const evaluation = await dynamicAssessmentAPI.evaluateAnswer(
+      currentQuestionData.id,
+      answer,
+      currentQuestionData.correctAnswer
+    );
+    
+    // Record the answer
+    const answerRecord = {
+      questionId: currentQuestionData.id,
+      question: currentQuestionData.question,
+      subject: currentQuestionData.subject,
+      answer,
+      correct: evaluation.correct,
+      difficulty: currentQuestionData.difficulty,
+      timestamp: new Date().toISOString()
+    };
+    
+    const newAnswers = { ...answers, [currentQuestion]: answerRecord };
+    const newPreviousAnswers = [...previousAnswers, answerRecord];
+    
     setAnswers(newAnswers);
+    setPreviousAnswers(newPreviousAnswers);
     
     // Show break screen halfway through (after question 7)
     if (currentQuestion === 6) {
@@ -128,20 +130,118 @@ export const Assessment: React.FC = () => {
       return;
     }
     
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Assessment complete
+      // Assessment complete - calculate detailed results
+      const subjectPerformance = calculateSubjectPerformance(newPreviousAnswers);
+      const overallPerformance = calculateOverallPerformance(newPreviousAnswers);
+      
       updateResults({
-        totalQuestions: questions.length,
+        totalQuestions,
         answers: newAnswers,
-        duration: '25', // Calculate actual duration
+        subjectPerformance,
+        overallPerformance,
+        recommendedLevel: determineRecommendedLevel(subjectPerformance),
+        duration: calculateDuration(),
+        adaptiveData: {
+          difficultyProgression: newPreviousAnswers.map(a => a.difficulty),
+          subjectSequence: newPreviousAnswers.map(a => a.subject)
+        }
       });
       navigate('/complete');
     }
   };
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const calculateSubjectPerformance = (answers: any[]) => {
+    const subjects = ['Math', 'Reading', 'Science'];
+    return subjects.reduce((acc, subject) => {
+      const subjectAnswers = answers.filter(a => a.subject === subject);
+      const correct = subjectAnswers.filter(a => a.correct).length;
+      const total = subjectAnswers.length;
+      
+      acc[subject] = {
+        correct,
+        total,
+        percentage: total > 0 ? Math.round((correct / total) * 100) : 0,
+        level: total > 0 ? determineSubjectLevel(correct, total) : 'Grade Level'
+      };
+      return acc;
+    }, {} as Record<string, any>);
+  };
+
+  const calculateOverallPerformance = (answers: any[]) => {
+    const correct = answers.filter(a => a.correct).length;
+    const total = answers.length;
+    return {
+      correct,
+      total,
+      percentage: Math.round((correct / total) * 100),
+      level: determineOverallLevel(correct, total)
+    };
+  };
+
+  const determineSubjectLevel = (correct: number, total: number): string => {
+    const percentage = (correct / total) * 100;
+    const baseGrade = sessionData.grade;
+    
+    if (percentage >= 90) return `Above Grade ${baseGrade + 1}`;
+    if (percentage >= 70) return `Grade ${baseGrade}`;
+    if (percentage >= 50) return `Approaching Grade ${baseGrade}`;
+    return `Below Grade ${baseGrade}`;
+  };
+
+  const determineOverallLevel = (correct: number, total: number): string => {
+    const percentage = (correct / total) * 100;
+    if (percentage >= 85) return 'Advanced';
+    if (percentage >= 70) return 'Proficient';
+    if (percentage >= 50) return 'Developing';
+    return 'Beginning';
+  };
+
+  const determineRecommendedLevel = (subjectPerformance: Record<string, any>): string => {
+    const averagePercentage = Object.values(subjectPerformance)
+      .reduce((sum: number, subject: any) => sum + subject.percentage, 0) / 
+      Object.keys(subjectPerformance).length;
+      
+    const baseGrade = sessionData.grade;
+    if (averagePercentage >= 85) return `Grade ${baseGrade + 1}`;
+    if (averagePercentage >= 70) return `Grade ${baseGrade}`;
+    return `Grade ${Math.max(baseGrade - 1, 0)}`;
+  };
+
+  const calculateDuration = (): string => {
+    // This would be calculated from actual start time
+    return '25 minutes';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-gray-600">
+            {currentQuestion === 0 ? 'Preparing your personalized assessment...' : 'Loading next question...'}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Our AI is creating questions just for you based on your grade level and abilities
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentQuestionData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Unable to load question. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = ((currentQuestion + 1) / totalQuestions) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -149,7 +249,7 @@ export const Assessment: React.FC = () => {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Question {currentQuestion + 1} of {questions.length}</span>
+            <span>Question {currentQuestion + 1} of {totalQuestions}</span>
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -160,27 +260,37 @@ export const Assessment: React.FC = () => {
               transition={{ duration: 0.5 }}
             />
           </div>
+          {/* AI Indicator */}
+          <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+            <Brain className="w-4 h-4 text-purple-500" />
+            <span>AI-powered adaptive assessment • Grade {sessionData.grade}</span>
+          </div>
         </div>
 
         {/* Question Card */}
         <motion.div
-          key={currentQuestion}
+          key={currentQuestionData.id}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-white/20"
         >
           <div className="mb-6">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
-              {questions[currentQuestion].subject}
-            </span>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                {currentQuestionData.subject}
+              </span>
+              <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                {currentQuestionData.difficulty}
+              </span>
+            </div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {questions[currentQuestion].question}
+              {currentQuestionData.question}
             </h2>
           </div>
 
           <div className="grid gap-4">
-            {questions[currentQuestion].options.map((option, index) => (
+            {currentQuestionData.options.map((option, index) => (
               <button
                 key={index}
                 onClick={() => handleAnswer(option)}

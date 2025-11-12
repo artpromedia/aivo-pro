@@ -1,0 +1,15 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.0
+pydantic-settings==2.5.2
+redis==5.0.8
+sqlalchemy==2.0.35
+asyncpg==0.29.0
+prometheus-client==0.21.0
+numpy==1.26.4
+
+# AI/ML (commented for basic implementation)
+# transformers==4.45.0
+# torch==2.4.0
+# opencv-python==4.10.0
+# fer==22.5.1

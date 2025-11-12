@@ -250,7 +250,7 @@ function AppRouter() {
     setChildProfile(null);
     localStorage.removeItem('aivoChildProfile');
     // Redirect back to parent dashboard
-    window.location.href = 'http://localhost:5174'; // Parent portal URL
+    window.location.href = import.meta.env.VITE_PARENT_PORTAL_URL || 'http://localhost:5174';
   };
 
   const getDashboardComponent = () => {
@@ -284,7 +284,7 @@ function AppRouter() {
             This learning dashboard requires setup through the parent portal and baseline assessment.
           </p>
           <button
-            onClick={() => window.location.href = 'http://localhost:5174'}
+            onClick={() => window.location.href = import.meta.env.VITE_PARENT_PORTAL_URL || 'http://localhost:5174'}
             className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-2xl shadow-lg"
           >
             Go to Parent Portal

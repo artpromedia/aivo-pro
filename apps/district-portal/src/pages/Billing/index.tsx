@@ -493,11 +493,42 @@ export const Billing: React.FC = () => {
 
               <div className="p-6">
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    // TODO: Implement payment method update API call
-                    console.log('Payment method update submitted');
-                    setShowPaymentModal(false);
+                    
+                    const formData = new FormData(e.currentTarget);
+                    const paymentData = {
+                      cardNumber: formData.get('cardNumber'),
+                      expiryDate: formData.get('expiryDate'),
+                      cvv: formData.get('cvv'),
+                      billingZip: formData.get('billingZip')
+                    };
+                    
+                    try {
+                      const response = await fetch(
+                        `${import.meta.env.VITE_API_BASE_URL}/v1/billing/payment-method`,
+                        {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                          },
+                          body: JSON.stringify(paymentData)
+                        }
+                      );
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to update payment method');
+                      }
+                      
+                      const result = await response.json();
+                      console.log('Payment method updated:', result);
+                      alert('Payment method updated successfully!');
+                      setShowPaymentModal(false);
+                    } catch (error) {
+                      console.error('Error updating payment method:', error);
+                      alert('Failed to update payment method. Please try again.');
+                    }
                   }}
                   className="space-y-6"
                 >
@@ -509,6 +540,7 @@ export const Billing: React.FC = () => {
                     <div className="relative">
                       <input
                         type="text"
+                        name="cardNumber"
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
                         className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -529,7 +561,9 @@ export const Billing: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Expiry Month
                       </label>
-                      <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                      <select 
+                        name="expiryMonth"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                         <option value="">Month</option>
                         {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
                           <option key={month} value={month.toString().padStart(2, '0')}>
@@ -542,7 +576,9 @@ export const Billing: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Expiry Year
                       </label>
-                      <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                      <select 
+                        name="expiryYear"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                         <option value="">Year</option>
                         {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((year) => (
                           <option key={year} value={year}>
@@ -557,6 +593,7 @@ export const Billing: React.FC = () => {
                       </label>
                       <input
                         type="text"
+                        name="cvv"
                         placeholder="123"
                         maxLength={4}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -571,12 +608,25 @@ export const Billing: React.FC = () => {
                     </label>
                     <input
                       type="text"
+                      name="cardholderName"
                       placeholder="John Doe"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
 
                   {/* Billing Address */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Billing ZIP Code
+                    </label>
+                    <input
+                      type="text"
+                      name="billingZip"
+                      placeholder="12345"
+                      maxLength={10}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-900">Billing Address</h3>
                     

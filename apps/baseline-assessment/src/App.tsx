@@ -105,13 +105,13 @@ export default function App() {
           </div>
           <div className="mt-6 space-y-2">
             <a 
-              href="http://localhost:5174" 
+              href={import.meta.env.VITE_PARENT_PORTAL_URL || 'http://localhost:5174'} 
               className="block w-full px-6 py-3 bg-gradient-to-r from-coral-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
             >
               Go to Parent Portal
             </a>
             <a 
-              href="http://localhost:5175" 
+              href={import.meta.env.VITE_TEACHER_PORTAL_URL || 'http://localhost:5175'} 
               className="block w-full px-6 py-3 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-coral-500 transition-all"
             >
               Go to Teacher Portal

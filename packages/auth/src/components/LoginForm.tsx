@@ -55,9 +55,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     } catch (error: any) {
       if (error.message === 'MFA_REQUIRED' && error.tempToken) {
         onMFARequired?.(error.tempToken);
+      } else if (error.response?.status === 403) {
+        // Email verification required
+        setFormError('root', {
+          message: 'Please verify your email address before logging in. Check your inbox for a verification link.',
+        });
+      } else if (error.response?.status === 423) {
+        // Account locked
+        setFormError('root', {
+          message: error.response?.data?.detail || 'Account is temporarily locked. Please try again later.',
+        });
+      } else if (error.response?.status === 401) {
+        setFormError('root', {
+          message: 'Invalid email/phone or password. Please check your credentials.',
+        });
       } else {
         setFormError('root', {
-          message: error.response?.data?.message || 'Invalid credentials',
+          message: error.response?.data?.message || 'Login failed. Please try again.',
         });
       }
     }

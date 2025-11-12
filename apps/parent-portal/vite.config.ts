@@ -16,7 +16,7 @@ export default defineConfig({
       '@aivo/ui': path.resolve(__dirname, '../../packages/ui/src/index.ts'),
       '@aivo/types': path.resolve(__dirname, '../../packages/types/src/index.ts'),
       '@aivo/utils': path.resolve(__dirname, '../../packages/utils/src/index.ts'),
-      '@aivo/auth': path.resolve(__dirname, '../../packages/auth/dist/index.js'),
+      '@aivo/auth': path.resolve(__dirname, '../../packages/auth/dist/index.mjs'),
     },
   },
   build: {

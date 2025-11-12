@@ -102,18 +102,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await authService.signup(data);
+      console.log('AuthProvider signup response:', response);
       
-      const newSession: Session = {
-        user: response.user,
-        tokens: response.tokens,
-        permissions: getPermissionsForRole(response.user.role),
-        expiresAt: Date.now() + response.tokens.expiresIn * 1000,
-        lastActivity: Date.now(),
-      };
+      // If user needs email verification, don't set them as logged in
+      if (response.user && !response.user.emailVerified) {
+        setError(`Account created! Please check your email (${data.email}) and click the verification link to complete registration.`);
+        return;
+      }
+      
+      // If signup includes immediate login (tokens provided)
+      if (response.tokens?.accessToken) {
+        const newSession: Session = {
+          user: response.user,
+          tokens: response.tokens,
+          permissions: getPermissionsForRole(response.user.role),
+          expiresAt: Date.now() + response.tokens.expiresIn * 1000,
+          lastActivity: Date.now(),
+        };
 
-      setUser(response.user);
-      setSession(newSession);
-      sessionService.setSession(newSession);
+        setUser(response.user);
+        setSession(newSession);
+        sessionService.setSession(newSession);
+      } else if (response.user_id && !response.verification_required) {
+        // Handle development mode where signup succeeds but doesn't return tokens
+        // We need to login the user automatically
+        try {
+          const loginResponse = await authService.login({
+            email: data.email,
+            password: data.password,
+          });
+          
+          if (loginResponse.tokens?.accessToken) {
+            const newSession: Session = {
+              user: loginResponse.user,
+              tokens: loginResponse.tokens,
+              permissions: getPermissionsForRole(loginResponse.user.role),
+              expiresAt: Date.now() + loginResponse.tokens.expiresIn * 1000,
+              lastActivity: Date.now(),
+            };
+
+            setUser(loginResponse.user);
+            setSession(newSession);
+            sessionService.setSession(newSession);
+          }
+        } catch (loginError) {
+          console.error('Auto-login after signup failed:', loginError);
+          setError('Account created successfully! Please login with your credentials.');
+        }
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Signup failed';
       setError(errorMessage);
@@ -212,6 +248,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     requestPasswordReset,
     resetPassword,
   };
+
+  // Debug logging
+  console.log('AuthProvider state:', {
+    user: !!user,
+    session: !!session,
+    loading,
+    error,
+    isAuthenticated: !!user,
+    userDetails: user ? { id: user.id, email: user.email } : null
+  });
 
   return React.createElement(AuthContext.Provider, { value }, children);
 };

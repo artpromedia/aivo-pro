@@ -207,17 +207,61 @@ export function CreateIEP() {
     });
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     console.log('Saving draft:', formData);
-    // TODO: API call to save draft
-    alert('IEP draft saved successfully!');
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/ieps/draft`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: 'draft'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save draft');
+      }
+      
+      const result = await response.json();
+      alert(`IEP draft saved successfully! Draft ID: ${result.id}`);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('Failed to save IEP draft. Please try again.');
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Submitting IEP:', formData);
-    // TODO: API call to submit IEP
-    alert('IEP submitted successfully!');
-    navigate('/ieps');
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/ieps`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: 'submitted'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit IEP');
+      }
+      
+      const result = await response.json();
+      alert(`IEP submitted successfully! IEP ID: ${result.id}`);
+      navigate('/ieps');
+    } catch (error) {
+      console.error('Error submitting IEP:', error);
+      alert('Failed to submit IEP. Please try again.');
+    }
   };
 
   const canProceed = () => {

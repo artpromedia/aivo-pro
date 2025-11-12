@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Brain, ArrowRight, CheckCircle } from 'lucide-react';
+import { Trophy, Brain, ArrowRight, CheckCircle, TrendingUp, Star, Target } from 'lucide-react';
 import { useAssessment } from '../providers/AssessmentProvider';
 import confetti from 'canvas-confetti';
 
@@ -20,12 +20,17 @@ export const Complete: React.FC = () => {
   const proceedToModelCloning = () => {
     setRedirecting(true);
     
-    // Prepare assessment data to pass to model cloning
+    // Prepare enhanced assessment data to pass to model cloning
     const assessmentData = {
       totalQuestions: assessmentResults?.totalQuestions || 15,
       answers: assessmentResults?.answers || {},
-      duration: assessmentResults?.duration || '25',
+      subjectPerformance: assessmentResults?.subjectPerformance || {},
+      overallPerformance: assessmentResults?.overallPerformance || {},
+      recommendedLevel: assessmentResults?.recommendedLevel || `Grade ${sessionData.grade}`,
+      adaptiveData: assessmentResults?.adaptiveData || {},
+      duration: assessmentResults?.duration || '25 minutes',
       completedAt: new Date().toISOString(),
+      aiGenerated: true, // Flag to indicate this was AI-powered assessment
     };
     
     // Build URL with all required parameters for model cloning
@@ -84,21 +89,79 @@ export const Complete: React.FC = () => {
 
             {/* Results Summary */}
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
-              <h3 className="font-semibold text-gray-900 mb-4">Assessment Summary</h3>
-              <div className="grid grid-cols-2 gap-4 text-left">
-                <div>
-                  <p className="text-sm text-gray-600">Questions Completed</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {assessmentResults?.totalQuestions || 20}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Time Taken</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {assessmentResults?.duration || '25'} min
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 justify-center mb-4">
+                <Brain className="w-5 h-5 text-purple-600" />
+                <h3 className="font-semibold text-gray-900">AI-Powered Assessment Results</h3>
               </div>
+              
+              {/* Overall Performance */}
+              {assessmentResults?.overallPerformance && (
+                <div className="bg-white rounded-xl p-4 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Overall Performance</span>
+                    <span className="text-2xl font-bold text-purple-600">
+                      {assessmentResults.overallPerformance.percentage}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-700">
+                      {assessmentResults.overallPerformance.level}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Subject Performance */}
+              {assessmentResults?.subjectPerformance && (
+                <div className="grid gap-3">
+                  {Object.entries(assessmentResults.subjectPerformance).map(([subject, data]: [string, any]) => (
+                    <div key={subject} className="bg-white rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-gray-700">{subject}</span>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-900">{data.percentage}%</div>
+                          <div className="text-xs text-gray-500">{data.correct}/{data.total} correct</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <TrendingUp className="w-3 h-3 text-green-600" />
+                        <span className="text-xs text-green-700 font-medium">{data.level}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Recommended Level */}
+              {assessmentResults?.recommendedLevel && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm font-medium text-yellow-800">
+                      Recommended Learning Level: {assessmentResults.recommendedLevel}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Basic stats for fallback */}
+              {!assessmentResults?.overallPerformance && (
+                <div className="grid grid-cols-2 gap-4 text-left">
+                  <div>
+                    <p className="text-sm text-gray-600">Questions Completed</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {assessmentResults?.totalQuestions || 15}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Time Taken</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {assessmentResults?.duration || '25 minutes'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Skills Identified */}

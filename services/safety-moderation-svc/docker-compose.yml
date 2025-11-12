@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  safety-moderation-svc:
+    build: .
+    ports:
+      - "8016:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://aivo:aivopass@postgres:5432/aivo_safety
+      - REDIS_URL=redis://redis:6379/7
+      - PERSPECTIVE_API_KEY=${PERSPECTIVE_API_KEY}
+      - LOG_LEVEL=info
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/models
+    networks:
+      - aivo-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=aivo
+      - POSTGRES_PASSWORD=aivopass
+      - POSTGRES_DB=aivo_safety
+    volumes:
+      - safety_postgres_data:/var/lib/postgresql/data
+    networks:
+      - aivo-network
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - safety_redis_data:/data
+    networks:
+      - aivo-network
+
+volumes:
+  safety_postgres_data:
+  safety_redis_data:
+
+networks:
+  aivo-network:
+    external: true

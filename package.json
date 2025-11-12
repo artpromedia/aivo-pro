@@ -14,8 +14,8 @@
     }
   },
   "scripts": {
-    "dev": "turbo dev --concurrency=10",
-    "dev:all": "turbo dev --concurrency=20",
+    "dev": "turbo dev --concurrency=35",
+    "dev:all": "turbo dev --concurrency=35",
     "build": "turbo build",
     "test": "turbo test",
     "lint": "turbo lint",

@@ -1,14 +1,35 @@
 import axios, { AxiosInstance } from 'axios';
-import { User, LoginRequest, SignupRequest, AuthTokens, MFASetupResponse, AuthResponse, PasswordResetRequest, PasswordResetConfirm } from '../types/auth.types';
+import { User, LoginRequest, SignupRequest, AuthTokens, MFASetupResponse, AuthResponse, PasswordResetRequest, PasswordResetConfirm, UserRole } from '../types/auth.types';
 import { tokenService } from './tokenService';
+import { seedDemoUsers, DEMO_USERS } from './demoUsers';
 
 class AuthService {
   private api: AxiosInstance;
   private refreshPromise: Promise<AuthTokens> | null = null;
+  private localStorageUsers = 'aivo_users';
+  private isLocalMode = true; // Default to local mode
 
-  constructor(baseURL: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:3001') {
+  constructor(baseURL: string = 'http://localhost:8001') {
+    // Check if we should use backend auth (must explicitly set env var to true)
+    const useBackendAuth = typeof window !== 'undefined' 
+      ? (window as any).VITE_USE_BACKEND_AUTH === 'true'
+      : false;
+    
+    this.isLocalMode = !useBackendAuth;
+    
+    console.log('🔐 AuthService initialized:', {
+      isLocalMode: this.isLocalMode,
+      useBackendAuth,
+      willSeedDemoUsers: this.isLocalMode && typeof window !== 'undefined'
+    });
+    
+    // Seed demo users on initialization in local mode
+    if (this.isLocalMode && typeof window !== 'undefined') {
+      seedDemoUsers();
+    }
+    
     this.api = axios.create({
-      baseURL: `${baseURL}/api/auth`,
+      baseURL: `${baseURL}/v1/auth`,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -54,25 +75,192 @@ class AuthService {
     );
   }
 
+  // Local storage helpers for simplified auth
+  private getLocalUsers(): any[] {
+    if (typeof window === 'undefined') return [];
+    const users = localStorage.getItem(this.localStorageUsers);
+    return users ? JSON.parse(users) : [];
+  }
+
+  private saveLocalUser(user: any): void {
+    if (typeof window === 'undefined') return;
+    const users = this.getLocalUsers();
+    users.push(user);
+    localStorage.setItem(this.localStorageUsers, JSON.stringify(users));
+  }
+
+  private findLocalUser(email: string): any {
+    return this.getLocalUsers().find((u: any) => u.email === email);
+  }
+
+  private generateMockToken(userId: string, role: UserRole): string {
+    return btoa(JSON.stringify({ userId, role, exp: Date.now() + 3600000 }));
+  }
+
   async signup(data: SignupRequest): Promise<AuthResponse> {
-    const response = await this.api.post('/signup', data);
+    console.log('AuthService.signup called with:', data);
     
-    if (response.data.tokens) {
-      tokenService.setTokens(response.data.tokens);
+    // Local mode - simplified signup
+    if (this.isLocalMode) {
+      const existingUser = this.findLocalUser(data.email);
+      if (existingUser) {
+        throw new Error('User already exists');
+      }
+
+      const userId = `user_${Date.now()}`;
+      const user: User = {
+        id: userId,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role || UserRole.PARENT,
+        emailVerified: true, // Auto-verify in local mode
+        mfaEnabled: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      this.saveLocalUser({ ...user, password: data.password });
+
+      const tokens: AuthTokens = {
+        accessToken: this.generateMockToken(userId, user.role),
+        refreshToken: this.generateMockToken(userId, user.role),
+        expiresIn: 3600,
+        tokenType: 'Bearer',
+      };
+
+      tokenService.setTokens(tokens);
+      
+      return { user, tokens };
     }
     
-    return response.data;
+    // Backend mode (original implementation)
+    const transformedData = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      password: data.password,
+      phone: data.phone,
+    };
+
+    console.log('Sending transformed data to backend:', transformedData);
+    console.log('API URL:', this.api.defaults.baseURL);
+
+    const response = await this.api.post('/signup', transformedData);
+    console.log('Backend response:', response.data);
+    
+    if (response.data.verification_required) {
+      return {
+        user: {
+          id: response.data.user_id,
+          email: response.data.email,
+          firstName: '',
+          lastName: '',
+          role: UserRole.PARENT,
+          organizationId: undefined,
+          districtId: undefined,
+          createdAt: new Date().toISOString(),
+          emailVerified: false,
+          mfaEnabled: false,
+        },
+        tokens: {
+          accessToken: '',
+          refreshToken: '',
+          expiresIn: 0,
+          tokenType: 'Bearer' as const,
+        },
+      };
+    }
+    
+    if (response.data.tokens || (response.data.access_token && response.data.refresh_token)) {
+      const tokens = response.data.tokens || {
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+        expiresIn: response.data.expires_in,
+        tokenType: 'Bearer' as const,
+      };
+      
+      tokenService.setTokens(tokens);
+      
+      return {
+        user: response.data.user,
+        tokens,
+      };
+    }
+    
+    return {
+      user: {} as User,
+      tokens: {} as AuthTokens,
+      user_id: response.data.user_id,
+      email: response.data.email,
+      verification_required: response.data.verification_required,
+      message: response.data.message,
+    };
   }
 
   async verifyEmail(token: string): Promise<void> {
     await this.api.post('/verify-email', { token });
   }
 
+  async resendVerification(email: string): Promise<void> {
+    await this.api.post('/resend-verification', { email });
+  }
+
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await this.api.post('/login', credentials);
+    console.log('🔐 AuthService.login called');
+    console.log('  - isLocalMode:', this.isLocalMode);
+    console.log('  - credentials:', { email: credentials.email, hasPassword: !!credentials.password });
     
-    if (!response.data.requiresMFA && response.data.tokens) {
-      tokenService.setTokens(response.data.tokens);
+    // Local mode - simplified login
+    if (this.isLocalMode) {
+      console.log('  ✅ Using LOCAL MODE authentication');
+      const user = this.findLocalUser(credentials.email!);
+      
+      if (!user) {
+        console.log('  ❌ User not found in local storage');
+        throw new Error('Invalid credentials - user not found');
+      }
+
+      if (user.password !== credentials.password) {
+        console.log('  ❌ Password mismatch');
+        throw new Error('Invalid credentials - wrong password');
+      }
+
+      console.log('  ✅ Login successful for:', user.email);
+      
+      const tokens: AuthTokens = {
+        accessToken: this.generateMockToken(user.id, user.role),
+        refreshToken: this.generateMockToken(user.id, user.role),
+        expiresIn: 3600,
+        tokenType: 'Bearer',
+      };
+
+      tokenService.setTokens(tokens);
+      
+      const { password, ...userWithoutPassword } = user;
+      return { user: userWithoutPassword, tokens };
+    }
+    
+    // Backend mode (original implementation)
+    console.log('  ⚠️  Using BACKEND MODE authentication');
+    console.log('  - API URL:', this.api.defaults.baseURL);
+    const response = await this.api.post('/login', credentials);
+    console.log('Login response:', response.data);
+    
+    if (response.data.access_token && response.data.refresh_token) {
+      const tokens = {
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+        expiresIn: response.data.expires_in,
+        tokenType: 'Bearer' as const,
+      };
+      
+      console.log('Setting tokens:', tokens);
+      tokenService.setTokens(tokens);
+      
+      return {
+        user: response.data.user,
+        tokens,
+      };
     }
     
     return response.data;
@@ -159,6 +347,28 @@ class AuthService {
   }
 
   async getCurrentUser(): Promise<User> {
+    // Local mode - decode token
+    if (this.isLocalMode) {
+      const token = tokenService.getAccessToken();
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      try {
+        const decoded = JSON.parse(atob(token));
+        const user = this.getLocalUsers().find((u: any) => u.id === decoded.userId);
+        if (!user) {
+          throw new Error('User not found');
+        }
+        
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      } catch (error) {
+        throw new Error('Invalid token');
+      }
+    }
+
+    // Backend mode
     const response = await this.api.get('/me');
     return response.data;
   }
@@ -176,7 +386,15 @@ class AuthService {
   // Utility methods
   isAuthenticated(): boolean {
     const token = tokenService.getAccessToken();
-    return !!token && !tokenService.isTokenExpired();
+    if (!token) return false;
+    
+    // In local mode, tokens don't expire
+    if (this.isLocalMode) {
+      return true;
+    }
+    
+    // In backend mode, check expiration
+    return !tokenService.isTokenExpired();
   }
 
   getAccessToken(): string | null {

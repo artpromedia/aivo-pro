@@ -32,7 +32,9 @@ interface DashboardStats {
 }
 
 export const Dashboard: React.FC = () => {
+  // Get authenticated user from auth context
   const { user } = useAuth();
+  
   const { children, isLoading: childrenLoading } = useChildren();
   const { pendingSuggestions } = useSuggestions();
   

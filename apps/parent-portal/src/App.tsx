@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, useAuth, AuthContainer } from '@aivo/auth';
+import { AuthProvider } from '@aivo/auth';
 
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout').then(module => ({ default: module.DashboardLayout })));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -39,35 +39,17 @@ const queryClient = new QueryClient({
 });
 
 const AuthenticatedApp: React.FC = () => {
-  const { user, loading, isAuthenticated } = useAuth();
-
-  // Show loading if auth is being initialized
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl flex items-center justify-center shadow-xl shadow-purple-300/30 animate-pulse mx-auto mb-4">
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-          <p className="text-purple-600 font-semibold">Loading AIVO...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show dashboard if authenticated
-  if (isAuthenticated && user) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route
-            element={(
-              <Suspense fallback={<PageLoader />}>
-                <DashboardLayout />
-              </Suspense>
-            )}
-          >
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          element={(
+            <Suspense fallback={<PageLoader />}>
+              <DashboardLayout />
+            </Suspense>
+          )}
+        >
             <Route
               path="/dashboard"
               element={(
@@ -192,18 +174,6 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
-    );
-  }
-
-  // Show auth container if not authenticated
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 flex items-center justify-center p-6">
-      <AuthContainer 
-        initialView="login"
-        onSuccess={() => window.location.reload()}
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-      />
-    </div>
   );
 };
 

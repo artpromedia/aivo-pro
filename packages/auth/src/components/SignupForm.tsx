@@ -10,8 +10,8 @@ const signupSchema = z.object({
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number'),
+  password: z.string().min(12, 'Password must be at least 12 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Password must contain uppercase, lowercase, number, and special character'),
   confirmPassword: z.string(),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   role: z.enum(['parent', 'teacher'], {
@@ -47,6 +47,12 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   className = '',
 }) => {
   const { signup, error, clearError, loading } = useAuth();
+  console.log('SignupForm: useAuth hook values:', { 
+    hasSignup: typeof signup === 'function', 
+    error, 
+    loading 
+  });
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -63,6 +69,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   const selectedRole = watch('role');
 
   const onSubmit = async (data: SignupFormData) => {
+    console.log('SignupForm.onSubmit called with:', data);
     clearError();
 
     try {
@@ -73,9 +80,15 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         ? signupData 
         : { ...signupData, licenseCode: undefined };
       
+      console.log('Calling signup with finalData:', finalData);
       await signup(finalData);
+      console.log('Signup completed successfully');
+      
+      // If we get here without an error, signup was successful
+      // But user may need to verify email before logging in
       onSuccess?.();
     } catch (error: any) {
+      console.error('Signup error:', error);
       if (error.response?.status === 409) {
         setFormError('email', {
           message: 'An account with this email already exists',
@@ -84,6 +97,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         setFormError('licenseCode', {
           message: 'Invalid or expired district license code',
         });
+      } else if (error.response?.status === 400) {
+        // Handle password validation errors from backend
+        const detail = error.response?.data?.detail;
+        if (detail?.message?.includes('Password')) {
+          setFormError('password', {
+            message: detail.message || 'Password does not meet security requirements',
+          });
+        } else {
+          setFormError('root', {
+            message: detail?.message || 'Please check your information and try again',
+          });
+        }
       } else {
         setFormError('root', {
           message: error.response?.data?.message || 'Failed to create account',
@@ -319,7 +344,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
+                placeholder="At least 12 characters with special characters"
                 className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:ring-4 focus:ring-purple-100 transition-all duration-200 bg-white/70 backdrop-blur-sm shadow-sm ${
                   errors.password 
                     ? 'border-red-300 focus:border-red-500' 
@@ -403,10 +428,31 @@ export const SignupForm: React.FC<SignupFormProps> = ({
           )}
         </div>
 
+        {/* Test API Connection Button */}
+        <button
+          type="button"
+          onClick={async () => {
+            console.log('Testing API connection...');
+            try {
+              const response = await fetch('http://localhost:8001/health');
+              const data = await response.json();
+              console.log('API Health Check Success:', data);
+              alert('API connection works! ' + JSON.stringify(data));
+            } catch (error) {
+              console.error('API Health Check Failed:', error);
+              alert('API connection failed: ' + (error instanceof Error ? error.message : String(error)));
+            }
+          }}
+          className="w-full border-2 border-blue-500 text-blue-600 py-2 px-4 rounded-xl font-medium hover:bg-blue-50 mb-4"
+        >
+          Test API Connection
+        </button>
+
         {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
+          onClick={() => console.log('Submit button clicked, loading:', loading)}
           className="w-full bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-300/30 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none flex items-center justify-center shadow-lg shadow-purple-200/50"
         >
           {loading ? (

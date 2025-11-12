@@ -1,0 +1,30 @@
+- name: gpt-3.5-turbo
+  backend: llama-cpp
+  parameters:
+    model: ggml-gpt4all-j-v1.3-groovy.bin
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 512
+    context_size: 2048
+  download:
+    - url: "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
+      sha256: "81a09a0ddf89690372fc296ff7f625af21b8093b6a9bf6b5308b4d52a4b93dd2"
+
+- name: gpt-4
+  backend: llama-cpp  
+  parameters:
+    model: ggml-gpt4all-j-v1.3-groovy.bin
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 1024
+    context_size: 4096
+  download:
+    - url: "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
+      sha256: "81a09a0ddf89690372fc296ff7f625af21b8093b6a9bf6b5308b4d52a4b93dd2"
+
+- name: text-embedding-ada-002
+  backend: bert-embeddings
+  parameters:
+    model: all-MiniLM-L6-v2
+  download:
+    - url: "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/pytorch_model.bin"

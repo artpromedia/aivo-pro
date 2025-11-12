@@ -79,6 +79,11 @@ export interface AuthResponse {
   tokens: AuthTokens;
   requiresMFA?: boolean;
   tempToken?: string;
+  // Backend signup response fields
+  user_id?: string;
+  email?: string;
+  verification_required?: boolean;
+  message?: string;
 }
 
 export interface ValidationError {

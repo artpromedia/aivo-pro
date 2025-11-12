@@ -10,6 +10,7 @@ export { MFASetup } from './components/MFASetup';
 export { MFAVerification } from './components/MFAVerification';
 export { AuthContainer } from './components/AuthContainer';
 export { ProtectedRoute } from './components/ProtectedRoute';
+export { DemoCredentials } from './components/DemoCredentials';
 
 // Advanced Authentication Components
 export { BiometricAuth } from './components/BiometricAuth';
@@ -24,6 +25,7 @@ export { authService } from './services/authService';
 export { tokenService } from './services/tokenService';
 export { mfaService } from './services/mfaService';
 export { sessionService } from './services/sessionService';
+export { getDemoCredentials, seedDemoUsers } from './services/demoUsers';
 
 // Hook exports
 export * from './hooks/useMFA';

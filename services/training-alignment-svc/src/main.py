@@ -15,6 +15,7 @@ from .training import ContinuousTrainingPipeline
 from .bias_detection import BiasDetector
 from .drift_monitor import ModelDriftMonitor
 from .config import Settings
+from .scheduler import get_scheduler, start_scheduler, stop_scheduler
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -22,6 +23,34 @@ app = FastAPI(
     description="Responsible AI governance and continuous model improvement",
     version="1.0.0"
 )
+
+
+# ===========================================================================
+# LIFECYCLE EVENTS
+# ===========================================================================
+
+@app.on_event("startup")
+async def startup_event():
+    """Start automated training scheduler on service startup"""
+    logger.info("Starting Training & Alignment Service...")
+    
+    # Start the automated training scheduler
+    start_scheduler()
+    
+    logger.info("✓ Training & Alignment Service started successfully")
+    logger.info("✓ AIVO Main Brain will be trained daily at 2:00 AM")
+    logger.info("✓ Drift monitoring active (every 6 hours)")
+    logger.info("✓ Weekly full retraining scheduled (Sundays 3:00 AM)")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Stop scheduler gracefully on service shutdown"""
+    logger.info("Shutting down Training & Alignment Service...")
+    
+    stop_scheduler()
+    
+    logger.info("✓ Training & Alignment Service stopped")
 
 # CORS middleware
 app.add_middleware(
@@ -501,6 +530,97 @@ async def get_model_status(model_id: str):
         raise HTTPException(
             status_code=500,
             detail=f"Status retrieval failed: {str(e)}"
+        )
+
+
+@app.get("/v1/scheduler/status")
+async def get_scheduler_status():
+    """
+    Get status of the automated training scheduler
+    
+    Returns information about scheduled jobs, currently training models,
+    and training history.
+    """
+    try:
+        scheduler = get_scheduler()
+        status = scheduler.get_scheduler_status()
+        
+        return {
+            "scheduler": status,
+            "timestamp": datetime.utcnow()
+        }
+    
+    except Exception as e:
+        logger.error(f"Scheduler status retrieval failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Scheduler status failed: {str(e)}"
+        )
+
+
+@app.post("/v1/scheduler/trigger/{model_id}")
+async def manually_trigger_training(
+    model_id: str,
+    reason: str = "manual_trigger",
+    priority: str = "high"
+):
+    """
+    Manually trigger training for a specific model
+    
+    Useful for testing or emergency retraining outside the
+    automated schedule.
+    """
+    try:
+        scheduler = get_scheduler()
+        
+        result = await scheduler.manual_trigger_training(
+            model_id=model_id,
+            reason=reason,
+            priority=priority
+        )
+        
+        return {
+            "status": "triggered",
+            "model_id": model_id,
+            "result": result,
+            "timestamp": datetime.utcnow()
+        }
+    
+    except Exception as e:
+        logger.error(f"Manual training trigger failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Trigger failed: {str(e)}"
+        )
+
+
+@app.post("/v1/scheduler/train-main-brain")
+async def trigger_main_brain_training():
+    """
+    Immediately trigger AIVO Main Brain training
+    
+    This bypasses the schedule and trains the main AIVO Brain
+    model immediately.
+    """
+    try:
+        scheduler = get_scheduler()
+        
+        logger.info("Manual trigger: AIVO Main Brain training")
+        
+        result = await scheduler.train_aivo_main_brain()
+        
+        return {
+            "status": "completed",
+            "model_id": "aivo-main-brain-v1",
+            "result": result,
+            "timestamp": datetime.utcnow()
+        }
+    
+    except Exception as e:
+        logger.error(f"Main brain training failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Training failed: {str(e)}"
         )
 
 

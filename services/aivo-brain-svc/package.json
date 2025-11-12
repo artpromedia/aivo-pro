@@ -1,0 +1,24 @@
+{
+  "name": "aivo-brain-svc",
+  "version": "1.0.0",
+  "description": "AIVO Main Brain Service - Production ML inference service",
+  "main": "src/main.py",
+  "scripts": {
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload",
+    "start:prod": "uvicorn src.main:app --host 0.0.0.0 --port 8001 --workers 4",
+    "dev": "uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug",
+    "test": "pytest tests/ -v",
+    "lint": "pylint src/",
+    "format": "black src/ tests/",
+    "type-check": "mypy src/"
+  },
+  "keywords": [
+    "ai",
+    "ml",
+    "education",
+    "inference",
+    "api"
+  ],
+  "author": "AIVO Team",
+  "license": "PROPRIETARY"
+}
