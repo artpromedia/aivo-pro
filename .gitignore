@@ -97,4 +97,6 @@ Thumbs.db
 *.tsbuildinfo
 
 # Local Netlify folder
-.netlify
+.netlify__pycache__/
+*.pyc
+*.pyo
