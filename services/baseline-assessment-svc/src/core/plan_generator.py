@@ -294,7 +294,7 @@ class PlanGenerator:
                     category=subject,
                     description=f"Demonstrate grade-level proficiency in {subject}",
                     target_date=target_date,
-                    success_criteria=f"IRT theta score ≥ 0.0 (grade level)",
+                    success_criteria="IRT theta score ≥ 0.0 (grade level)",
                     progress_monitoring="Weekly adaptive assessments"
                 ))
         

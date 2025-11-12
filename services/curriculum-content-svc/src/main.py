@@ -4,25 +4,15 @@ Comprehensive K-12 content across all subjects and educational systems
 Author: Principal Engineer (Educational Technology)
 """
 
-import json
 import uuid
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-from enum import Enum
+from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from prometheus_client import Counter, Histogram
 
-from src.db.models import (
-    CurriculumStandard, Skill, LearningContent, LessonPlan,
-    AssessmentBank, SubjectScope, ContentTemplate,
-    CurriculumSystem, Subject, GradeLevel, ContentType
-)
 
 # Metrics
 content_generated = Counter('content_generated_total', 'Content generated', ['subject', 'type'])
@@ -264,7 +254,6 @@ class ScienceManager:
     
     def _generate_chemistry_content(self, skill: str, difficulty: float) -> Dict:
         """Chemistry questions"""
-        import random
         
         if difficulty < 0.5:
             return {
@@ -481,8 +470,8 @@ async def startup():
     global redis_client
     redis_client = await redis.from_url("redis://localhost:6379/4", max_connections=100)
     print("✅ Curriculum Content Service started")
-    print(f"   Subjects: Math, Science, ELA, Social Studies, Languages, Arts, PE")
-    print(f"   Systems: US, UK, IB, EU, China, Africa, Middle East")
+    print("   Subjects: Math, Science, ELA, Social Studies, Languages, Arts, PE")
+    print("   Systems: US, UK, IB, EU, China, Africa, Middle East")
 
 
 @app.on_event("shutdown")

@@ -4,7 +4,7 @@ Following Microsoft Azure Cache patterns
 """
 
 import json
-from typing import Any, Optional
+from typing import Optional
 
 import redis.asyncio as redis
 

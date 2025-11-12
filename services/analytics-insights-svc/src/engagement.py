@@ -1,7 +1,7 @@
 """
 User engagement analyzer
 """
-from typing import Dict, List
+from typing import Dict
 import logging
 
 logger = logging.getLogger(__name__)

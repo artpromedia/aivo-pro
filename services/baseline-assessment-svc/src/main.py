@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 import logging
 import sys
 
-from src.core.irt_engine import ItemParameters, irt_engine
+from src.core.irt_engine import ItemParameters
 from src.core.item_selector import item_selector, stopping_criteria
 from src.core.session_manager import session_manager
 from src.core.skill_analyzer import skill_analyzer

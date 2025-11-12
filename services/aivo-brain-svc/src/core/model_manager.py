@@ -3,7 +3,6 @@ Model Manager with Google-style model serving
 Implements model versioning, A/B testing, and fallback strategies
 """
 
-import asyncio
 import hashlib
 import time
 from collections import OrderedDict

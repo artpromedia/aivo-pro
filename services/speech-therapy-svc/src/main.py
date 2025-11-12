@@ -4,27 +4,23 @@ AI-powered speech and language therapy for all children
 Author: Principal SLP (Stanford Children's/Google Euphonia)
 """
 
-import asyncio
 import json
 import uuid
-import io
 import random
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
+from datetime import datetime
+from typing import Dict, List, Optional
 from enum import Enum
 import numpy as np
 from dataclasses import dataclass
 
-from fastapi import FastAPI, HTTPException, WebSocket, UploadFile, File, Form, Depends
+from fastapi import FastAPI, WebSocket, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
 # Metrics
-from prometheus_client import Counter, Histogram, Gauge, make_asgi_app
+from prometheus_client import Counter, Histogram, make_asgi_app
 
 therapy_sessions_completed = Counter('speech_therapy_sessions_total', 'Total therapy sessions')
 articulation_improvements = Histogram('articulation_improvement_rate', 'Articulation improvement')
@@ -670,7 +666,7 @@ class TherapyPlanGenerator:
             milestones.append({
                 "week": week,
                 "goal": f"Milestone {i}",
-                "criteria": f"80% accuracy in structured activities",
+                "criteria": "80% accuracy in structured activities",
                 "assessment_method": "Clinician observation and recording"
             })
         

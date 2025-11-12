@@ -1,7 +1,6 @@
 """Report generator for analytics"""
 
 from typing import Dict
-import plotly.graph_objects as go
 
 
 class ReportGenerator:

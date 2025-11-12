@@ -5,11 +5,9 @@ Author: Principal Education Architect
 """
 
 import random
-import json
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
-import numpy as np
 
 
 class DifficultyLevel(str, Enum):

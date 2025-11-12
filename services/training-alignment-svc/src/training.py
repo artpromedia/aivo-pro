@@ -241,10 +241,10 @@ class ContinuousTrainingPipeline:
             improved = test_metrics["test_accuracy"] > (baseline_accuracy + improvement_threshold)
             
             if improved:
-                logger.info(f"Model improved! Deploying new version.")
+                logger.info("Model improved! Deploying new version.")
                 await self.deploy_model(job_id, training_metrics, test_metrics)
             else:
-                logger.info(f"Model did not improve significantly. Keeping current version.")
+                logger.info("Model did not improve significantly. Keeping current version.")
             
             # 7. Store training results
             await self.store_training_results(job_id, training_metrics, test_metrics)

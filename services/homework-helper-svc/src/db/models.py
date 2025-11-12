@@ -5,12 +5,10 @@ Author: Staff Engineer (ex-Google AI for Education)
 
 import uuid
 from datetime import datetime
-from typing import Optional, Dict, List
 from enum import Enum
 
 from sqlalchemy import (
-    Column, String, DateTime, Integer, Float, Text, JSON,
-    Boolean, ForeignKey, Enum as SQLEnum, ARRAY, LargeBinary
+    Column, String, DateTime, Integer, Float, Text, Boolean, ForeignKey, Enum as SQLEnum, ARRAY, LargeBinary
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID, JSONB

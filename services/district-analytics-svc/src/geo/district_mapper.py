@@ -1,7 +1,6 @@
 """District mapper for zipcode to district detection"""
 
 from typing import Dict, Optional, List
-import json
 
 
 class DistrictMapper:

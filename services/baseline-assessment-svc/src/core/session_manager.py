@@ -9,7 +9,7 @@ import uuid
 import logging
 
 from src.core.irt_engine import ItemParameters, Response, irt_engine
-from src.core.item_selector import item_selector, stopping_criteria
+from src.core.item_selector import stopping_criteria
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """COPPA compliance enforcer"""
 
-from typing import Dict, Optional
-from datetime import datetime, timedelta
+from typing import Dict
+from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -54,8 +54,8 @@ class COPPAEnforcer:
         result = await db.execute(
             select(ParentalConsent).where(
                 ParentalConsent.child_id == child_id,
-                ParentalConsent.consent_given == True,
-                ParentalConsent.revoked == False,
+                ParentalConsent.consent_given,
+                ~ParentalConsent.revoked,
                 ParentalConsent.expires_at > datetime.utcnow()
             ).order_by(ParentalConsent.created_at.desc())
         )

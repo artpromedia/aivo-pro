@@ -3,13 +3,11 @@ Dynamic Pricing Engine with ML
 Revenue optimization following Stripe's pricing research
 """
 
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
-from decimal import Decimal
+from typing import Dict
+from datetime import datetime
 import numpy as np
 from scipy import stats
 import pandas as pd
-from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 
 

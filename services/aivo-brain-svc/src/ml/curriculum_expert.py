@@ -5,7 +5,7 @@ Manages curriculum standards and educational content
 
 import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 class CurriculumExpertSystem:

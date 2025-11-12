@@ -4,8 +4,8 @@ Multi-language templates with personalization
 """
 
 from typing import Dict, Optional
-from datetime import datetime
-from jinja2 import Environment, Template, TemplateNotFound
+from datetime import datetime, timedelta
+from jinja2 import Environment, TemplateNotFound
 import json
 
 

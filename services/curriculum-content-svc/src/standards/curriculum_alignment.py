@@ -4,7 +4,7 @@ Maps content to international educational standards
 Author: Principal Education Architect
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
 

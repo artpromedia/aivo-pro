@@ -4,7 +4,7 @@ Track notification performance and engagement
 """
 
 from typing import Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass
 import secrets
 

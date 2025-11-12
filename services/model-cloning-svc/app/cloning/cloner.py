@@ -22,7 +22,6 @@ from datetime import datetime
 import logging
 from pathlib import Path
 import boto3
-import os
 import httpx
 
 logger = logging.getLogger(__name__)

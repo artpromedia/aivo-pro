@@ -4,13 +4,12 @@ Production adaptive learning with Bayesian Knowledge Tracing
 Author: Staff Engineer (ex-Google DeepMind Education)
 """
 
-import asyncio
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import redis.asyncio as redis
@@ -24,7 +23,7 @@ from src.db.models import (
     SessionStatus, TaskStatus, SuggestionStatus
 )
 from src.db.session import get_db, db_manager
-from src.ml.knowledge_tracing import BayesianKnowledgeTracer, Response
+from src.ml.knowledge_tracing import BayesianKnowledgeTracer, Response as KTResponse
 from src.config import settings
 
 # Metrics
@@ -101,7 +100,7 @@ async def startup():
         max_connections=settings.redis_max_connections
     )
     
-    print(f"✅ Learning Session Service started")
+    print("✅ Learning Session Service started")
     print(f"   Environment: {settings.environment}")
     print(f"   BKT p_init={settings.bkt_default_p_init}, "
           f"p_learn={settings.bkt_default_p_learn}")
@@ -262,7 +261,7 @@ async def submit_response(
     )
     
     # Update knowledge using BKT
-    bkt_response = Response(
+    bkt_response = KTResponse(
         correct=evaluation["correct"],
         time_spent=request.time_spent,
         attempt_number=1,

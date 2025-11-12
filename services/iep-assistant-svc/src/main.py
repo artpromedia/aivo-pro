@@ -4,13 +4,13 @@ Production-grade IEP management following Microsoft Education best practices
 """
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from prometheus_client import Counter, Histogram, Gauge, make_asgi_app
+from prometheus_client import Counter, Histogram, make_asgi_app
 import redis.asyncio as redis
 
 from src.config import settings

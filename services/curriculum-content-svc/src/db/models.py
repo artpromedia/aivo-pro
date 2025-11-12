@@ -5,17 +5,15 @@ All subjects: Math, Science, English, Social Studies, Languages, Arts, PE, CS
 """
 
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 import enum
 
 from sqlalchemy import (
     Column, String, Integer, Float, Boolean, DateTime,
-    ForeignKey, Index, Text, Enum as SQLEnum, JSON
+    ForeignKey, Index, Text, Enum as SQLEnum
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 

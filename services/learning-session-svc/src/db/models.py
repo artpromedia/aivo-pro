@@ -4,12 +4,11 @@ Author: Staff Engineer (ex-Google DeepMind Education)
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
 from sqlalchemy import (
     Column, String, Integer, Float, Boolean, DateTime,
-    JSON, ForeignKey, Index, Text, Enum as SQLEnum
+    ForeignKey, Index, Text, Enum as SQLEnum
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base

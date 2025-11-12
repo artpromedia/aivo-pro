@@ -4,16 +4,14 @@ Geographic district detection and comprehensive analytics
 Author: Senior Data Engineer (ex-Palantir)
 """
 
-import asyncio
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional
-from decimal import Decimal
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -30,9 +28,7 @@ from src.analytics.outcome_predictor import OutcomePredictor
 from src.reports.report_generator import ReportGenerator
 from src.ml.trend_analyzer import TrendAnalyzer
 from src.db.models import (
-    Base, District, DistrictBoundary, School,
-    LearningMetric, EngagementMetric, OutcomeMetric,
-    AnalyticsReport, DataExport, Benchmark
+    Base, District, AnalyticsReport
 )
 from src.config import settings
 

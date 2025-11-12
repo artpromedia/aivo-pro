@@ -4,13 +4,12 @@ Author: Principal Engineer (ex-Microsoft Education)
 """
 
 import uuid
-from datetime import datetime, date
-from typing import Optional
+from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import (
     Column, String, DateTime, Integer, Float, Text, Boolean,
-    ForeignKey, Enum as SQLEnum, ARRAY, Date
+    ForeignKey, Enum as SQLEnum, Date
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID, JSONB

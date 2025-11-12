@@ -1,7 +1,6 @@
 """Trend analyzer using statistical methods"""
 
 from typing import Dict, List
-from datetime import datetime
 
 
 class TrendAnalyzer:

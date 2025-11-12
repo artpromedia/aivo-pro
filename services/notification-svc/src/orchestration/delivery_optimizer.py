@@ -3,7 +3,7 @@ Delivery Orchestrator
 Intelligent multi-channel notification routing
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime, timedelta
 from enum import Enum
 import asyncio

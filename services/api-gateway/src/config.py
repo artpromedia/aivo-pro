@@ -3,7 +3,7 @@ Configuration Management for API Gateway
 Uses Pydantic Settings for type-safe configuration
 """
 from typing import List, Optional
-from pydantic import Field, field_validator, PostgresDsn
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

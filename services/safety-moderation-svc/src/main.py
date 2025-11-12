@@ -4,16 +4,15 @@ Content moderation, child safety, and compliance enforcement
 Author: Principal Security Engineer (ex-Google Trust & Safety)
 """
 
-import asyncio
 import hashlib
 import json
 import re
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import redis.asyncio as redis
@@ -31,9 +30,8 @@ from src.threat.behavior_analyzer import BehaviorAnalyzer
 from src.filters.profanity_filter import ProfanityFilter
 from src.filters.pii_detector import PIIDetector
 from src.db.models import (
-    Base, ModerationLog, SafetyIncident, ComplianceAudit,
-    BlockedContent, UserFlag, ThreatAssessment,
-    ParentalConsent, DataRetention, ViolationType
+    Base, ModerationLog, BlockedContent, ThreatAssessment,
+    ParentalConsent, ViolationType
 )
 from src.config import settings
 

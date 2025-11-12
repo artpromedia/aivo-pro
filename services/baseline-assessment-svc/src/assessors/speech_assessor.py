@@ -4,7 +4,7 @@ Comprehensive evaluation of speech and language development
 Evidence-based approach following ASHA guidelines
 """
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum

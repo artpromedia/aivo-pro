@@ -2,7 +2,6 @@
 Item Selection Strategy for Adaptive Testing
 Maximum information with exposure control
 """
-import numpy as np
 from typing import List, Set, Optional, Dict
 from dataclasses import dataclass
 import random

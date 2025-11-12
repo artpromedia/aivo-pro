@@ -13,7 +13,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import AsyncGenerator, Dict, Optional
+from typing import Dict, Optional
 
 import sentry_sdk
 import uvicorn
@@ -475,7 +475,7 @@ async def generate(
                 timestamp=datetime.utcnow().isoformat()
             )
             
-        except Exception as e:
+        except Exception:
             request_count.labels(
                 method="POST",
                 endpoint="/v1/generate",

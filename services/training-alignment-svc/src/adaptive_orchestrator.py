@@ -5,8 +5,8 @@ for difficulty adjustments, content suggestions, and personalized learning paths
 
 This is the brain behind adaptive learning decisions.
 """
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import List, Optional, Tuple
+from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 import logging
@@ -430,13 +430,13 @@ class AdaptiveLearningOrchestrator:
             )
             evidence = [
                 f"Consistent accuracy: {metrics.recent_accuracy:.0%}",
-                f"Needs more practice for mastery"
+                "Needs more practice for mastery"
             ]
         
         elif recommendation_type == RecommendationType.REMEDIATION:
             reasoning = (
-                f"Learner shows gaps in foundational concepts. "
-                f"Recommend focused review before continuing."
+                "Learner shows gaps in foundational concepts. "
+                "Recommend focused review before continuing."
             )
             evidence = [
                 f"Low accuracy: {metrics.recent_accuracy:.0%}",
@@ -462,7 +462,7 @@ class AdaptiveLearningOrchestrator:
             )
             evidence = [
                 f"Accuracy: {metrics.recent_accuracy:.0%}",
-                f"Consistent engagement"
+                "Consistent engagement"
             ]
         
         return reasoning, evidence

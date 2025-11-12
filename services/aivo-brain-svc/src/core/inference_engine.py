@@ -5,7 +5,7 @@ Following Google's TPU serving patterns
 
 import asyncio
 import time
-from typing import Any, Dict, List, Optional
+from typing import Dict, List
 
 import torch
 

@@ -1,8 +1,7 @@
 """Behavior analyzer for threat detection"""
 
 from typing import Dict, List
-from datetime import datetime, timedelta
-import numpy as np
+from datetime import datetime
 
 
 class BehaviorAnalyzer:

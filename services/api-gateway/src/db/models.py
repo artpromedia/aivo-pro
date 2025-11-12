@@ -4,7 +4,7 @@ SQLAlchemy 2.0 async models
 """
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Integer, Float, Boolean, DateTime, Text, Index, JSON
+from sqlalchemy import String, Integer, Float, Boolean, DateTime, Text, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import uuid

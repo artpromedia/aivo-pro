@@ -1,7 +1,6 @@
 """Boundary loader for district geographic data"""
 
 from typing import List, Dict
-import json
 
 
 class BoundaryLoader:

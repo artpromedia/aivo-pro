@@ -3,9 +3,8 @@ Stripe Webhook Handler
 Subscription lifecycle and dunning management
 """
 
-from typing import Dict
+from typing import Dict, List
 from datetime import datetime, timedelta
-import stripe
 from enum import Enum
 
 

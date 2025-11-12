@@ -5,17 +5,13 @@ Optimizes content for ChatGPT, Perplexity, Gemini, Claude, etc.
 Author: Principal Growth Engineer
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass
-import asyncio
-import json
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
-import openai
-from anthropic import Anthropic
 
 
 class AIEngine(str, Enum):

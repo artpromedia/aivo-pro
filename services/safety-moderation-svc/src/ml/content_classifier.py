@@ -2,7 +2,7 @@
 
 from transformers import pipeline
 import torch
-from typing import Dict, List
+from typing import Dict
 import asyncio
 
 

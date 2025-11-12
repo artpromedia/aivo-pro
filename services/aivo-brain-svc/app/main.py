@@ -19,8 +19,7 @@ from .schemas import (
     AssessResponse,
     CurriculumQuery,
     CurriculumResponse,
-    HealthResponse,
-    ErrorResponse
+    HealthResponse
 )
 
 # Configure logging

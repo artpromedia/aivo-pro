@@ -1,6 +1,6 @@
 """FERPA compliance guardian"""
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime
 
 

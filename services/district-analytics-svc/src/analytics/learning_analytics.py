@@ -1,7 +1,6 @@
 """Learning analytics engine"""
 
 from typing import Dict, List
-from datetime import datetime
 import statistics
 
 

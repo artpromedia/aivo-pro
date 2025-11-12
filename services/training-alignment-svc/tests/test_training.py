@@ -4,7 +4,7 @@ Validates training job execution, data collection, and hyperparameter optimizati
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 from src.training import TrainingService
 
 

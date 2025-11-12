@@ -3,9 +3,7 @@ SMART Goal Generation Engine
 Follows Microsoft Education IEP best practices
 """
 
-from typing import Dict, List, Optional
-from datetime import datetime, timedelta
-import asyncio
+from typing import Dict, List
 
 from openai import AsyncOpenAI
 

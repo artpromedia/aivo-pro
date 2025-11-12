@@ -1,7 +1,7 @@
 """PII (Personally Identifiable Information) detector"""
 
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 
 class PIIDetector:

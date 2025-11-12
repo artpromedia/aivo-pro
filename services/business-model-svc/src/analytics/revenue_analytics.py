@@ -5,8 +5,6 @@ SaaS metrics following Stripe Atlas and ChartMogul best practices
 
 from typing import Dict, List
 from datetime import datetime, timedelta
-from decimal import Decimal
-import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 import pandas as pd

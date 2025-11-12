@@ -4,8 +4,6 @@ Comprehensive SEL support for child development
 Author: Chief Child Psychologist (Yale/CASEL)
 """
 
-import asyncio
-import json
 import uuid
 import random
 from datetime import datetime
@@ -14,11 +12,10 @@ from enum import Enum
 from dataclasses import dataclass
 import numpy as np
 
-from fastapi import FastAPI, HTTPException, WebSocket, Depends
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
 # Metrics
@@ -717,12 +714,12 @@ class MindfulnessEngine:
     ) -> List[str]:
         """Generate step-by-step guided script"""
         return [
-            f"Find a comfortable position",
-            f"Close your eyes or look down gently",
+            "Find a comfortable position",
+            "Close your eyes or look down gently",
             f"Let's begin: {practice.get('instruction', '')}",
-            f"Take your time, there's no rush",
-            f"Notice how you feel",
-            f"When you're ready, slowly open your eyes"
+            "Take your time, there's no rush",
+            "Notice how you feel",
+            "When you're ready, slowly open your eyes"
         ]
     
     def _select_background_music(self, child_age: int) -> str:

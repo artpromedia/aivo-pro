@@ -1,7 +1,7 @@
 """
 Learning metrics analyzer
 """
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 import logging
 
 logger = logging.getLogger(__name__)

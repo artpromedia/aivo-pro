@@ -4,13 +4,12 @@ Supporting 50+ languages with educational terminology and cultural sensitivity
 Author: Principal Localization Engineer (ex-Google Translate/Microsoft)
 """
 
-import asyncio
 import json
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import redis.asyncio as redis

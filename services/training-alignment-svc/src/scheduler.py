@@ -2,10 +2,9 @@
 Automated Training Scheduler
 Continuously trains AIVO Main Brain and monitors all models for retraining needs
 """
-import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from datetime import datetime
+from typing import Dict, Optional
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
@@ -128,8 +127,8 @@ class AIVOTrainingScheduler:
             
             # Schedule training job with high priority
             logger.info(
-                f"Scheduling AIVO Main Brain training "
-                f"(Reason: Daily scheduled training)"
+                "Scheduling AIVO Main Brain training "
+                "(Reason: Daily scheduled training)"
             )
             
             job = await self.pipeline.schedule_retraining(
