@@ -16,17 +16,17 @@ services:
       - "8001:8001"
     environment:
       - SERVICE_NAME=api-gateway
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_auth
-      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_auth
+      - REDIS_URL=redis://aivo-redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-jwt-key-change-this-in-production-min-32-chars}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - HIBP_API_KEY=${HIBP_API_KEY}
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -41,12 +41,12 @@ services:
       - "8003:8003"
     environment:
       - SERVICE_NAME=baseline-assessment-svc
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo
-      - REDIS_URL=redis://redis:6379/6
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo
+      - REDIS_URL=redis://aivo-redis:6379/6
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
@@ -61,17 +61,17 @@ services:
       - "8004:8004"
     environment:
       - SERVICE_NAME=learning-session-svc
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_learning
-      - REDIS_URL=redis://redis:6379/2
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_learning
+      - REDIS_URL=redis://aivo-redis:6379/2
       - BKT_DEFAULT_P_INIT=0.3
       - BKT_DEFAULT_P_LEARN=0.1
       - BKT_DEFAULT_P_GUESS=0.2
       - BKT_DEFAULT_P_SLIP=0.1
       - MASTERY_THRESHOLD=0.8
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
@@ -86,12 +86,10 @@ services:
       - "8005:8005"
     environment:
       - SERVICE_NAME=focus-monitor-svc
-      - REDIS_URL=redis://redis:6379/3
+      - REDIS_URL=redis://aivo-redis:6379/3
       - IDLE_THRESHOLD_MS=30000
       - FOCUS_SCORE_THRESHOLD=0.4
       - LOG_LEVEL=INFO
-    depends_on:
-      - redis
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
@@ -106,8 +104,8 @@ services:
       - "8006:8006"
     environment:
       - SERVICE_NAME=curriculum-content-svc
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_curriculum
-      - REDIS_URL=redis://redis:6379/4
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_curriculum
+      - REDIS_URL=redis://aivo-redis:6379/4
       - AI_PROVIDER=localai
       - LOCALAI_BASE_URL=http://localai:8080
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -119,11 +117,11 @@ services:
       - ENABLE_IB=true
       - ENABLE_CHINESE_NATIONAL=true
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
       - localai
       - ollama
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
@@ -138,8 +136,8 @@ services:
       - "8007:8007"
     environment:
       - SERVICE_NAME=homework-helper-svc
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_homework
-      - REDIS_URL=redis://redis:6379/5
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_homework
+      - REDIS_URL=redis://aivo-redis:6379/5
       - AI_PROVIDER=localai
       - LOCALAI_BASE_URL=http://localai:8080
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -167,11 +165,11 @@ services:
       - LOG_LEVEL=INFO
     volumes:
       - ./google-credentials.json:/app/google-credentials.json:ro
-    depends_on:
-      - postgres
-      - redis
       - localai
       - ollama
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
@@ -186,8 +184,8 @@ services:
       - "8008:8008"
     environment:
       - SERVICE_NAME=iep-assistant-svc
-      - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres:5432/aivo_iep
-      - REDIS_URL=redis://redis:6379/6
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_iep
+      - REDIS_URL=redis://aivo-redis:6379/6
       - AI_PROVIDER=localai
       - LOCALAI_BASE_URL=http://localai:8080
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -207,11 +205,11 @@ services:
       - MAX_GOAL_GENERATIONS_PER_HOUR=20
       - MAX_DATA_POINTS_PER_DAY=100
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
       - localai
       - ollama
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
@@ -230,16 +228,16 @@ services:
       - "8009:8009"
     environment:
       - SERVICE_NAME=training-alignment-svc
-      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@aivo-postgres:5432/aivo}
+      - REDIS_URL=${REDIS_URL:-redis://aivo-redis:6379/0}
       - BIAS_THRESHOLD=0.10
       - DRIFT_THRESHOLD=0.15
       - ENABLE_AUTO_RETRAINING=true
       - ENABLE_BIAS_MITIGATION=true
       - LOG_LEVEL=INFO
-    depends_on:
-      - postgres
-      - redis
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
 
   # Language Translator Agent - Multi-language support (50+ languages)
@@ -251,12 +249,10 @@ services:
       - SERVICE_NAME=translator-svc
       - GOOGLE_TRANSLATE_API_KEY=${GOOGLE_TRANSLATE_API_KEY}
       - GOOGLE_CLOUD_TTS_KEY=${GOOGLE_CLOUD_TTS_KEY}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/1}
+      - REDIS_URL=${REDIS_URL:-redis://aivo-redis:6379/1}
       - LOG_LEVEL=INFO
       - CACHE_TTL=3600
       - ENABLE_AUDIO_TRANSLATION=true
-    depends_on:
-      - redis
     restart: unless-stopped
 
   # Business Model Agent - Subscriptions and licensing
@@ -266,14 +262,15 @@ services:
       - "8011:8011"
     environment:
       - SERVICE_NAME=business-model-svc
-      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@aivo-postgres:5432/aivo}
       - STRIPE_API_KEY=${STRIPE_API_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
       - LOG_LEVEL=INFO
       - CHURN_THRESHOLD=0.70
-    depends_on:
-      - postgres
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
 
   # Notification Agent - Multi-channel communications
@@ -288,10 +285,8 @@ services:
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
       - FIREBASE_CONFIG=${FIREBASE_CONFIG}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - REDIS_URL=${REDIS_URL:-redis://aivo-redis:6379/2}
       - LOG_LEVEL=INFO
-    depends_on:
-      - redis
     restart: unless-stopped
 
   # Analytics & Insights Agent - Platform analytics
@@ -301,13 +296,13 @@ services:
       - "8013:8013"
     environment:
       - SERVICE_NAME=analytics-insights-svc
-      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@postgres:5432/aivo}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/3}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://aivo:password@aivo-postgres:5432/aivo}
+      - REDIS_URL=${REDIS_URL:-redis://aivo-redis:6379/3}
       - LOG_LEVEL=INFO
       - CACHE_TTL=3600
-    depends_on:
-      - postgres
-      - redis
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
 
   # ============================================================================
@@ -318,9 +313,10 @@ services:
   aivo-brain:
     build: ./services/aivo-brain-svc
     ports:
-      - "8001:8001"
+      - "8014:8014"
     environment:
       - SERVICE_NAME=aivo-brain-svc
+      - PORT=8014
       - AI_PROVIDER=localai
       - LOCALAI_BASE_URL=http://localai:8080
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -328,12 +324,10 @@ services:
       - FALLBACK_MODEL=tinyllama:1.1b
       - EMBEDDING_MODEL=nomic-embed-text
       - USE_LOCAL_MODELS=true
-      - REDIS_HOST=redis
+      - REDIS_HOST=aivo-redis
       - REDIS_PORT=6379
       - REDIS_DB=4
       - LOG_LEVEL=INFO
-    depends_on:
-      - redis
       - localai
       - ollama
     restart: unless-stopped
@@ -352,7 +346,7 @@ services:
       - CLONING_MODEL=llama3.2:3b
       - PERSONALIZATION_MODEL=codellama:7b
       - USE_LOCAL_MODELS=true
-      - REDIS_URL=redis://redis:6379/5
+      - REDIS_URL=redis://aivo-redis:6379/5
       - S3_BUCKET=aivo-student-models
       - MINIO_ENDPOINT=http://minio:9000
       - MINIO_ACCESS_KEY=minioadmin
@@ -360,7 +354,6 @@ services:
       - LOG_LEVEL=INFO
     depends_on:
       - aivo-brain
-      - redis
       - minio
       - localai
       - ollama
@@ -464,36 +457,38 @@ services:
     command: server /data --console-address ":9001"
     restart: unless-stopped
 
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=aivo
-      - POSTGRES_USER=aivo
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aivo"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # NOTE: Using existing aivo-postgres and aivo-redis containers
+  # Uncomment below if you need dedicated instances
+  # postgres:
+  #   image: postgres:15-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_DB=aivo
+  #     - POSTGRES_USER=aivo
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U aivo"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 3s
+  #     retries: 5
 
   # Speech Therapy Service
   speech-therapy-svc:
@@ -503,12 +498,12 @@ services:
     environment:
       - SERVICE_NAME=speech-therapy-svc
       - PORT=8016
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://aivo-redis:6379
       - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres/aivo_speech_therapy
       - API_GATEWAY_URL=http://api-gateway:8001
-    depends_on:
-      - redis
-      - postgres
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8016/health')"]
@@ -524,12 +519,12 @@ services:
     environment:
       - SERVICE_NAME=sel-agent-svc
       - PORT=8015
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://aivo-redis:6379
       - DATABASE_URL=postgresql+asyncpg://aivo:${DB_PASSWORD:-password}@postgres/aivo_sel
       - API_GATEWAY_URL=http://api-gateway:8001
-    depends_on:
-      - redis
-      - postgres
+    networks:
+      - default
+      - database_aivo-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8015/health')"]
@@ -558,4 +553,6 @@ volumes:
 networks:
   default:
     name: aivo-network
+    external: true
+  database_aivo-network:
     external: true
