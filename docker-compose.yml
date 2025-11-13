@@ -341,7 +341,7 @@ services:
     environment:
       - SERVICE_NAME=model-cloning-svc
       - AI_PROVIDER=localai
-      - AIVO_BRAIN_URL=http://aivo-brain:8001
+      - AIVO_BRAIN_URL=http://aivo-brain:8014
       - LOCALAI_BASE_URL=http://localai:8080
       - OLLAMA_BASE_URL=http://ollama:11434
       - CLONING_MODEL=llama3.2:3b

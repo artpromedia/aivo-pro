@@ -2,7 +2,7 @@
 Analytics & Insights Agent Service
 Platform KPIs, learning metrics, and predictive insights
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
@@ -259,7 +259,7 @@ async def get_revenue_metrics(time_range: TimeRange = TimeRange.MONTH):
 
 
 @app.get("/v1/revenue/forecast")
-async def get_revenue_forecast(months: int = Field(default=6, ge=1, le=24)):
+async def get_revenue_forecast(months: int = Query(default=6, ge=1, le=24)):
     """
     Generate revenue forecast
     

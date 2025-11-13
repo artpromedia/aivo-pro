@@ -23,8 +23,8 @@ import logging
 from pathlib import Path
 from threading import Thread
 
-from .config import settings
-from .schemas import StudentContext, AssessmentCriteria
+from ..config import settings
+from ..schemas import StudentContext, AssessmentCriteria
 
 logger = logging.getLogger(__name__)
 
