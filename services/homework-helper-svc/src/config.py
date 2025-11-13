@@ -4,8 +4,8 @@ Configuration for Homework Helper Service
 
 import os
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
-from typing import List
+from pydantic import model_validator
+from typing import List, Any
 
 
 class Settings(BaseSettings):
@@ -49,16 +49,19 @@ class Settings(BaseSettings):
 
     # File Upload
     MAX_FILE_SIZE_MB: int = 10
-    ALLOWED_FILE_TYPES: List[str] = ["pdf", "png", "jpg", "jpeg"]
+    ALLOWED_FILE_TYPES: Any = ["pdf", "png", "jpg", "jpeg"]
     UPLOAD_STORAGE_PATH: str = "/app/uploads"
 
-    @field_validator('ALLOWED_FILE_TYPES', mode='before')
+    @model_validator(mode='before')
     @classmethod
-    def parse_allowed_file_types(cls, v):
-        """Parse ALLOWED_FILE_TYPES from comma-separated string or list"""
-        if isinstance(v, str):
-            return [item.strip() for item in v.split(',')]
-        return v
+    def parse_env_vars(cls, values: dict) -> dict:
+        """Parse environment variables that need special handling"""
+        # Handle ALLOWED_FILE_TYPES which may come as comma-separated string
+        if 'ALLOWED_FILE_TYPES' in values:
+            val = values['ALLOWED_FILE_TYPES']
+            if isinstance(val, str):
+                values['ALLOWED_FILE_TYPES'] = [item.strip() for item in val.split(',')]
+        return values
     
     # Session Management
     SESSION_TIMEOUT_MINUTES: int = 120
