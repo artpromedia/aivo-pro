@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BookOpen, 
-  Calculator, 
-  Beaker, 
-  Globe2, 
-  BarChart3, 
-  Calendar, 
+import {
+  BookOpen,
+  Calculator,
+  Beaker,
+  Globe2,
+  BarChart3,
+  Calendar,
   Target,
   Clock,
   TrendingUp,
@@ -18,7 +18,9 @@ import {
   PenTool,
   HelpCircle,
   Gamepad2,
-  FileText
+  FileText,
+  X,
+  Sparkles
 } from 'lucide-react';
 import { FocusMonitor } from '../components/FocusMonitor';
 import { HomeworkHelper } from '../pages/HomeworkHelper';
@@ -55,6 +57,7 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
   const [showGameBreak, setShowGameBreak] = useState(false);
   const [showTestCenter, setShowTestCenter] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [comingSoonFeature, setComingSoonFeature] = useState<{title: string; description: string; features: string[]} | null>(null);
 
   const subjects = [
     { 
@@ -417,22 +420,34 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
               
               <div className="space-y-3">
                 {[
-                  { label: 'Study Planner', icon: Calendar },
-                  { label: 'Grade Calculator', icon: Calculator },
-                  { label: 'Study Groups', icon: Users },
-                  { label: 'Performance Analytics', icon: BarChart3 },
+                  {
+                    label: 'Study Planner',
+                    icon: Calendar,
+                    description: 'Organize your study schedule and stay on track',
+                    features: ['Set study goals', 'Schedule sessions', 'Track progress', 'Manage deadlines']
+                  },
+                  {
+                    label: 'Grade Calculator',
+                    icon: Calculator,
+                    description: 'Calculate and predict your grades',
+                    features: ['Assignment weights', 'Test scores', 'Final grade predictions', 'GPA tracking']
+                  },
+                  {
+                    label: 'Study Groups',
+                    icon: Users,
+                    description: 'Connect and collaborate with classmates',
+                    features: ['Join study sessions', 'Share resources', 'Collaborate on projects', 'Help each other learn']
+                  },
+                  {
+                    label: 'Performance Analytics',
+                    icon: BarChart3,
+                    description: 'Track your academic performance with detailed insights',
+                    features: ['Grade trends', 'Study time analysis', 'Subject comparisons', 'Progress insights']
+                  },
                 ].map((action, i) => (
                   <motion.button
                     key={i}
-                    onClick={() => {
-                      const messages = {
-                        'Study Planner': '📅 Study Planner\n\nOrganize your study schedule:\n• Set study goals\n• Schedule sessions\n• Track progress\n• Manage deadlines\n\nStay organized and succeed!',
-                        'Grade Calculator': '🧮 Grade Calculator\n\nCalculate your grades:\n• Assignment weights\n• Test scores\n• Final grade predictions\n• GPA tracking\n\nKnow where you stand!',
-                        'Study Groups': '👥 Study Groups\n\nConnect with classmates:\n• Join study sessions\n• Share resources\n• Collaborate on projects\n• Help each other learn\n\nLearning together!',
-                        'Performance Analytics': '📈 Performance Analytics\n\nTrack your academic performance:\n• Grade trends\n• Study time analysis\n• Subject comparisons\n• Progress insights\n\nData-driven success!'
-                      };
-                      alert(messages[action.label as keyof typeof messages] || `${action.label} feature coming soon!`);
-                    }}
+                    onClick={() => setComingSoonFeature({ title: action.label, description: action.description, features: action.features })}
                     whileHover={{ scale: 1.02 }}
                     className="w-full flex items-center gap-3 p-3 text-left rounded-xl hover:bg-gray-50 border border-gray-200"
                   >
@@ -518,6 +533,59 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
           childGrade={childProfile.grade}
           onClose={() => setShowTestCenter(false)}
         />
+      )}
+
+      {/* Coming Soon Modal */}
+      {comingSoonFeature && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">{comingSoonFeature.title}</h3>
+                  <p className="text-sm text-purple-600 font-medium">Coming Soon</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setComingSoonFeature(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-4">{comingSoonFeature.description}</p>
+
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+              <h4 className="font-semibold text-gray-900 mb-3">What to Expect:</h4>
+              <ul className="space-y-2">
+                {comingSoonFeature.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setComingSoonFeature(null)}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+              >
+                Got it!
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

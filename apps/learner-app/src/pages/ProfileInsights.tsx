@@ -285,15 +285,245 @@ export const ProfileInsights: React.FC<ProfileInsightsProps> = ({ childProfile, 
           </div>
         )}
 
-        {/* Other tab content placeholders */}
-        {activeTab !== 'insights' && (
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-lg p-8 text-center"
+            className="space-y-6"
           >
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 capitalize">{activeTab} Content</h2>
-            <p className="text-gray-600">This section is coming soon!</p>
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {stats.map((stat, idx) => (
+                <div key={idx} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className={`inline-flex px-3 py-1 rounded-full bg-gradient-to-r ${stat.color} text-white text-2xl font-bold mb-2`}>
+                    {stat.value}
+                  </div>
+                  <p className="text-sm text-gray-600 font-medium">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Profile Summary */}
+            <div className="bg-white rounded-3xl shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <User className="w-6 h-6 text-purple-600" />
+                Profile Summary
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-3">Basic Information</h4>
+                  <div className="space-y-2 text-gray-600">
+                    <p><span className="font-medium">Name:</span> {childProfile.name}</p>
+                    <p><span className="font-medium">Age:</span> {childProfile.age} years old</p>
+                    <p><span className="font-medium">Grade:</span> {childProfile.grade}</p>
+                    <p><span className="font-medium">Learning Style:</span> {childProfile.baselineResults?.learningStyle || 'Not assessed'}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-3">Academic Levels</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Math</span>
+                        <span className="text-sm text-gray-600">{childProfile.baselineResults?.mathLevel || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style={{width: `${childProfile.baselineResults?.mathLevel || 0}%`}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Reading</span>
+                        <span className="text-sm text-gray-600">{childProfile.baselineResults?.readingLevel || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style={{width: `${childProfile.baselineResults?.readingLevel || 0}%`}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Science</span>
+                        <span className="text-sm text-gray-600">{childProfile.baselineResults?.scienceLevel || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full" style={{width: `${childProfile.baselineResults?.scienceLevel || 0}%`}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Interests */}
+            {childProfile.baselineResults?.interests && childProfile.baselineResults.interests.length > 0 && (
+              <div className="bg-white rounded-3xl shadow-lg p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <Lightbulb className="w-6 h-6 text-yellow-600" />
+                  Interests
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {childProfile.baselineResults.interests.map((interest, idx) => (
+                    <span key={idx} className="px-4 py-2 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-full text-gray-700 font-medium">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Progress Tab */}
+        {activeTab === 'progress' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Progress Summary */}
+            <div className="bg-white rounded-3xl shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+                Learning Progress
+              </h3>
+
+              {/* Strengths */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Strengths
+                </h4>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {strengths.map((strength, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
+                      <Award className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <span className="text-gray-700">{strength}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Growth Areas */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  Areas for Growth
+                </h4>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {growthAreas.map((area, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-xl">
+                      <Target className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                      <span className="text-gray-700">{area}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-3xl shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <Clock className="w-6 h-6 text-blue-600" />
+                Recent Activity
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <BookOpen className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Completed Math Module</p>
+                    <p className="text-sm text-gray-600">Advanced Algebra - 2 hours ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                  <BookOpen className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Reading Exercise</p>
+                    <p className="text-sm text-gray-600">Comprehension skills - 5 hours ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <Award className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Achievement Unlocked</p>
+                    <p className="text-sm text-gray-600">5-day learning streak - 1 day ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Goals Tab */}
+        {activeTab === 'goals' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Active Goals */}
+            <div className="bg-white rounded-3xl shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <Target className="w-6 h-6 text-purple-600" />
+                Active Learning Goals
+              </h3>
+              <div className="space-y-4">
+                <div className="p-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-2xl">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800 mb-1">Improve Reading Comprehension</h4>
+                      <p className="text-sm text-gray-600">Complete 5 reading exercises this week</p>
+                    </div>
+                    <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-medium">3/5</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800 mb-1">Master Science Vocabulary</h4>
+                      <p className="text-sm text-gray-600">Learn 20 new science terms</p>
+                    </div>
+                    <span className="px-3 py-1 bg-green-600 text-white rounded-full text-sm font-medium">14/20</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style={{width: '70%'}}></div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800 mb-1">Increase Focus Duration</h4>
+                      <p className="text-sm text-gray-600">Reach 45-minute study sessions</p>
+                    </div>
+                    <span className="px-3 py-1 bg-orange-600 text-white rounded-full text-sm font-medium">30min</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-orange-400 to-orange-600 h-2 rounded-full" style={{width: '67%'}}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="bg-white rounded-3xl shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <Lightbulb className="w-6 h-6 text-yellow-600" />
+                AI Recommendations
+              </h3>
+              <div className="space-y-3">
+                {recommendations.map((rec, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl">
+                    <CheckCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-700">{rec}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </div>

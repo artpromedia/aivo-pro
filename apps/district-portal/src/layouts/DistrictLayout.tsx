@@ -1,11 +1,11 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  School, 
-  Users, 
-  CreditCard, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  School,
+  Users,
+  CreditCard,
+  BarChart3,
   FileText,
   Settings,
   LogOut,
@@ -15,6 +15,7 @@ import {
   Link2,
   Brain
 } from 'lucide-react';
+import { useAuth } from '@aivo/auth';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -30,6 +31,7 @@ const navigation = [
 ];
 
 export const DistrictLayout: React.FC = () => {
+  const { logout } = useAuth();
   const location = useLocation();
 
   return (
@@ -85,7 +87,11 @@ export const DistrictLayout: React.FC = () => {
               <p className="text-sm font-medium text-gray-900 truncate">District Admin</p>
               <p className="text-xs text-gray-500 truncate">admin@district.edu</p>
             </div>
-            <button className="text-gray-400 hover:text-purple-600 transition-colors">
+            <button
+              onClick={logout}
+              className="text-gray-400 hover:text-purple-600 transition-colors"
+              title="Logout"
+            >
               <LogOut className="w-4 h-4" />
             </button>
           </div>

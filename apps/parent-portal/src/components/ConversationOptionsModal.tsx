@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -9,7 +9,10 @@ import {
   Flag,
   UserMinus,
   Settings,
-  Info
+  Info,
+  Users,
+  Calendar,
+  MessageCircle
 } from 'lucide-react';
 
 interface ConversationOptionsModalProps {
@@ -35,6 +38,8 @@ export const ConversationOptionsModal: React.FC<ConversationOptionsModalProps> =
   onReport,
   onDelete
 }) => {
+  const [showInfo, setShowInfo] = useState(false);
+
   const options = [
     {
       icon: isMuted ? Bell : BellOff,
@@ -48,8 +53,7 @@ export const ConversationOptionsModal: React.FC<ConversationOptionsModalProps> =
       label: 'Conversation Info',
       description: 'View conversation details and members',
       action: () => {
-        onClose();
-        alert('Conversation info feature coming soon!');
+        setShowInfo(true);
       },
       color: 'text-gray-600 hover:bg-gray-50'
     },
@@ -162,6 +166,102 @@ export const ConversationOptionsModal: React.FC<ConversationOptionsModalProps> =
                 className="w-full bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
               >
                 Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Conversation Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-coral-500 to-purple-600 text-white p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Info className="w-6 h-6" />
+                  <h2 className="text-xl font-bold">Conversation Info</h2>
+                </div>
+                <button
+                  onClick={() => setShowInfo(false)}
+                  className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Conversation Name */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Conversation</h3>
+                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-coral-50 to-purple-50 rounded-xl border border-purple-100">
+                  <MessageCircle className="w-5 h-5 text-coral-600" />
+                  <span className="font-semibold text-gray-800">{conversationName}</span>
+                </div>
+              </div>
+
+              {/* Members */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Members</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-coral-400 to-coral-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      {conversationName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{conversationName}</p>
+                      <p className="text-sm text-gray-500">Contact</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      You
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">You</p>
+                      <p className="text-sm text-gray-500">Parent</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Conversation Details */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Details</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Calendar className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Created</p>
+                      <p className="text-xs text-gray-500">{new Date().toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Bell className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Notifications</p>
+                      <p className="text-xs text-gray-500">{isMuted ? 'Muted' : 'Enabled'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 p-4">
+              <button
+                onClick={() => setShowInfo(false)}
+                className="w-full bg-gradient-to-r from-coral-500 to-purple-600 text-white py-3 rounded-xl font-medium hover:from-coral-600 hover:to-purple-700 transition-all"
+              >
+                Close
               </button>
             </div>
           </motion.div>

@@ -1,20 +1,23 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { 
-  Calendar, 
-  Users, 
-  Brain, 
-  Target, 
-  Activity, 
-  Bell, 
+import {
+  Calendar,
+  Users,
+  Brain,
+  Target,
+  Activity,
+  Bell,
   Settings,
+  LogOut,
   User,
   CreditCard,
   MessageCircle,
   FileText
 } from 'lucide-react';
+import { useAuth } from '@aivo/auth';
 
 export const DashboardLayout: React.FC = () => {
+  const { logout } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -61,6 +64,13 @@ export const DashboardLayout: React.FC = () => {
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white group hover:bg-white/30 transition-all">
                 <User className="w-5 h-5" />
               </div>
+              <button
+                onClick={logout}
+                className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white hover:bg-red-500/20 hover:text-red-200 transition-all group"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
             </div>
           </nav>
         </div>
