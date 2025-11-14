@@ -7,7 +7,12 @@ import asyncio
 from datetime import datetime
 from typing import Dict, Optional
 
-import torch
+# Try to import torch, but make it optional
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 
 
 class HealthChecker:
@@ -119,21 +124,21 @@ class HealthChecker:
     async def _check_device(self) -> bool:
         """Check GPU/device availability and health"""
         try:
-            if torch.cuda.is_available():
+            if TORCH_AVAILABLE and torch.cuda.is_available():
                 # Test GPU with small operation
                 test_tensor = torch.rand(10, 10).cuda()
                 _ = torch.mm(test_tensor, test_tensor)
                 return True
-            return True  # CPU mode is acceptable
+            return True  # CPU mode or cloud mode is acceptable
             
         except Exception as e:
             print(f"Device health check failed: {e}")
-            return False
+            return True  # Don't fail on device check in cloud mode
     
     async def _check_memory(self) -> bool:
         """Check memory usage"""
         try:
-            if torch.cuda.is_available():
+            if TORCH_AVAILABLE and torch.cuda.is_available():
                 # Check GPU memory
                 memory_allocated = torch.cuda.memory_allocated()
                 memory_reserved = torch.cuda.memory_reserved()

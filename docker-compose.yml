@@ -308,7 +308,9 @@ services:
 
   # AIVO Main Brain - Connected to Cloud AI (No memory constraints)
   aivo-brain:
-    build: ./services/aivo-brain-svc
+    build:
+      context: ./services/aivo-brain-svc
+      dockerfile: Dockerfile.cloud
     ports:
       - "8014:8014"
     environment:

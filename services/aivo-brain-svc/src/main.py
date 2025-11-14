@@ -28,7 +28,11 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from src.config import settings
 from src.core.cache_layer import CacheLayer
 from src.core.inference_engine import InferenceEngine
-from src.core.model_manager import ModelManager
+# Import model managers conditionally to avoid torch dependency in cloud mode
+if settings.USE_LOCAL_MODELS:
+    from src.core.model_manager import ModelManager
+else:
+    ModelManager = None
 from src.core.cloud_model_manager import CloudModelManager
 from src.infrastructure.health_checker import HealthChecker
 from src.ml.curriculum_expert import CurriculumExpertSystem
@@ -173,13 +177,27 @@ class AIVOBrainService:
         print("⚠️ Initializing in fallback mode with reduced functionality")
         
         try:
-            # Initialize only critical components
-            self.model_manager = ModelManager(
-                primary_model="microsoft/phi-2",
-                fallback_models=[],
-                device_map="cpu",
-                optimization_level="low"
-            )
+            # In cloud mode, use cloud model manager for fallback
+            if not settings.USE_LOCAL_MODELS:
+                self.model_manager = CloudModelManager(
+                    ai_provider=settings.AI_PROVIDER,
+                    primary_model="gpt-3.5-turbo",  # Cheaper fallback
+                    fallback_models=[],
+                    openai_api_key=settings.OPENAI_API_KEY,
+                    anthropic_api_key=settings.ANTHROPIC_API_KEY,
+                    google_api_key=settings.GOOGLE_API_KEY
+                )
+            else:
+                # Initialize only critical components for local mode
+                if ModelManager is None:
+                    raise Exception("ModelManager not available in cloud mode")
+                self.model_manager = ModelManager(
+                    primary_model="microsoft/phi-2",
+                    fallback_models=[],
+                    device_map="cpu",
+                    optimization_level="low"
+                )
+            
             await self.model_manager.load_models()
             
             self.inference_engine = InferenceEngine(
