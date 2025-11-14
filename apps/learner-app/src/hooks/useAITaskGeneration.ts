@@ -136,7 +136,11 @@ export const useAITaskGeneration = () => {
     async (subject: string, skill: string) => {
       const currentProfile = getCurrentProfile();
       
+      console.log('🎓 Generate lesson called:', { subject, skill, hasProfile: !!currentProfile });
+      
       if (!currentProfile) {
+        console.error('❌ No profile available for lesson generation');
+        console.log('💡 Tip: Complete baseline assessment or create a profile first');
         return null;
       }
 
@@ -149,6 +153,15 @@ export const useAITaskGeneration = () => {
           ...(currentProfile.specialNeeds || []),
         ];
 
+        console.log('📚 Calling AI lesson generator with:', {
+          subject,
+          skill,
+          gradeLevel,
+          studentId: currentProfile.id,
+          learningStyle: currentProfile.learningStyle,
+          disabilities: disabilities.length
+        });
+
         const lesson = await aiTaskGenerator.generateLesson(
           subject,
           skill,
@@ -158,9 +171,18 @@ export const useAITaskGeneration = () => {
           disabilities
         );
 
+        if (lesson) {
+          console.log('✅ Generated lesson with', lesson.length, 'steps');
+        } else {
+          console.warn('⚠️ AI returned null lesson');
+        }
+
         return lesson;
       } catch (err) {
-        console.error('Lesson generation error:', err);
+        console.error('❌ Lesson generation error:', err);
+        if (err instanceof Error) {
+          console.error('Error details:', err.message, err.stack);
+        }
         return null;
       }
     },
