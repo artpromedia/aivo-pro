@@ -39,11 +39,23 @@ class Settings(BaseSettings):
     CACHE_TTL: int = 3600  # 1 hour
     CACHE_MAX_SIZE: int = 10000
     
+    # AI Provider Selection
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "localai")
+    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "true").lower() == "true"
+    
+    # LocalAI Configuration
+    LOCALAI_BASE_URL: str = os.getenv("LOCALAI_BASE_URL", "http://localai:8080")
+    
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
+    
     # Model configuration
-    PRIMARY_MODEL: str = os.getenv("PRIMARY_MODEL", "microsoft/phi-3-mini-4k-instruct")
+    PRIMARY_MODEL: str = os.getenv("PRIMARY_MODEL", "llama3.2:3b")
+    FALLBACK_MODEL: str = os.getenv("FALLBACK_MODEL", "tinyllama:1.1b")
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
     FALLBACK_MODELS: List[str] = [
-        "microsoft/phi-2",
-        "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        "llama3.2:3b",
+        "tinyllama:1.1b"
     ]
     OPTIMIZATION_LEVEL: str = os.getenv("OPTIMIZATION_LEVEL", "medium")  # low, medium, high
     

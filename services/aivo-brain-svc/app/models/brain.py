@@ -94,10 +94,12 @@ class AIVOMainBrain:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             
             # Load base model with quantization
+            # Use float32 on CPU, float16 on CUDA
+            dtype = torch.float32 if not torch.cuda.is_available() else torch.float16
             model_kwargs = {
                 "device_map": "auto",
                 "trust_remote_code": True,
-                "torch_dtype": torch.float16,
+                "torch_dtype": dtype,
             }
             
             if self.bnb_config:
@@ -134,11 +136,13 @@ class AIVOMainBrain:
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             
+            # Use float32 on CPU, float16 on CUDA
+            dtype = torch.float32 if not torch.cuda.is_available() else torch.float16
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
                 device_map="auto",
                 trust_remote_code=True,
-                torch_dtype=torch.float16
+                torch_dtype=dtype
             )
             
             logger.info("✅ Fallback model loaded successfully")

@@ -1,30 +1,78 @@
+# LocalAI Model Configuration for AIVO
+# Compatible with Ollama models - bridges LocalAI API to Ollama backend
+# Updated: November 2025
+
+# Primary Chat Model - Llama 3.2 3B (Fast, good quality)
 - name: gpt-3.5-turbo
-  backend: llama-cpp
+  backend: http
   parameters:
-    model: ggml-gpt4all-j-v1.3-groovy.bin
+    url: "http://ollama:11434/api/generate"
+    model: "llama3.2:3b"
     temperature: 0.7
     top_p: 0.9
     max_tokens: 512
-    context_size: 2048
-  download:
-    - url: "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
-      sha256: "81a09a0ddf89690372fc296ff7f625af21b8093b6a9bf6b5308b4d52a4b93dd2"
+    context_size: 4096
 
 - name: gpt-4
-  backend: llama-cpp  
+  backend: http
   parameters:
-    model: ggml-gpt4all-j-v1.3-groovy.bin
+    url: "http://ollama:11434/api/generate"
+    model: "llama3.2:3b"
     temperature: 0.7
     top_p: 0.9
     max_tokens: 1024
     context_size: 4096
-  download:
-    - url: "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
-      sha256: "81a09a0ddf89690372fc296ff7f625af21b8093b6a9bf6b5308b4d52a4b93dd2"
 
-- name: text-embedding-ada-002
-  backend: bert-embeddings
+# Direct model names for AIVO services
+- name: llama3.2:3b
+  backend: http
   parameters:
-    model: all-MiniLM-L6-v2
-  download:
-    - url: "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/pytorch_model.bin"
+    url: "http://ollama:11434/api/generate"
+    model: "llama3.2:3b"
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 1024
+    context_size: 4096
+
+- name: codellama:7b
+  backend: http
+  parameters:
+    url: "http://ollama:11434/api/generate"
+    model: "codellama:7b"
+    temperature: 0.5
+    top_p: 0.95
+    max_tokens: 2048
+    context_size: 8192
+
+- name: llava:7b
+  backend: http
+  parameters:
+    url: "http://ollama:11434/api/generate"
+    model: "llava:7b"
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 1024
+    context_size: 4096
+
+- name: tinyllama:1.1b
+  backend: http
+  parameters:
+    url: "http://ollama:11434/api/generate"
+    model: "tinyllama:1.1b"
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 512
+    context_size: 2048
+
+# Embeddings Model
+- name: text-embedding-ada-002
+  backend: http
+  parameters:
+    url: "http://ollama:11434/api/embeddings"
+    model: "nomic-embed-text"
+
+- name: nomic-embed-text
+  backend: http
+  parameters:
+    url: "http://ollama:11434/api/embeddings"
+    model: "nomic-embed-text"

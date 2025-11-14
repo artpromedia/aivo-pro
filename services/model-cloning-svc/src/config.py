@@ -37,7 +37,30 @@ class Settings(BaseSettings):
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     S3_BUCKET: str = os.getenv("S3_BUCKET", "aivo-models")
     
-    # Base model configuration
+    # AI Provider Selection
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "localai")
+    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "true").lower() == "true"
+    
+    # LocalAI Configuration
+    LOCALAI_BASE_URL: str = os.getenv("LOCALAI_BASE_URL", "http://localai:8080")
+    
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
+    
+    # AIVO Brain Connection
+    AIVO_BRAIN_URL: str = os.getenv("AIVO_BRAIN_URL", "http://aivo-brain:8014")
+    
+    # Model Configuration
+    CLONING_MODEL: str = os.getenv("CLONING_MODEL", "llama3.2:3b")
+    PERSONALIZATION_MODEL: str = os.getenv("PERSONALIZATION_MODEL", "codellama:7b")
+    
+    # MinIO Configuration (S3-compatible storage)
+    MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "http://minio:9000")
+    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+    S3_BUCKET: str = os.getenv("S3_BUCKET", "aivo-student-models")
+    
+    # Base model configuration (HuggingFace fallback)
     BASE_MODEL_PATH: str = os.getenv(
         "BASE_MODEL_PATH",
         "microsoft/phi-3-mini-4k-instruct"

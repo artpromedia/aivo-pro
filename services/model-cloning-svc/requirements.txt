@@ -22,6 +22,7 @@ protobuf==3.20.3
 
 # Model optimization
 optimum==1.14.1
+scipy==1.11.4
 
 # Storage
 boto3==1.34.0

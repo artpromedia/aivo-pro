@@ -16,7 +16,21 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/aivo_iep"
     REDIS_URL: str = "redis://localhost:6379/6"
     
-    # AI
+    # AI Provider Selection
+    AI_PROVIDER: str = "localai"  # Options: openai, anthropic, localai, ollama
+    USE_LOCAL_MODELS: bool = True
+    
+    # LocalAI Configuration
+    LOCALAI_BASE_URL: str = "http://localai:8080"
+    
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    
+    # Model Configuration
+    IEP_MODEL: str = "llama3.2:3b"
+    ANALYSIS_MODEL: str = "codellama:7b"
+    
+    # OpenAI (Fallback)
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4"
     ANTHROPIC_API_KEY: str = ""

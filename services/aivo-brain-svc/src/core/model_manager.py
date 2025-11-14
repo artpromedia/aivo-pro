@@ -88,9 +88,11 @@ class ModelManager:
         # Load with optimization based on level
         if self.optimization_level == "high" and torch.cuda.is_available():
             # Quantization for production
+            # Use float32 on CPU, float16 on CUDA
+            compute_dtype = torch.float32 if not torch.cuda.is_available() else torch.float16
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_compute_dtype=compute_dtype,
                 bnb_4bit_use_double_quant=True,
                 bnb_4bit_quant_type="nf4"
             )
@@ -102,11 +104,12 @@ class ModelManager:
                 low_cpu_mem_usage=True
             )
         elif self.optimization_level == "medium":
-            # Float16 for balanced performance
+            # Float16 for balanced performance (float32 on CPU)
+            dtype = torch.float32 if not torch.cuda.is_available() else torch.float16
             model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 device_map=self.device_map,
-                torch_dtype=torch.float16,
+                torch_dtype=dtype,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True
             )

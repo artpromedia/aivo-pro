@@ -25,11 +25,26 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str | None = None
     GOOGLE_PROJECT_ID: str | None = None
 
-    # OpenAI
+    # AI Provider Selection
+    AI_PROVIDER: str = "localai"  # Options: openai, anthropic, localai, ollama
+    USE_LOCAL_MODELS: bool = True
+    
+    # LocalAI Configuration
+    LOCALAI_BASE_URL: str = "http://localai:8080"
+    
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    
+    # Model Configuration
+    CHAT_MODEL: str = "llama3.2:3b"
+    MATH_MODEL: str = "codellama:7b"
+    VISION_MODEL: str = "llava:7b"
+    
+    # OpenAI (Fallback)
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str = "gpt-4"
 
-    # Anthropic
+    # Anthropic (Fallback)
     ANTHROPIC_API_KEY: str | None = None
 
     # OCR Settings
