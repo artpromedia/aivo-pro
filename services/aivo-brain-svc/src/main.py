@@ -29,6 +29,7 @@ from src.config import settings
 from src.core.cache_layer import CacheLayer
 from src.core.inference_engine import InferenceEngine
 from src.core.model_manager import ModelManager
+from src.core.cloud_model_manager import CloudModelManager
 from src.infrastructure.health_checker import HealthChecker
 from src.ml.curriculum_expert import CurriculumExpertSystem
 from src.monitoring.metrics import MetricsCollector
@@ -107,15 +108,29 @@ class AIVOBrainService:
             await self.cache_layer.initialize()
             print("✅ Cache layer initialized")
             
-            # Initialize model manager with fallback strategy
-            self.model_manager = ModelManager(
-                primary_model=settings.PRIMARY_MODEL,
-                fallback_models=settings.FALLBACK_MODELS,
-                device_map="auto",
-                optimization_level=settings.OPTIMIZATION_LEVEL
-            )
-            await self.model_manager.load_models()
-            print("✅ Model manager initialized")
+            # Initialize model manager based on AI provider
+            if settings.USE_LOCAL_MODELS:
+                # Local HuggingFace models
+                self.model_manager = ModelManager(
+                    primary_model=settings.PRIMARY_MODEL,
+                    fallback_models=settings.FALLBACK_MODELS,
+                    device_map="auto",
+                    optimization_level=settings.OPTIMIZATION_LEVEL
+                )
+                await self.model_manager.load_models()
+                print("✅ Local model manager initialized")
+            else:
+                # Cloud AI providers (OpenAI, Anthropic, Google)
+                self.model_manager = CloudModelManager(
+                    ai_provider=settings.AI_PROVIDER,
+                    primary_model=settings.PRIMARY_MODEL,
+                    fallback_models=settings.FALLBACK_MODELS,
+                    openai_api_key=settings.OPENAI_API_KEY,
+                    anthropic_api_key=settings.ANTHROPIC_API_KEY,
+                    google_api_key=settings.GOOGLE_API_KEY
+                )
+                await self.model_manager.load_models()
+                print(f"✅ Cloud model manager initialized ({settings.AI_PROVIDER})")
             
             # Initialize inference engine with batching
             self.inference_engine = InferenceEngine(

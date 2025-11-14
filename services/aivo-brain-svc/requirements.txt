@@ -20,6 +20,11 @@ peft==0.7.0
 sentencepiece==0.1.99
 protobuf==3.20.3
 
+# Cloud AI providers
+openai==1.58.1
+anthropic==0.43.2
+google-generativeai==0.8.3
+
 # Model optimization
 optimum==1.14.1
 onnx==1.15.0

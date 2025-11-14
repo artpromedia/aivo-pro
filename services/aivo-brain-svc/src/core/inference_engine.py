@@ -7,20 +7,16 @@ import asyncio
 import time
 from typing import Any, Dict, List, Optional
 
-import torch
-
-from src.core.model_manager import ModelManager
-
 
 class InferenceEngine:
     """
-    Production inference engine with dynamic batching
+    Production inference engine supporting both local and cloud models
     Implements Google's serving optimization patterns
     """
     
     def __init__(
         self,
-        model_manager: ModelManager,
+        model_manager,  # Can be ModelManager or CloudModelManager
         batch_size: int = 8,
         max_batch_delay_ms: int = 50
     ):
@@ -32,6 +28,9 @@ class InferenceEngine:
         self.pending_requests: List[Dict] = []
         self.batch_lock = asyncio.Lock()
         
+        # Check if using cloud models
+        self.is_cloud = hasattr(model_manager, 'ai_provider')
+        
     async def generate(
         self,
         prompt: str,
@@ -41,8 +40,41 @@ class InferenceEngine:
         streaming: bool = False
     ) -> Dict:
         """
-        Generate response with optional streaming
+        Generate response with support for both local and cloud models
         """
+        start_time = time.time()
+        
+        try:
+            # If using cloud models, delegate to cloud model manager
+            if self.is_cloud:
+                return await self.model_manager.generate(
+                    prompt=prompt,
+                    context=context,
+                    max_tokens=max_tokens,
+                    temperature=temperature
+                )
+            
+            # Otherwise use local HuggingFace model
+            return await self._generate_local(
+                prompt=prompt,
+                context=context,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            
+        except Exception as e:
+            raise Exception(f"Inference failed: {str(e)}")
+    
+    async def _generate_local(
+        self,
+        prompt: str,
+        context: Dict,
+        max_tokens: int,
+        temperature: float
+    ) -> Dict:
+        """Generate using local HuggingFace models"""
+        import torch
+        
         start_time = time.time()
         
         try:
@@ -117,7 +149,7 @@ class InferenceEngine:
                 tokens=0,
                 error=True
             )
-            raise Exception(f"Inference failed: {str(e)}")
+            raise Exception(f"Local inference failed: {str(e)}")
     
     def _build_prompt(self, prompt: str, context: Dict) -> str:
         """
