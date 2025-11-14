@@ -128,7 +128,8 @@ export const SubjectLearning: React.FC = () => {
 
     if (aiGeneratedTasks.length > 0) {
       console.log('Using AI generated tasks:', aiGeneratedTasks.length);
-      return aiGeneratedTasks;
+      // Type assertion since AITask is compatible with Task
+      return aiGeneratedTasks as unknown as Task[];
     }
 
     console.log('No tasks available yet');
