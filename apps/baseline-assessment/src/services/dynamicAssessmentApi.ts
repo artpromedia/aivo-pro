@@ -29,26 +29,87 @@ interface AssessmentResponse {
 class DynamicAssessmentAPI {
   private baseUrl: string;
   private aivoBaseUrl: string;
+  private usedQuestionIds: Set<string> = new Set();
+  private sessionId: string;
 
   constructor() {
     // Use local AI endpoints
     this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     this.aivoBaseUrl = import.meta.env.VITE_AIVO_BRAIN_URL || 'http://localhost:8001';
+    
+    // Generate unique session ID for this assessment
+    this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('🆔 New assessment session:', this.sessionId);
   }
 
   async generateQuestion(request: QuestionRequest): Promise<AssessmentResponse> {
+    console.log('🎯 Generating question for:', request, 'Session:', this.sessionId);
+    
+    // Try curriculum-content-svc first (our actual AI service)
     try {
-      // First try to use LocalAI directly for question generation
+      const curriculumUrl = import.meta.env.VITE_CURRICULUM_CONTENT_URL || 'http://localhost:8006';
+      const response = await fetch(`${curriculumUrl}/v1/content/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: request.subject,
+          grade_level: request.grade.toString(),
+          difficulty: (request.difficulty === 'easy' ? 0.3 : request.difficulty === 'hard' ? 0.8 : 0.5),
+          content_type: 'assessment',
+          count: 1,
+          session_id: this.sessionId, // Include session for uniqueness
+          previous_questions: Array.from(this.usedQuestionIds).slice(-10) // Last 10 questions to avoid
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.contents && data.contents.length > 0) {
+          const content = data.contents[0];
+          const questionData = content.content;
+          
+          console.log('✅ Generated AI question from curriculum-content-svc');
+          
+          // Generate unique options if not provided
+          const options = questionData.options || this.generateOptions(questionData.answer, request.subject);
+          
+          const questionId = `ai_curriculum_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          this.usedQuestionIds.add(questionId);
+          
+          return {
+            question: {
+              id: questionId,
+              subject: request.subject,
+              question: questionData.question || questionData.problem || 'Question generated',
+              options: options,
+              correctAnswer: questionData.answer,
+              difficulty: request.difficulty || 'medium',
+              gradeLevel: request.grade,
+              explanation: questionData.explanation || questionData.hint
+            }
+          };
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Curriculum-content-svc not available:', error);
+    }
+    
+    try {
+      // Fallback to LocalAI
       const localAIResponse = await fetch('http://localhost:8080/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'ibm-granite.granite-4.0-1b', // Use the loaded LocalAI model
+          model: 'ibm-granite.granite-4.0-1b',
           messages: [{
             role: 'system',
-            content: `You are an educational assessment expert. Create a ${request.difficulty || 'medium'} difficulty ${request.subject} question appropriate for grade ${request.grade}. 
+            content: `You are an educational assessment expert. Create a UNIQUE ${request.difficulty || 'medium'} difficulty ${request.subject} question appropriate for grade ${request.grade}. 
+IMPORTANT: Make each question different and creative. Session ID: ${this.sessionId}
+Avoid questions similar to IDs: ${Array.from(this.usedQuestionIds).slice(-5).join(', ')}
 
 Return your response in this exact JSON format:
 {
@@ -59,9 +120,9 @@ Return your response in this exact JSON format:
 }`
           }, {
             role: 'user', 
-            content: `Create a ${request.subject} question for grade ${request.grade} at ${request.difficulty} difficulty level.`
+            content: `Create a UNIQUE ${request.subject} question for grade ${request.grade} at ${request.difficulty} difficulty. Session: ${this.sessionId}, Timestamp: ${Date.now()}`
           }],
-          temperature: 0.7,
+          temperature: 0.9, // Higher temperature for more variety
           max_tokens: 500
         }),
       });
@@ -72,9 +133,14 @@ Return your response in this exact JSON format:
         if (content) {
           try {
             const questionData = JSON.parse(content);
+            console.log('✅ Generated AI question from LocalAI');
+            
+            const questionId = `ai_local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            this.usedQuestionIds.add(questionId);
+            
             return {
               question: {
-                id: `ai_${Date.now()}`,
+                id: questionId,
                 subject: request.subject,
                 question: questionData.question,
                 options: questionData.options,
@@ -476,6 +542,16 @@ Return your response in this exact JSON format:
     const gradeKey = grade.toString();
     const subjectQuestions = questionPools[subject as keyof typeof questionPools];
     
+    // Helper to shuffle array for randomness
+    const shuffleArray = <T,>(array: T[]): T[] => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
     // Enhanced fallback logic - try different grades and subjects if needed
     let selectedQuestion: any = null;
     let actualGrade = grade;
@@ -484,7 +560,21 @@ Return your response in this exact JSON format:
     if (subjectQuestions && subjectQuestions[gradeKey as keyof typeof subjectQuestions]) {
       const difficultyQuestions = subjectQuestions[gradeKey as keyof typeof subjectQuestions][difficulty];
       if (difficultyQuestions && difficultyQuestions.length > 0) {
-        selectedQuestion = difficultyQuestions[Math.floor(Math.random() * difficultyQuestions.length)];
+        // Shuffle before selecting to get different question each time
+        const shuffled = shuffleArray(difficultyQuestions);
+        // Try to find unused question
+        for (const q of shuffled) {
+          const potentialId = `mock_${actualSubject}_${gradeKey}_${difficulty}_${q.q.substring(0, 20)}`;
+          if (!this.usedQuestionIds.has(potentialId)) {
+            selectedQuestion = q;
+            this.usedQuestionIds.add(potentialId);
+            break;
+          }
+        }
+        // If all used, take first shuffled one
+        if (!selectedQuestion) {
+          selectedQuestion = shuffled[0];
+        }
       }
     }
     
@@ -496,7 +586,8 @@ Return your response in this exact JSON format:
         if (subjectQuestions && subjectQuestions[tryGradeKey as keyof typeof subjectQuestions]) {
           const difficultyQuestions = subjectQuestions[tryGradeKey as keyof typeof subjectQuestions][difficulty];
           if (difficultyQuestions && difficultyQuestions.length > 0) {
-            selectedQuestion = difficultyQuestions[Math.floor(Math.random() * difficultyQuestions.length)];
+            const shuffled = shuffleArray(difficultyQuestions);
+            selectedQuestion = shuffled[0];
             actualGrade = tryGrade;
             break;
           }
@@ -506,7 +597,7 @@ Return your response in this exact JSON format:
     
     // If still no question, try different subjects
     if (!selectedQuestion) {
-      const subjectsToTry = ['Math', 'Reading', 'Science', 'SEL', 'Speech Therapy'];
+      const subjectsToTry = shuffleArray(['Math', 'Reading', 'Science', 'SEL', 'Speech Therapy']);
       for (const trySubject of subjectsToTry) {
         const trySubjectQuestions = questionPools[trySubject as keyof typeof questionPools];
         if (trySubjectQuestions) {
@@ -519,7 +610,8 @@ Return your response in this exact JSON format:
                                         trySubjectQuestions[tryGradeKey as keyof typeof trySubjectQuestions]['medium'] ||
                                         trySubjectQuestions[tryGradeKey as keyof typeof trySubjectQuestions]['easy'];
               if (difficultyQuestions && difficultyQuestions.length > 0) {
-                selectedQuestion = difficultyQuestions[Math.floor(Math.random() * difficultyQuestions.length)];
+                const shuffled = shuffleArray(difficultyQuestions);
+                selectedQuestion = shuffled[0];
                 actualGrade = tryGrade;
                 actualSubject = trySubject;
                 break;
@@ -533,18 +625,29 @@ Return your response in this exact JSON format:
     
     // Final fallback with a proper educational question
     if (!selectedQuestion) {
+      // Generate a truly random fallback question with timestamp-based variation
+      const randomSeed = Date.now() % 100;
       selectedQuestion = {
-        q: 'What is 1 + 1?',
-        options: ['1', '2', '3', '4'],
-        correct: '2'
+        q: `What is ${randomSeed + 1} + ${randomSeed + 2}?`,
+        options: [
+          (randomSeed + 1 + randomSeed + 2).toString(),
+          (randomSeed + 1 + randomSeed + 2 + 1).toString(),
+          (randomSeed + 1 + randomSeed + 2 - 1).toString(),
+          (randomSeed + 1 + randomSeed + 2 + 2).toString()
+        ].sort(() => Math.random() - 0.5), // Shuffle options
+        correct: (randomSeed + 1 + randomSeed + 2).toString()
       };
       actualGrade = 1;
       actualSubject = 'Math';
     }
 
+    // Add randomization to question ID to ensure uniqueness
+    const uniqueId = `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.usedQuestionIds.add(uniqueId);
+    
     return {
       question: {
-        id: `mock_${Date.now()}`,
+        id: uniqueId,
         subject: actualSubject,
         question: selectedQuestion.q,
         options: selectedQuestion.options,
@@ -554,6 +657,30 @@ Return your response in this exact JSON format:
       },
       adjustedDifficulty: difficulty
     };
+  }
+
+  // Helper method to generate multiple choice options from an answer
+  private generateOptions(correctAnswer: string, subject: string): string[] {
+    const options = [correctAnswer];
+    const answerNum = parseFloat(correctAnswer);
+    
+    // If answer is numeric, generate nearby numbers
+    if (!isNaN(answerNum)) {
+      const offset1 = Math.floor(Math.random() * 5) + 1;
+      const offset2 = Math.floor(Math.random() * 5) + 1;
+      const offset3 = Math.floor(Math.random() * 5) + 1;
+      options.push((answerNum + offset1).toString());
+      options.push((answerNum - offset2).toString());
+      options.push((answerNum + offset3 + offset1).toString());
+    } else {
+      // For non-numeric answers, generate plausible alternatives
+      options.push(correctAnswer + ' (incorrect)');
+      options.push('None of the above');
+      options.push('All of the above');
+    }
+    
+    // Shuffle and return
+    return options.sort(() => Math.random() - 0.5);
   }
 
   async evaluateAnswer(questionId: string, answer: string, correctAnswer: string): Promise<{
