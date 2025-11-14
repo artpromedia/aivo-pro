@@ -25,23 +25,31 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://aivo-redis:6379/4"
 
     # AI Provider Selection
-    AI_PROVIDER: str = "localai"  # Options: openai, localai, ollama
-    USE_LOCAL_MODELS: bool = True
+    AI_PROVIDER: str = "openai"  # Options: openai, localai, ollama
+    USE_LOCAL_MODELS: bool = False
 
-    # LocalAI Configuration
+    # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = "http://localai:8080"
 
-    # Ollama Configuration
+    # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = "http://ollama:11434"
 
     # Model Configuration
-    CONTENT_MODEL: str = "llama3.2:3b"
-    MATH_MODEL: str = "codellama:7b"
-    SCIENCE_MODEL: str = "llama3.2:3b"
+    CONTENT_MODEL: str = "gpt-4o-mini"
+    MATH_MODEL: str = "gpt-4o"
+    SCIENCE_MODEL: str = "gpt-4o-mini"
 
-    # OpenAI (Fallback)
+    # OpenAI
     OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-4"
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    
+    # Anthropic (Alternative)
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
+    
+    # Google (Alternative)
+    GOOGLE_API_KEY: str = ""
+    GOOGLE_MODEL: str = "gemini-1.5-pro"
 
     # Curriculum Systems
     SUBJECTS: List[str] = [

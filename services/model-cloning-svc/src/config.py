@@ -38,21 +38,26 @@ class Settings(BaseSettings):
     S3_BUCKET: str = os.getenv("S3_BUCKET", "aivo-models")
     
     # AI Provider Selection
-    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "localai")
-    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "true").lower() == "true"
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "openai")
+    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "false").lower() == "true"
     
-    # LocalAI Configuration
+    # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = os.getenv("LOCALAI_BASE_URL", "http://localai:8080")
     
-    # Ollama Configuration
+    # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
     
     # AIVO Brain Connection
     AIVO_BRAIN_URL: str = os.getenv("AIVO_BRAIN_URL", "http://aivo-brain:8014")
     
     # Model Configuration
-    CLONING_MODEL: str = os.getenv("CLONING_MODEL", "llama3.2:3b")
-    PERSONALIZATION_MODEL: str = os.getenv("PERSONALIZATION_MODEL", "codellama:7b")
+    CLONING_MODEL: str = os.getenv("CLONING_MODEL", "gpt-4o")
+    PERSONALIZATION_MODEL: str = os.getenv("PERSONALIZATION_MODEL", "gpt-4o-mini")
+    
+    # Cloud AI API Keys
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     
     # MinIO Configuration (S3-compatible storage)
     MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "http://minio:9000")

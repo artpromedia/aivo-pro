@@ -106,20 +106,18 @@ services:
       - SERVICE_NAME=curriculum-content-svc
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_curriculum
       - REDIS_URL=redis://aivo-redis:6379/4
-      - AI_PROVIDER=localai
-      - LOCALAI_BASE_URL=http://localai:8080
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - CONTENT_MODEL=llama3.2:3b
-      - USE_LOCAL_MODELS=true
+      - AI_PROVIDER=openai
+      - USE_LOCAL_MODELS=false
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - CONTENT_MODEL=gpt-4o-mini
       - SUBJECTS=math,science,english,social_studies,languages,arts,pe,cs
       - ENABLE_US_COMMON_CORE=true
       - ENABLE_UK_NATIONAL=true
       - ENABLE_IB=true
       - ENABLE_CHINESE_NATIONAL=true
       - LOG_LEVEL=INFO
-    depends_on:
-      - localai
-      - ollama
     networks:
       - default
       - database_aivo-network
@@ -130,7 +128,7 @@ services:
       timeout: 10s
       retries: 3
 
-  # Homework Helper - Socratic tutoring with OCR (LocalAI-powered)
+  # Homework Helper - Socratic tutoring with OCR (Cloud AI-powered)
   homework-helper:
     build: ./services/homework-helper-svc
     ports:
@@ -139,13 +137,14 @@ services:
       - SERVICE_NAME=homework-helper-svc
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_homework
       - REDIS_URL=redis://aivo-redis:6379/5
-      - AI_PROVIDER=localai
-      - LOCALAI_BASE_URL=http://localai:8080
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - CHAT_MODEL=llama3.2:3b
-      - MATH_MODEL=codellama:7b
-      - VISION_MODEL=llava:7b
-      - USE_LOCAL_MODELS=true
+      - AI_PROVIDER=openai
+      - USE_LOCAL_MODELS=false
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - CHAT_MODEL=gpt-4o-mini
+      - MATH_MODEL=gpt-4o
+      - VISION_MODEL=gpt-4o
       - GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
       - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
       - TESSERACT_PATH=/usr/bin/tesseract
@@ -185,12 +184,13 @@ services:
       - SERVICE_NAME=iep-assistant-svc
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@aivo-postgres:5432/aivo_iep
       - REDIS_URL=redis://aivo-redis:6379/6
-      - AI_PROVIDER=localai
-      - LOCALAI_BASE_URL=http://localai:8080
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - IEP_MODEL=llama3.2:3b
-      - ANALYSIS_MODEL=codellama:7b
-      - USE_LOCAL_MODELS=true
+      - AI_PROVIDER=openai
+      - USE_LOCAL_MODELS=false
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - IEP_MODEL=gpt-4o
+      - ANALYSIS_MODEL=gpt-4o
       - ENABLE_SMART_VALIDATION=true
       - MIN_CONFIDENCE_SCORE=0.7
       - MAX_GOALS_PER_AREA=3
@@ -204,9 +204,6 @@ services:
       - MAX_GOAL_GENERATIONS_PER_HOUR=20
       - MAX_DATA_POINTS_PER_DAY=100
       - LOG_LEVEL=INFO
-    depends_on:
-      - localai
-      - ollama
     networks:
       - default
       - database_aivo-network
@@ -309,7 +306,7 @@ services:
   # ACTUAL AI SERVICES - NOT MOCKS!
   # ============================================================================
 
-  # AIVO Main Brain - Connected to LocalAI (CPU-friendly)
+  # AIVO Main Brain - Connected to Cloud AI (No memory constraints)
   aivo-brain:
     build: ./services/aivo-brain-svc
     ports:
@@ -317,36 +314,35 @@ services:
     environment:
       - SERVICE_NAME=aivo-brain-svc
       - PORT=8014
-      - AI_PROVIDER=localai
-      - LOCALAI_BASE_URL=http://localai:8080
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - PRIMARY_MODEL=llama3.2:3b
-      - FALLBACK_MODEL=tinyllama:1.1b
-      - EMBEDDING_MODEL=nomic-embed-text
-      - USE_LOCAL_MODELS=true
+      - AI_PROVIDER=openai
+      - USE_LOCAL_MODELS=false
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - PRIMARY_MODEL=gpt-4o-mini
+      - FALLBACK_MODEL=gpt-3.5-turbo
+      - EMBEDDING_MODEL=text-embedding-3-small
       - REDIS_HOST=aivo-redis
       - REDIS_PORT=6379
       - REDIS_DB=4
       - LOG_LEVEL=INFO
-    depends_on:
-      - localai
-      - ollama
     restart: unless-stopped
 
-  # Model Cloning Service - Creates personalized AI for each student (LocalAI-powered)
+  # Model Cloning Service - Creates personalized AI for each student (Cloud AI-powered)
   model-cloning:
     build: ./services/model-cloning-svc
     ports:
       - "8002:8002"
     environment:
       - SERVICE_NAME=model-cloning-svc
-      - AI_PROVIDER=localai
+      - AI_PROVIDER=openai
+      - USE_LOCAL_MODELS=false
       - AIVO_BRAIN_URL=http://aivo-brain:8014
-      - LOCALAI_BASE_URL=http://localai:8080
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - CLONING_MODEL=llama3.2:3b
-      - PERSONALIZATION_MODEL=codellama:7b
-      - USE_LOCAL_MODELS=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - CLONING_MODEL=gpt-4o
+      - PERSONALIZATION_MODEL=gpt-4o-mini
       - REDIS_URL=redis://aivo-redis:6379/5
       - S3_BUCKET=aivo-student-models
       - MINIO_ENDPOINT=http://minio:9000
@@ -356,8 +352,6 @@ services:
     depends_on:
       - aivo-brain
       - minio
-      - localai
-      - ollama
     restart: unless-stopped
 
   # ============================================================================

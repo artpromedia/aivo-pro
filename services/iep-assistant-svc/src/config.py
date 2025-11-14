@@ -17,23 +17,30 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/6"
     
     # AI Provider Selection
-    AI_PROVIDER: str = "localai"  # Options: openai, anthropic, localai, ollama
-    USE_LOCAL_MODELS: bool = True
+    AI_PROVIDER: str = "openai"  # Options: openai, anthropic, localai, ollama
+    USE_LOCAL_MODELS: bool = False
     
-    # LocalAI Configuration
+    # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = "http://localai:8080"
     
-    # Ollama Configuration
+    # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = "http://ollama:11434"
     
     # Model Configuration
-    IEP_MODEL: str = "llama3.2:3b"
-    ANALYSIS_MODEL: str = "codellama:7b"
+    IEP_MODEL: str = "gpt-4o"
+    ANALYSIS_MODEL: str = "gpt-4o"
     
-    # OpenAI (Fallback)
+    # OpenAI
     OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-4"
+    OPENAI_MODEL: str = "gpt-4o"
+    
+    # Anthropic (Alternative)
     ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
+    
+    # Google (Alternative)
+    GOOGLE_API_KEY: str = ""
+    GOOGLE_MODEL: str = "gemini-1.5-pro"
     
     # SMART Goals
     ENABLE_SMART_VALIDATION: bool = True

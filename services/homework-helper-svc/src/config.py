@@ -26,26 +26,31 @@ class Settings(BaseSettings):
     GOOGLE_PROJECT_ID: str | None = None
 
     # AI Provider Selection
-    AI_PROVIDER: str = "localai"  # Options: openai, anthropic, localai, ollama
-    USE_LOCAL_MODELS: bool = True
+    AI_PROVIDER: str = "openai"  # Options: openai, anthropic, localai, ollama
+    USE_LOCAL_MODELS: bool = False
     
-    # LocalAI Configuration
+    # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = "http://localai:8080"
     
-    # Ollama Configuration
+    # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = "http://ollama:11434"
     
     # Model Configuration
-    CHAT_MODEL: str = "llama3.2:3b"
-    MATH_MODEL: str = "codellama:7b"
-    VISION_MODEL: str = "llava:7b"
+    CHAT_MODEL: str = "gpt-4o-mini"
+    MATH_MODEL: str = "gpt-4o"
+    VISION_MODEL: str = "gpt-4o"
     
-    # OpenAI (Fallback)
+    # OpenAI
     OPENAI_API_KEY: str | None = None
-    OPENAI_MODEL: str = "gpt-4"
+    OPENAI_MODEL: str = "gpt-4o-mini"
 
-    # Anthropic (Fallback)
+    # Anthropic (Alternative)
     ANTHROPIC_API_KEY: str | None = None
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
+    
+    # Google (Alternative)
+    GOOGLE_API_KEY: str | None = None
+    GOOGLE_MODEL: str = "gemini-1.5-pro"
 
     # OCR Settings
     TESSERACT_PATH: str = "/usr/bin/tesseract"

@@ -40,24 +40,29 @@ class Settings(BaseSettings):
     CACHE_MAX_SIZE: int = 10000
     
     # AI Provider Selection
-    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "localai")
-    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "true").lower() == "true"
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "openai")
+    USE_LOCAL_MODELS: bool = os.getenv("USE_LOCAL_MODELS", "false").lower() == "true"
     
-    # LocalAI Configuration
+    # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = os.getenv("LOCALAI_BASE_URL", "http://localai:8080")
     
-    # Ollama Configuration
+    # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
     
     # Model configuration
-    PRIMARY_MODEL: str = os.getenv("PRIMARY_MODEL", "llama3.2:3b")
-    FALLBACK_MODEL: str = os.getenv("FALLBACK_MODEL", "tinyllama:1.1b")
-    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+    PRIMARY_MODEL: str = os.getenv("PRIMARY_MODEL", "gpt-4o-mini")
+    FALLBACK_MODEL: str = os.getenv("FALLBACK_MODEL", "gpt-3.5-turbo")
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     FALLBACK_MODELS: List[str] = [
-        "llama3.2:3b",
-        "tinyllama:1.1b"
+        "gpt-4o-mini",
+        "gpt-3.5-turbo"
     ]
     OPTIMIZATION_LEVEL: str = os.getenv("OPTIMIZATION_LEVEL", "medium")  # low, medium, high
+    
+    # Cloud AI API Keys
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     
     # Inference configuration
     BATCH_SIZE: int = int(os.getenv("BATCH_SIZE", "8"))
