@@ -362,6 +362,113 @@ Return your response in this exact JSON format:
             { q: 'What type of energy does a moving car have?', options: ['Potential energy', 'Kinetic energy', 'Chemical energy', 'Electrical energy'], correct: 'Kinetic energy' }
           ]
         }
+      },
+      'SEL': {
+        'K': {
+          easy: [
+            { q: 'How do you feel when someone shares with you?', options: ['Sad', 'Happy', 'Angry', 'Scared'], correct: 'Happy' },
+            { q: 'What should you say when someone helps you?', options: ['Nothing', 'Thank you', 'Go away', 'Stop'], correct: 'Thank you' }
+          ],
+          medium: [
+            { q: 'What should you do when you feel angry?', options: ['Hit someone', 'Take deep breaths', 'Scream', 'Run away'], correct: 'Take deep breaths' },
+            { q: 'How can you be a good friend?', options: ['Take toys away', 'Share and be kind', 'Ignore them', 'Be mean'], correct: 'Share and be kind' }
+          ],
+          hard: [
+            { q: 'What is empathy?', options: ['Being mean', 'Understanding how others feel', 'Being selfish', 'Not caring'], correct: 'Understanding how others feel' }
+          ]
+        },
+        '1': {
+          easy: [
+            { q: 'What is a good way to solve a problem with a friend?', options: ['Fight', 'Talk about it', 'Ignore it', 'Tell lies'], correct: 'Talk about it' },
+            { q: 'Which feeling word describes being scared?', options: ['Happy', 'Excited', 'Afraid', 'Proud'], correct: 'Afraid' }
+          ],
+          medium: [
+            { q: 'What should you do if you see someone being bullied?', options: ['Join in', 'Tell a trusted adult', 'Laugh', 'Walk away'], correct: 'Tell a trusted adult' },
+            { q: 'How can you show respect to others?', options: ['Interrupt them', 'Listen when they speak', 'Ignore them', 'Be rude'], correct: 'Listen when they speak' }
+          ],
+          hard: [
+            { q: 'What is self-control?', options: ['Doing whatever you want', 'Managing your actions and feelings', 'Being bossy', 'Never having fun'], correct: 'Managing your actions and feelings' }
+          ]
+        },
+        '2': {
+          easy: [
+            { q: 'What does it mean to be responsible?', options: ['Blame others', 'Do what you should do', 'Make excuses', 'Give up easily'], correct: 'Do what you should do' },
+            { q: 'How do you show kindness?', options: ['Help others', 'Take things', 'Be mean', 'Ignore people'], correct: 'Help others' }
+          ],
+          medium: [
+            { q: 'What should you do when you make a mistake?', options: ['Blame others', 'Learn from it and try again', 'Give up', 'Get angry'], correct: 'Learn from it and try again' },
+            { q: 'What is cooperation?', options: ['Working together', 'Working alone always', 'Competing unfairly', 'Not helping'], correct: 'Working together' }
+          ],
+          hard: [
+            { q: 'Why is it important to understand different perspectives?', options: ['It\'s not important', 'It helps you understand others better', 'To prove you\'re right', 'To win arguments'], correct: 'It helps you understand others better' }
+          ]
+        },
+        '3': {
+          easy: [
+            { q: 'What is a growth mindset?', options: ['Believing you can\'t improve', 'Believing you can learn and grow', 'Giving up easily', 'Never trying new things'], correct: 'Believing you can learn and grow' }
+          ],
+          medium: [
+            { q: 'How can you be a good leader?', options: ['Boss people around', 'Listen to others and help the team', 'Take all the credit', 'Do everything yourself'], correct: 'Listen to others and help the team' },
+            { q: 'What does resilience mean?', options: ['Giving up quickly', 'Bouncing back from challenges', 'Never facing problems', 'Always being perfect'], correct: 'Bouncing back from challenges' }
+          ],
+          hard: [
+            { q: 'How can you manage stress in a healthy way?', options: ['Bottle it up', 'Talk to someone, exercise, or do activities you enjoy', 'Blame others', 'Ignore it completely'], correct: 'Talk to someone, exercise, or do activities you enjoy' }
+          ]
+        }
+      },
+      'Speech Therapy': {
+        'K': {
+          easy: [
+            { q: 'Which word starts with the /b/ sound?', options: ['Cat', 'Dog', 'Ball', 'Fish'], correct: 'Ball' },
+            { q: 'How many syllables in "cat"?', options: ['1', '2', '3', '4'], correct: '1' }
+          ],
+          medium: [
+            { q: 'Which word rhymes with "cat"?', options: ['Dog', 'Hat', 'Run', 'Jump'], correct: 'Hat' },
+            { q: 'What sound does the letter S make?', options: ['/s/', '/z/', '/sh/', '/ch/'], correct: '/s/' }
+          ],
+          hard: [
+            { q: 'Which word has 3 sounds? (phonemes)', options: ['Cat', 'Ship', 'The', 'I'], correct: 'Cat' }
+          ]
+        },
+        '1': {
+          easy: [
+            { q: 'How many syllables in "banana"?', options: ['2', '3', '4', '5'], correct: '3' },
+            { q: 'Which word starts with /sh/?', options: ['Cat', 'Shoe', 'Tree', 'Ball'], correct: 'Shoe' }
+          ],
+          medium: [
+            { q: 'What is the beginning sound in "fish"?', options: ['/f/', '/s/', '/sh/', '/h/'], correct: '/f/' },
+            { q: 'Which two words rhyme?', options: ['Tree and See', 'Dog and Cat', 'Run and Walk', 'Big and Small'], correct: 'Tree and See' }
+          ],
+          hard: [
+            { q: 'What happens when you blend /c/ /a/ /t/?', options: ['Car', 'Cat', 'Cow', 'Cut'], correct: 'Cat' }
+          ]
+        },
+        '2': {
+          easy: [
+            { q: 'Which word has a long "a" sound?', options: ['Cat', 'Cake', 'Can', 'Cap'], correct: 'Cake' },
+            { q: 'How do you make "run" past tense?', options: ['Run', 'Runned', 'Ran', 'Running'], correct: 'Ran' }
+          ],
+          medium: [
+            { q: 'Which word has a silent letter?', options: ['Dog', 'Knee', 'Cat', 'Run'], correct: 'Knee' },
+            { q: 'What is a synonym for "happy"?', options: ['Sad', 'Joyful', 'Angry', 'Tired'], correct: 'Joyful' }
+          ],
+          hard: [
+            { q: 'Which sentence is grammatically correct?', options: ['She go to school', 'She goes to school', 'She going to school', 'She goed to school'], correct: 'She goes to school' }
+          ]
+        },
+        '3': {
+          easy: [
+            { q: 'Which word has a prefix?', options: ['Happy', 'Unhappy', 'Happiness', 'Happily'], correct: 'Unhappy' },
+            { q: 'What is an antonym for "hot"?', options: ['Warm', 'Cold', 'Cool', 'Freezing'], correct: 'Cold' }
+          ],
+          medium: [
+            { q: 'Which word has a suffix that means "one who"?', options: ['Teacher', 'Teaching', 'Teach', 'Taught'], correct: 'Teacher' },
+            { q: 'What is the root word in "unhappily"?', options: ['Happy', 'Unhappy', 'Happily', 'Un'], correct: 'Happy' }
+          ],
+          hard: [
+            { q: 'Which sentence uses proper subject-verb agreement?', options: ['The dogs runs fast', 'The dog run fast', 'The dogs run fast', 'The dog running fast'], correct: 'The dogs run fast' }
+          ]
+        }
       }
     };
 
@@ -399,7 +506,7 @@ Return your response in this exact JSON format:
     
     // If still no question, try different subjects
     if (!selectedQuestion) {
-      const subjectsToTry = ['Math', 'Reading', 'Science'];
+      const subjectsToTry = ['Math', 'Reading', 'Science', 'SEL', 'Speech Therapy'];
       for (const trySubject of subjectsToTry) {
         const trySubjectQuestions = questionPools[trySubject as keyof typeof questionPools];
         if (trySubjectQuestions) {
@@ -467,7 +574,7 @@ Return your response in this exact JSON format:
 
   async getAdaptiveSequence(grade: number, previousAnswers: any[]): Promise<string[]> {
     // Determine next subjects based on performance
-    const subjects = ['Math', 'Reading', 'Science'];
+    const subjects = ['Math', 'Reading', 'Science', 'SEL', 'Speech Therapy'];
     
     if (previousAnswers.length === 0) {
       return subjects; // Start with all subjects

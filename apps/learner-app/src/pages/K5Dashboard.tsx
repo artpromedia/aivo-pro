@@ -56,15 +56,20 @@ export const K5Dashboard: React.FC<K5DashboardProps> = ({ childProfile }) => {
     });
   };
 
-  const subjects = [
+  // Get actual grade from baseline results or profile
+  const actualGrade = childProfile.baselineResults?.mathLevel 
+    ? `Grade ${Math.max(1, Math.min(12, childProfile.baselineResults.mathLevel))}`
+    : childProfile.grade;
+
+  const baseSubjects = [
     { 
       id: 'math', 
       name: 'Math Adventures', 
       icon: '🔢', 
       bgGradient: 'from-blue-400 to-blue-600',
-      progress: 75,
-      level: 'Level 3',
-      stars: 3,
+      progress: childProfile.baselineResults?.mathLevel ? (childProfile.baselineResults.mathLevel * 10) : 75,
+      level: `Level ${childProfile.baselineResults?.mathLevel || 3}`,
+      stars: Math.min(3, Math.ceil((childProfile.baselineResults?.mathLevel || 3) / 3)),
       description: 'Numbers and counting fun!'
     },
     { 
@@ -72,9 +77,9 @@ export const K5Dashboard: React.FC<K5DashboardProps> = ({ childProfile }) => {
       name: 'Story Time', 
       icon: '📚', 
       bgGradient: 'from-emerald-400 to-emerald-600',
-      progress: 60,
-      level: 'Level 2',
-      stars: 2,
+      progress: childProfile.baselineResults?.readingLevel ? (childProfile.baselineResults.readingLevel * 10) : 60,
+      level: `Level ${childProfile.baselineResults?.readingLevel || 2}`,
+      stars: Math.min(3, Math.ceil((childProfile.baselineResults?.readingLevel || 2) / 3)),
       description: 'Magical reading adventures!'
     },
     { 
@@ -92,12 +97,55 @@ export const K5Dashboard: React.FC<K5DashboardProps> = ({ childProfile }) => {
       name: 'Science Fun', 
       icon: '🔬', 
       bgGradient: 'from-orange-400 to-orange-600',
-      progress: 80,
-      level: 'Level 4',
-      stars: 3,
+      progress: childProfile.baselineResults?.scienceLevel ? (childProfile.baselineResults.scienceLevel * 10) : 80,
+      level: `Level ${childProfile.baselineResults?.scienceLevel || 4}`,
+      stars: Math.min(3, Math.ceil((childProfile.baselineResults?.scienceLevel || 4) / 3)),
       description: 'Discover amazing things!'
     },
   ];
+
+  // Add SEL and Speech Therapy if needed based on baseline results
+  const needsSEL = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['focus', 'emotional', 'social', 'behavior', 'self-regulation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const needsSpeech = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['speech', 'language', 'communication', 'articulation', 'pronunciation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const additionalSubjects = [];
+  
+  if (needsSEL) {
+    additionalSubjects.push({
+      id: 'sel',
+      name: 'Feelings & Friends',
+      icon: '💖',
+      bgGradient: 'from-pink-400 to-rose-600',
+      progress: 50,
+      level: 'Level 1',
+      stars: 1,
+      description: 'Understanding emotions!'
+    });
+  }
+
+  if (needsSpeech) {
+    additionalSubjects.push({
+      id: 'speech',
+      name: 'Talk & Learn',
+      icon: '🗣️',
+      bgGradient: 'from-cyan-400 to-blue-600',
+      progress: 45,
+      level: 'Level 1',
+      stars: 1,
+      description: 'Practice speaking clearly!'
+    });
+  }
+
+  const subjects = [...baseSubjects, ...additionalSubjects];
 
   const achievements = [
     { emoji: '🦄', name: 'Unicorn Reader', unlocked: true },

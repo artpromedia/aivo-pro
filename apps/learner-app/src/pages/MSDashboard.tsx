@@ -53,14 +53,19 @@ export const MSDashboard: React.FC<MSDashboardProps> = ({ childProfile }) => {
   const [showGameBreak, setShowGameBreak] = useState(false);
   const [showTestCenter, setShowTestCenter] = useState(false);
 
-  const subjects = [
+  // Get actual grade from baseline results or profile
+  const actualGrade = childProfile.baselineResults?.mathLevel 
+    ? `Grade ${Math.max(1, Math.min(12, childProfile.baselineResults.mathLevel))}`
+    : childProfile.grade;
+
+  const baseSubjects = [
     { 
       id: 'math', 
       name: 'Algebra & Geometry', 
       icon: Calculator, 
       bgGradient: 'from-blue-500 to-blue-700',
-      progress: 78,
-      level: 'Grade 7',
+      progress: childProfile.baselineResults?.mathLevel ? (childProfile.baselineResults.mathLevel * 10) : 78,
+      level: actualGrade,
       nextTopic: 'Quadratic Equations',
       timeSpent: '2h 15m this week'
     },
@@ -69,8 +74,8 @@ export const MSDashboard: React.FC<MSDashboardProps> = ({ childProfile }) => {
       name: 'Physical Science', 
       icon: Beaker, 
       bgGradient: 'from-emerald-500 to-emerald-700',
-      progress: 65,
-      level: 'Grade 8', 
+      progress: childProfile.baselineResults?.scienceLevel ? (childProfile.baselineResults.scienceLevel * 10) : 65,
+      level: actualGrade, 
       nextTopic: 'Chemical Reactions',
       timeSpent: '1h 45m this week'
     },
@@ -79,8 +84,8 @@ export const MSDashboard: React.FC<MSDashboardProps> = ({ childProfile }) => {
       name: 'Language Arts', 
       icon: BookOpen, 
       bgGradient: 'from-purple-500 to-purple-700',
-      progress: 82,
-      level: 'Grade 7',
+      progress: childProfile.baselineResults?.readingLevel ? (childProfile.baselineResults.readingLevel * 10) : 82,
+      level: actualGrade,
       nextTopic: 'Creative Writing',
       timeSpent: '3h 20m this week'
     },
@@ -90,11 +95,54 @@ export const MSDashboard: React.FC<MSDashboardProps> = ({ childProfile }) => {
       icon: Globe, 
       bgGradient: 'from-orange-500 to-orange-700',
       progress: 71,
-      level: 'Grade 8',
+      level: actualGrade,
       nextTopic: 'Ancient Civilizations',
       timeSpent: '1h 30m this week'
     },
   ];
+
+  // Add SEL and Speech Therapy if needed based on baseline results
+  const needsSEL = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['focus', 'emotional', 'social', 'behavior', 'self-regulation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const needsSpeech = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['speech', 'language', 'communication', 'articulation', 'pronunciation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const additionalSubjects = [];
+  
+  if (needsSEL) {
+    additionalSubjects.push({
+      id: 'sel',
+      name: 'Social-Emotional Learning',
+      icon: Users,
+      bgGradient: 'from-pink-500 to-rose-700',
+      progress: 50,
+      level: actualGrade,
+      nextTopic: 'Managing Emotions',
+      timeSpent: '1h this week'
+    });
+  }
+
+  if (needsSpeech) {
+    additionalSubjects.push({
+      id: 'speech',
+      name: 'Speech Therapy',
+      icon: PenTool,
+      bgGradient: 'from-cyan-500 to-blue-700',
+      progress: 45,
+      level: actualGrade,
+      nextTopic: 'Articulation Practice',
+      timeSpent: '45m this week'
+    });
+  }
+
+  const subjects = [...baseSubjects, ...additionalSubjects];
 
   const achievements = [
     { name: 'Problem Solver', icon: Target, unlocked: true, description: 'Solved 50 math problems' },
@@ -127,7 +175,7 @@ export const MSDashboard: React.FC<MSDashboardProps> = ({ childProfile }) => {
           className="grid md:grid-cols-4 gap-6 mb-10"
         >
           {[
-            { label: 'Current Level', value: 'Grade 7-8', icon: TrendingUp, color: 'from-blue-500 to-blue-600' },
+            { label: 'Current Level', value: actualGrade, icon: TrendingUp, color: 'from-blue-500 to-blue-600' },
             { label: 'Weekly Goal', value: '8h / 10h', icon: Target, color: 'from-green-500 to-green-600' },
             { label: 'Streak', value: '12 days', icon: Award, color: 'from-purple-500 to-purple-600' },
             { label: 'Study Friends', value: '23 online', icon: Users, color: 'from-orange-500 to-orange-600' },

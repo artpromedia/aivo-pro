@@ -72,8 +72,16 @@ function AppRouter() {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
   const { isOnline } = useNetworkStatus();
 
-  // Auto-determine theme based on age
-  const getThemeFromAge = (age: number): AgeGroup => {
+  // Auto-determine theme based on age and learning level
+  const getThemeFromAge = (age: number, learningLevel?: number): AgeGroup => {
+    // If we have baseline results with learning level, use that to determine dashboard
+    if (learningLevel) {
+      if (learningLevel >= 1 && learningLevel <= 5) return 'K5';  // Grades K-5
+      if (learningLevel >= 6 && learningLevel <= 8) return 'MS';  // Grades 6-8
+      if (learningLevel >= 9 && learningLevel <= 12) return 'HS'; // Grades 9-12
+    }
+    
+    // Fallback to age-based determination
     if (age >= 5 && age <= 10) return 'K5';
     if (age >= 11 && age <= 14) return 'MS';
     if (age >= 15 && age <= 18) return 'HS';
@@ -83,7 +91,10 @@ function AppRouter() {
   // Update theme when child profile changes
   useEffect(() => {
     if (childProfile) {
-      const newTheme = getThemeFromAge(childProfile.age);
+      const learningLevel = childProfile.baselineResults?.mathLevel || 
+                          childProfile.baselineResults?.readingLevel || 
+                          childProfile.baselineResults?.scienceLevel;
+      const newTheme = getThemeFromAge(childProfile.age, learningLevel);
       setCurrentTheme(newTheme);
     }
   }, [childProfile]);

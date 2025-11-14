@@ -20,7 +20,8 @@ import {
   Gamepad2,
   FileText,
   X,
-  Sparkles
+  Sparkles,
+  MessageCircle
 } from 'lucide-react';
 import { FocusMonitor } from '../components/FocusMonitor';
 import { HomeworkHelper } from '../pages/HomeworkHelper';
@@ -59,13 +60,18 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [comingSoonFeature, setComingSoonFeature] = useState<{title: string; description: string; features: string[]} | null>(null);
 
-  const subjects = [
+  // Get actual grade from baseline results or profile
+  const actualGrade = childProfile.baselineResults?.mathLevel 
+    ? `Grade ${Math.max(1, Math.min(12, childProfile.baselineResults.mathLevel))}`
+    : childProfile.grade;
+
+  const baseSubjects = [
     { 
       id: 'calculus', 
       name: 'AP Calculus', 
       icon: Calculator, 
       bgGradient: 'from-slate-600 to-slate-800',
-      progress: 85,
+      progress: childProfile.baselineResults?.mathLevel ? (childProfile.baselineResults.mathLevel * 10) : 85,
       grade: 'A-',
       nextAssignment: 'Derivatives Quiz',
       dueDate: '2 days',
@@ -76,7 +82,7 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
       name: 'AP Chemistry', 
       icon: Beaker, 
       bgGradient: 'from-emerald-600 to-emerald-800',
-      progress: 78,
+      progress: childProfile.baselineResults?.scienceLevel ? (childProfile.baselineResults.scienceLevel * 10) : 78,
       grade: 'B+', 
       nextAssignment: 'Organic Compounds Lab',
       dueDate: '5 days',
@@ -87,7 +93,7 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
       name: 'AP Literature', 
       icon: BookOpen, 
       bgGradient: 'from-indigo-600 to-indigo-800',
-      progress: 92,
+      progress: childProfile.baselineResults?.readingLevel ? (childProfile.baselineResults.readingLevel * 10) : 92,
       grade: 'A',
       nextAssignment: 'Poetry Analysis Essay',
       dueDate: '1 week',
@@ -105,6 +111,51 @@ export const HSDashboard: React.FC<HSDashboardProps> = ({ childProfile }) => {
       difficulty: 'Intermediate'
     },
   ];
+
+  // Add SEL and Speech Therapy if needed based on baseline results
+  const needsSEL = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['focus', 'emotional', 'social', 'behavior', 'self-regulation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const needsSpeech = childProfile.baselineResults?.needsImprovement?.some(need => 
+    ['speech', 'language', 'communication', 'articulation', 'pronunciation'].some(keyword => 
+      need.toLowerCase().includes(keyword)
+    )
+  );
+
+  const additionalSubjects = [];
+  
+  if (needsSEL) {
+    additionalSubjects.push({
+      id: 'sel',
+      name: 'Social-Emotional Learning',
+      icon: Users,
+      bgGradient: 'from-pink-600 to-rose-800',
+      progress: 50,
+      grade: 'In Progress',
+      nextAssignment: 'Stress Management',
+      dueDate: '1 week',
+      difficulty: 'Intermediate'
+    });
+  }
+
+  if (needsSpeech) {
+    additionalSubjects.push({
+      id: 'speech',
+      name: 'Communication Skills',
+      icon: MessageCircle,
+      bgGradient: 'from-cyan-600 to-blue-800',
+      progress: 45,
+      grade: 'In Progress',
+      nextAssignment: 'Public Speaking',
+      dueDate: '5 days',
+      difficulty: 'Intermediate'
+    });
+  }
+
+  const subjects = [...baseSubjects, ...additionalSubjects];
 
   const upcomingDeadlines = [
     { subject: 'Calculus', task: 'Derivatives Quiz', date: '2024-11-06', urgent: true },
