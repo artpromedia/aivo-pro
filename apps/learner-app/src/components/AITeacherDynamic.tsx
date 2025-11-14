@@ -68,23 +68,74 @@ export const AITeacherDynamic: React.FC<AITeacherProps> = ({ subject, topic, onL
   useEffect(() => {
     const loadLesson = async () => {
       setIsLoadingLesson(true);
+      console.log('🎓 Starting lesson generation for:', { subject, topic, theme });
+      
       try {
         const generatedLesson = await generateLesson(subject, topic);
+        console.log('📚 Generated lesson:', generatedLesson);
+        
         if (generatedLesson && generatedLesson.length > 0) {
+          console.log('✅ Using AI-generated lesson with', generatedLesson.length, 'steps');
           setLessons(generatedLesson);
         } else {
-          // Fallback to minimal lesson
-          setLessons([{
-            id: 'fallback-1',
-            type: 'introduction',
-            title: `Welcome to ${topic}!`,
-            content: `Let's learn about ${topic} together! This is an exciting topic in ${subject}.`,
-            duration: 15,
-          }]);
+          console.warn('⚠️ No AI lesson generated, using enhanced fallback');
+          // Enhanced fallback lesson with more content
+          setLessons([
+            {
+              id: 'fallback-intro',
+              type: 'introduction',
+              title: `Welcome to ${topic}!`,
+              content: theme === 'K5' 
+                ? `Hi there! 👋 I'm so excited to explore ${topic} with you today! This is going to be fun!\n\n${subject} is all about discovering amazing things. Let's learn together!`
+                : `Welcome! Today we're diving into ${topic}, a fascinating area of ${subject}.\n\nWe'll explore key concepts, see examples, and practice together. Let's get started!`,
+              duration: 15,
+            },
+            {
+              id: 'fallback-concept',
+              type: 'concept',
+              title: `Understanding ${topic}`,
+              content: theme === 'K5'
+                ? `${topic} is really cool! 🌟\n\nLet me explain it in a simple way:\n\nThink of ${topic} like... (imagine something fun!)\n\nIt helps us learn and understand ${subject} better!`
+                : `Let's break down ${topic} into its key components:\n\n1. Core Concept: The fundamental idea\n2. Why It Matters: Real-world applications\n3. How It Works: The mechanism behind it\n\nUnderstanding these will help you master this topic.`,
+              duration: 20,
+            },
+            {
+              id: 'fallback-example',
+              type: 'example',
+              title: `${topic} in Action`,
+              content: theme === 'K5'
+                ? `Let me show you an example! 💡\n\nImagine you're using ${topic} to solve a problem...\n\nSee? That's how it works! Pretty neat, right?`
+                : `Here's a practical example of ${topic}:\n\nScenario: [Real-world situation]\nApplication: [How the concept applies]\nOutcome: [Result achieved]\n\nThis demonstrates the power of understanding ${topic}.`,
+              duration: 25,
+            },
+            {
+              id: 'fallback-interactive',
+              type: 'interactive',
+              title: 'Try It Yourself!',
+              content: theme === 'K5'
+                ? `Now it's YOUR turn! 🎯\n\nCan you think of a time when you might use ${topic}?\n\nType your answer below!`
+                : `Time to apply what you've learned!\n\nQuestion: How would you use ${topic} to solve a problem?\n\nShare your thoughts:`,
+              duration: 30,
+              interactive: {
+                type: 'type',
+                instruction: theme === 'K5' ? 'Type your answer here!' : 'Enter your response:',
+                answer: 'any',
+              },
+            },
+            {
+              id: 'fallback-summary',
+              type: 'summary',
+              title: 'Great Work!',
+              content: theme === 'K5'
+                ? `You did amazing! 🎉\n\nToday we learned about ${topic}!\n\nRemember:\n✅ It's an important part of ${subject}\n✅ You can use it to solve problems\n✅ Practice makes perfect!\n\nI'm so proud of you!`
+                : `Excellent work! Let's review what we covered:\n\n✅ Core concepts of ${topic}\n✅ Real-world applications\n✅ Practical examples\n✅ Hands-on practice\n\nYou're now ready to practice with exercises!`,
+              duration: 15,
+            },
+          ]);
         }
       } catch (error) {
-        console.error('Failed to load AI lesson:', error);
-        // Set fallback lesson
+        console.error('❌ Failed to load AI lesson:', error);
+        // Simple error fallback
         setLessons([{
           id: 'error-1',
           type: 'introduction',
@@ -98,7 +149,7 @@ export const AITeacherDynamic: React.FC<AITeacherProps> = ({ subject, topic, onL
     };
 
     loadLesson();
-  }, [subject, topic, generateLesson]);
+  }, [subject, topic, theme, generateLesson]);
 
   const currentLesson = lessons[currentStep];
 

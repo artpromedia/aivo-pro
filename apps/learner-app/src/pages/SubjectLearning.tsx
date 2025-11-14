@@ -26,7 +26,7 @@ import { HintSystem } from '../components/HintSystem';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { RewardAnimation } from '../components/RewardAnimation';
 import { WritingPad } from '../components/WritingPad';
-import { AITeacher } from '../components/AITeacher';
+import { AITeacherDynamic } from '../components/AITeacherDynamic';
 import { useAdaptiveLearning } from '../hooks/useAdaptiveLearning';
 import { useAITaskGeneration, Task as AITask } from '../hooks/useAITaskGeneration';
 
@@ -348,7 +348,7 @@ export const SubjectLearning: React.FC = () => {
   // Show AI Teacher lesson first
   if (mode === 'lesson') {
     return (
-      <AITeacher
+      <AITeacherDynamic
         subject={subject}
         topic={currentTopic}
         theme={theme}
