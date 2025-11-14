@@ -28,7 +28,7 @@ import { RewardAnimation } from '../components/RewardAnimation';
 import { WritingPad } from '../components/WritingPad';
 import { AITeacher } from '../components/AITeacher';
 import { useAdaptiveLearning } from '../hooks/useAdaptiveLearning';
-import { useTaskGeneration, GeneratedTask } from '../hooks/useTaskGeneration';
+import { useAITaskGeneration, Task as AITask } from '../hooks/useAITaskGeneration';
 
 type Subject = 'math' | 'reading' | 'writing' | 'science';
 
@@ -75,6 +75,7 @@ export const SubjectLearning: React.FC = () => {
   const [showWritingPad, setShowWritingPad] = useState(false);
   const [startTime, setStartTime] = useState(() => Date.now());
   const [mode, setMode] = useState<'lesson' | 'practice'>('lesson');
+  const [aiGeneratedTasks, setAiGeneratedTasks] = useState<AITask[]>([]);
   const [currentTopic, setCurrentTopic] = useState<string>(() => {
     // Generate topic based on subject
     const topics = {
@@ -88,7 +89,7 @@ export const SubjectLearning: React.FC = () => {
   });
 
   const adaptiveLearning = useAdaptiveLearning();
-  const { generateTasks } = useTaskGeneration();
+  const { generateTasks, assessResponse, isGenerating: isTaskGenerating } = useAITaskGeneration();
 
   const { data: session, isLoading, error } = useQuery<LearningSession | undefined>({
     queryKey: ['learning-session', subject],
@@ -118,26 +119,37 @@ export const SubjectLearning: React.FC = () => {
   });
 
   const tasks: Task[] = useMemo(() => {
-    console.log('Generating tasks - session:', session, 'subject:', subject);
+    console.log('Checking tasks - session:', session, 'AI generated:', aiGeneratedTasks.length);
     
     if (session?.tasks?.length) {
       console.log('Using session tasks:', session.tasks.length);
       return session.tasks;
     }
 
-    console.log('Generating fallback tasks for subject:', subject);
-    const generated = generateTasks({
-      subject: subject as Subject,
-      difficulty: adaptiveLearning.state.lastDifficulty === 'hard' ? 4 : 2,
-    }, 5) as GeneratedTask[];
+    if (aiGeneratedTasks.length > 0) {
+      console.log('Using AI generated tasks:', aiGeneratedTasks.length);
+      return aiGeneratedTasks;
+    }
 
-    console.log('Generated tasks:', generated);
-    
-    return generated.map((task) => ({
-      ...task,
-      id: `${task.subject}-${task.id}`,
-    }));
-  }, [adaptiveLearning.state.lastDifficulty, generateTasks, session, subject]);
+    console.log('No tasks available yet');
+    return [];
+  }, [session, aiGeneratedTasks]);
+
+  // Generate AI tasks when no session tasks available
+  useEffect(() => {
+    const loadAITasks = async () => {
+      if (!session && aiGeneratedTasks.length === 0 && !isTaskGenerating) {
+        console.log('Generating AI tasks for:', subject);
+        const generated = await generateTasks({
+          subject: subject as Subject,
+          difficulty: adaptiveLearning.state.lastDifficulty === 'hard' ? 4 : 2,
+          count: 5,
+        });
+        setAiGeneratedTasks(generated);
+      }
+    };
+    loadAITasks();
+  }, [subject, session, aiGeneratedTasks.length, isTaskGenerating, generateTasks, adaptiveLearning.state.lastDifficulty]);
 
   const submitAnswer = useMutation({
     mutationFn: async (payload: {
@@ -146,10 +158,47 @@ export const SubjectLearning: React.FC = () => {
       hintsUsed: number;
       timeSpent: number;
     }) => {
+      const currentTask = tasks[currentTaskIndex];
+      
       if (!session?.id) {
+        // Use AI assessment for offline mode
+        if (currentTask && assessResponse) {
+          try {
+            const aiAssessment = await assessResponse(
+              String(payload.answer),
+              {
+                id: currentTask.id,
+                subject: currentTask.subject,
+                skill: currentTask.skillTags[0] || 'general',
+                gradeLevel: '5',
+                difficulty: currentTask.difficulty / 5,
+                question: currentTask.content.question,
+                answer: currentTask.correctAnswer,
+                hint: currentTask.content.hint,
+                explanation: currentTask.explanation,
+              }
+            );
+
+            if (aiAssessment) {
+              return {
+                correct: aiAssessment.correct,
+                points: Math.round(aiAssessment.score / 10),
+                feedback: aiAssessment.feedback,
+                nextDifficulty: aiAssessment.nextDifficulty,
+              };
+            }
+          } catch (error) {
+            console.error('AI assessment failed:', error);
+          }
+        }
+
+        // Fallback to simple comparison
+        const isCorrect = payload.answer === currentTask?.correctAnswer;
         return {
-          correct: payload.answer === tasks[currentTaskIndex]?.correctAnswer,
-          points: payload.answer === tasks[currentTaskIndex]?.correctAnswer ? 10 : 0,
+          correct: isCorrect,
+          points: isCorrect ? 10 : 0,
+          feedback: isCorrect ? 'Great job!' : 'Not quite right. Try again!',
+          nextDifficulty: currentTask?.difficulty / 5 || 0.5,
         };
       }
 
@@ -160,7 +209,7 @@ export const SubjectLearning: React.FC = () => {
       });
       return response.json();
     },
-    onSuccess: (data: { correct: boolean; points: number }) => {
+    onSuccess: (data: { correct: boolean; points: number; feedback?: string; nextDifficulty?: number }) => {
       setIsCorrect(data.correct);
       setShowFeedback(true);
 
@@ -177,6 +226,19 @@ export const SubjectLearning: React.FC = () => {
             origin: { y: 0.6 },
             colors: ['#FF7B5C', '#A855F7', '#10B981'],
           });
+        }
+
+        // Regenerate tasks with new difficulty if AI provided it
+        if (data.nextDifficulty !== undefined && data.nextDifficulty !== (tasks[currentTaskIndex]?.difficulty / 5)) {
+          setTimeout(async () => {
+            const newTasks = await generateTasks({
+              subject: subject as Subject,
+              difficulty: Math.round(data.nextDifficulty! * 5),
+              count: 5,
+            });
+            setAiGeneratedTasks(newTasks);
+            console.log('Adapted difficulty to:', data.nextDifficulty);
+          }, 1000);
         }
       } else {
         setStreak(0);

@@ -10,6 +10,7 @@ import type { ErrorInfo } from 'react';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ProfileMenu } from './components/ProfileMenu';
+import { ModelCloningManager } from './services/ModelCloningManager';
 import { en, es, fr, zh, ar } from './locales';
 
 // Lazy load pages for code splitting
@@ -220,6 +221,23 @@ function AppRouter() {
           
           setChildProfile(profile);
           localStorage.setItem('aivoChildProfile', JSON.stringify(profile));
+
+          // Initialize model cloning if baseline is complete
+          if (profile.baselineResults && import.meta.env.VITE_ENABLE_MODEL_CLONING === 'true') {
+            setLoadingMessage('Creating your personalized AI teacher...');
+            try {
+              await ModelCloningManager.initializeForStudent({
+                ...profile,
+                grade: parseInt(profile.grade) || profile.age - 5, // Convert grade string to number
+              }, (status) => {
+                setLoadingMessage(`Personalizing AI: ${status.progress}%`);
+              });
+              console.log('Model cloning initialized for student:', profile.id);
+            } catch (error) {
+              console.error('Model cloning failed, continuing without:', error);
+              // Continue even if cloning fails - app will use regular AI
+            }
+          }
         } else {
           // Try to load existing profile from localStorage
           const savedProfile = localStorage.getItem('aivoChildProfile');

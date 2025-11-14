@@ -7,3 +7,4 @@ export * from './components/Avatar';
 export * from './components/Alert';
 export * from './utils/cn';
 export * from './utils/accessibility';
+export * from './services/AIBrainService';
