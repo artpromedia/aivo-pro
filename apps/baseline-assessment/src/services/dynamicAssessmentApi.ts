@@ -45,89 +45,61 @@ class DynamicAssessmentAPI {
   async generateQuestion(request: QuestionRequest): Promise<AssessmentResponse> {
     console.log('🎯 Generating question for:', request, 'Session:', this.sessionId);
     
-    // Try curriculum-content-svc first (our actual AI service)
+    // Try AIVO Main Brain FIRST - it's trained specifically for educational assessment
     try {
-      const curriculumUrl = import.meta.env.VITE_CURRICULUM_CONTENT_URL || 'http://localhost:8006';
+      console.log('🧠 Requesting question from AIVO Main Brain (trained education model)...');
       
-      // Enhanced prompt for better assessment questions
-      const assessmentPrompt = `Create a ${request.difficulty || 'medium'} difficulty ${request.subject} assessment question for grade ${request.grade}.
-
-REQUIREMENTS:
-- The question must be clear, specific, and age-appropriate
-- Include exactly 4 multiple choice options
-- Only ONE option should be correct
-- Wrong options should be plausible but clearly incorrect
-- For SEL/Speech Therapy: Use realistic scenarios
-- For Math: Show the problem clearly
-- For Reading/ELA: Provide context if needed
-- For Science: Use grade-appropriate concepts
-
-Format as multiple choice with clear options.`;
-
-      const response = await fetch(`${curriculumUrl}/v1/content/generate`, {
+      const response = await fetch(`${this.aivoBaseUrl}/generate-assessment-question`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          grade_level: request.grade,
           subject: request.subject,
-          grade_level: request.grade.toString(),
-          difficulty: (request.difficulty === 'easy' ? 0.3 : request.difficulty === 'hard' ? 0.8 : 0.5),
-          content_type: 'assessment',
-          prompt: assessmentPrompt,
-          count: 1,
+          previous_performance: request.previousAnswers || [],
+          difficulty_preference: request.difficulty || 'medium',
+          adaptive: true,
           session_id: this.sessionId,
-          previous_questions: Array.from(this.usedQuestionIds).slice(-10),
-          format: 'multiple_choice'
+          previous_question_ids: Array.from(this.usedQuestionIds).slice(-10)
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('📦 Curriculum-content-svc response:', JSON.stringify(data, null, 2));
+        console.log('🧠 AIVO Brain response:', JSON.stringify(data, null, 2));
         
-        if (data.contents && data.contents.length > 0) {
-          const content = data.contents[0];
-          const questionData = content.content;
+        // Validate AIVO Brain response quality
+        if (data.question && data.question.length > 15 && 
+            !data.question.includes('Sample') &&
+            (data.options || data.choices) && 
+            (data.options?.length >= 4 || data.choices?.length >= 4)) {
           
-          console.log('📝 Question data:', questionData);
+          console.log('✅ Generated quality question from AIVO Main Brain');
           
-          // Validate we have proper question data
-          if (!questionData.question || questionData.question.includes('Sample') || 
-              questionData.question.includes('content') || questionData.question.length < 10) {
-            console.warn('⚠️ Poor quality question from curriculum-content-svc, trying LocalAI');
-            throw new Error('Invalid question format');
-          }
-          
-          // Validate options
-          let options = questionData.options;
-          if (!options || options.length < 4 || 
-              options.some((opt: string) => opt === 'answer' || opt.includes('(incorrect)') || opt === 'All of the above' || opt === 'None of the above')) {
-            console.warn('⚠️ Poor quality options, regenerating...');
-            throw new Error('Invalid options');
-          }
-          
-          console.log('✅ Generated quality AI question from curriculum-content-svc');
-          
-          const questionId = `ai_curriculum_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          const questionId = `aivo_brain_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           this.usedQuestionIds.add(questionId);
           
           return {
             question: {
               id: questionId,
-              subject: request.subject,
-              question: questionData.question,
-              options: options,
-              correctAnswer: questionData.answer || options[0],
-              difficulty: request.difficulty || 'medium',
+              subject: data.subject || request.subject,
+              question: data.question,
+              options: data.options || data.choices,
+              correctAnswer: data.correct_answer,
+              difficulty: data.difficulty || request.difficulty || 'medium',
               gradeLevel: request.grade,
-              explanation: questionData.explanation || questionData.hint
-            }
+              explanation: data.explanation
+            },
+            nextSubject: data.next_subject,
+            adjustedDifficulty: data.adjusted_difficulty
           };
+        } else {
+          console.warn('⚠️ AIVO Brain returned incomplete data, trying LocalAI');
         }
       }
     } catch (error) {
-      console.warn('⚠️ Curriculum-content-svc failed, trying LocalAI:', error);
+      console.warn('⚠️ AIVO Main Brain not available, trying LocalAI:', error);
     }
     
     try {
@@ -236,52 +208,16 @@ Return ONLY valid JSON in this exact format:
               }
             };
           } catch (parseError) {
-            console.warn('⚠️ Failed to parse LocalAI response, using mock:', parseError);
+            console.warn('⚠️ Failed to parse LocalAI response, falling back to mock questions:', parseError);
           }
         }
       }
     } catch (error) {
-      console.warn('LocalAI not available, trying AIVO Brain:', error);
+      console.warn('⚠️ LocalAI not available, falling back to enhanced mock questions:', error);
     }
 
-    try {
-      // Fallback to AIVO Brain service
-      const response = await fetch(`${this.aivoBaseUrl}/generate-assessment-question`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          grade_level: request.grade,
-          subject: request.subject,
-          previous_performance: request.previousAnswers || [],
-          difficulty_preference: request.difficulty || 'medium',
-          adaptive: true
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          question: {
-            id: `ai_${Date.now()}`,
-            subject: data.subject || request.subject,
-            question: data.question,
-            options: data.options || data.choices,
-            correctAnswer: data.correct_answer,
-            difficulty: data.difficulty || request.difficulty || 'medium',
-            gradeLevel: request.grade,
-            explanation: data.explanation
-          },
-          nextSubject: data.next_subject,
-          adjustedDifficulty: data.adjusted_difficulty
-        };
-      }
-    } catch (error) {
-      console.warn('AIVO Brain not available, falling back to enhanced mock questions:', error);
-    }
-
-    // Fallback to enhanced mock questions based on grade and performance
+    // Final fallback: High-quality curated mock questions (500+ questions)
+    console.log('📚 Using enhanced mock questions as final fallback');
     return this.generateMockQuestion(request);
   }
 
