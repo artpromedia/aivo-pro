@@ -33,10 +33,10 @@ app = FastAPI(
 async def startup_event():
     """Start automated training scheduler on service startup"""
     logger.info("Starting Training & Alignment Service...")
-    
+
     # Start the automated training scheduler
     start_scheduler()
-    
+
     logger.info("✓ Training & Alignment Service started successfully")
     logger.info("✓ AIVO Main Brain will be trained daily at 2:00 AM")
     logger.info("✓ Drift monitoring active (every 6 hours)")
@@ -47,9 +47,9 @@ async def startup_event():
 async def shutdown_event():
     """Stop scheduler gracefully on service shutdown"""
     logger.info("Shutting down Training & Alignment Service...")
-    
+
     stop_scheduler()
-    
+
     logger.info("✓ Training & Alignment Service stopped")
 
 # CORS middleware
@@ -206,23 +206,23 @@ async def health_check():
 async def validate_model_alignment(request: AlignmentRequest):
     """
     Validate model outputs for responsible AI compliance
-    
+
     This endpoint checks model outputs against governance rules to ensure
     they meet responsible AI standards for educational content.
     """
     try:
         governor = ResponsibleAIGovernor()
-        
+
         # Validate against specified or all rules
         rules_to_check = request.rules or list(GovernanceRule)
-        
+
         validation_results = await governor.validate_model_output(
             model_id=request.model_id,
             output=request.output,
             context=request.context,
             rules=rules_to_check
         )
-        
+
         # Log violations if any
         if not validation_results["compliant"]:
             logger.warning(
@@ -230,7 +230,7 @@ async def validate_model_alignment(request: AlignmentRequest):
                 f"{validation_results['violations']}"
             )
             await governor.log_compliance_violation(validation_results)
-        
+
         return AlignmentResponse(
             compliant=validation_results["compliant"],
             model_id=request.model_id,
@@ -239,7 +239,7 @@ async def validate_model_alignment(request: AlignmentRequest):
             recommendations=validation_results["recommendations"],
             timestamp=datetime.utcnow()
         )
-    
+
     except Exception as e:
         logger.error(f"Alignment validation failed: {str(e)}")
         raise HTTPException(
@@ -252,19 +252,19 @@ async def validate_model_alignment(request: AlignmentRequest):
 async def check_bias(request: BiasCheckRequest):
     """
     Detect and measure bias in model outputs
-    
+
     Analyzes model outputs for various forms of bias including gender,
     racial, disability, and socioeconomic bias.
     """
     try:
         detector = BiasDetector()
-        
+
         bias_analysis = await detector.analyze_bias(
             model_id=request.model_id,
             output=request.output,
             context=request.context
         )
-        
+
         metrics = BiasMetrics(
             gender_bias=bias_analysis["metrics"]["gender_bias"],
             racial_bias=bias_analysis["metrics"]["racial_bias"],
@@ -272,14 +272,14 @@ async def check_bias(request: BiasCheckRequest):
             socioeconomic_bias=bias_analysis["metrics"]["socioeconomic_bias"],
             overall_bias_score=bias_analysis["overall_score"]
         )
-        
+
         return BiasCheckResponse(
             bias_detected=bias_analysis["bias_detected"],
             metrics=metrics,
             threshold=settings.BIAS_THRESHOLD,
             mitigation_strategy=bias_analysis.get("mitigation_strategy")
         )
-    
+
     except Exception as e:
         logger.error(f"Bias check failed: {str(e)}")
         raise HTTPException(
@@ -295,41 +295,41 @@ async def mitigate_bias(
 ):
     """
     Apply bias mitigation strategies to a model
-    
+
     Triggers bias mitigation procedures for a specific model based on
     detected bias patterns.
     """
     try:
         detector = BiasDetector()
-        
+
         # First check for bias
         bias_analysis = await detector.analyze_bias(
             request.model_id,
             request.output,
             request.context
         )
-        
+
         if not bias_analysis["bias_detected"]:
             return {
                 "status": "no_action_needed",
                 "message": "No significant bias detected",
                 "bias_score": bias_analysis["overall_score"]
             }
-        
+
         # Schedule mitigation in background
         background_tasks.add_task(
             detector.apply_mitigation,
             request.model_id,
             bias_analysis["mitigation_strategy"]
         )
-        
+
         return {
             "status": "mitigation_scheduled",
             "model_id": request.model_id,
             "strategy": bias_analysis["mitigation_strategy"],
             "estimated_completion": datetime.utcnow() + timedelta(hours=2)
         }
-    
+
     except Exception as e:
         logger.error(f"Bias mitigation failed: {str(e)}")
         raise HTTPException(
@@ -345,13 +345,13 @@ async def schedule_training(
 ):
     """
     Schedule model retraining
-    
+
     Initiates a retraining job for a specific model with optional
     custom hyperparameters and data sources.
     """
     try:
         pipeline = ContinuousTrainingPipeline()
-        
+
         # Create training job
         job = await pipeline.schedule_retraining(
             model_id=request.model_id,
@@ -360,14 +360,14 @@ async def schedule_training(
             data_sources=request.data_sources,
             hyperparameters=request.hyperparameters
         )
-        
+
         # Start training in background for low/normal priority
         if request.priority in ["low", "normal"]:
             background_tasks.add_task(
                 pipeline.execute_training_job,
                 job["job_id"]
             )
-        
+
         return TrainingResponse(
             job_id=job["job_id"],
             model_id=request.model_id,
@@ -375,7 +375,7 @@ async def schedule_training(
             estimated_completion=job["estimated_completion"],
             priority=request.priority
         )
-    
+
     except Exception as e:
         logger.error(f"Training scheduling failed: {str(e)}")
         raise HTTPException(
@@ -388,22 +388,22 @@ async def schedule_training(
 async def auto_schedule_training(background_tasks: BackgroundTasks):
     """
     Automatically schedule training for models that need it
-    
+
     Checks all models for drift and schedules retraining as needed.
     """
     try:
         pipeline = ContinuousTrainingPipeline()
         drift_monitor = ModelDriftMonitor()
-        
+
         # Get all model IDs
         model_ids = await pipeline.get_all_model_ids()
-        
+
         scheduled_count = 0
-        
+
         for model_id in model_ids:
             # Check for drift
             drift_score = await drift_monitor.evaluate_drift(model_id)
-            
+
             if drift_score > settings.DRIFT_THRESHOLD:
                 # Schedule retraining
                 background_tasks.add_task(
@@ -417,14 +417,14 @@ async def auto_schedule_training(background_tasks: BackgroundTasks):
                     f"Scheduled retraining for {model_id} "
                     f"due to drift score {drift_score:.3f}"
                 )
-        
+
         return {
             "status": "scheduled",
             "models_checked": len(model_ids),
             "models_scheduled": scheduled_count,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error(f"Auto-scheduling failed: {str(e)}")
         raise HTTPException(
@@ -437,18 +437,18 @@ async def auto_schedule_training(background_tasks: BackgroundTasks):
 async def check_model_drift(request: DriftCheckRequest):
     """
     Check for model performance drift
-    
+
     Evaluates whether a model's performance has degraded over time
     and recommends retraining if necessary.
     """
     try:
         monitor = ModelDriftMonitor()
-        
+
         drift_analysis = await monitor.check_drift(
             model_id=request.model_id,
             evaluation_window_days=request.evaluation_window_days
         )
-        
+
         return DriftResponse(
             model_id=request.model_id,
             drift_score=drift_analysis["drift_score"],
@@ -458,7 +458,7 @@ async def check_model_drift(request: DriftCheckRequest):
             recommendation=drift_analysis["recommendation"],
             last_training_date=drift_analysis["last_training_date"]
         )
-    
+
     except Exception as e:
         logger.error(f"Drift check failed: {str(e)}")
         raise HTTPException(
@@ -471,15 +471,15 @@ async def check_model_drift(request: DriftCheckRequest):
 async def generate_governance_report():
     """
     Generate comprehensive responsible AI governance report
-    
+
     Provides metrics on compliance, bias, alignment checks, and
     overall model governance.
     """
     try:
         governor = ResponsibleAIGovernor()
-        
+
         report_data = await governor.generate_governance_report()
-        
+
         return GovernanceReport(
             compliance_score=report_data["compliance_score"],
             bias_metrics=BiasMetrics(**report_data["bias_metrics"]),
@@ -490,7 +490,7 @@ async def generate_governance_report():
             last_audit=report_data["last_audit"],
             recommendations=report_data["recommendations"]
         )
-    
+
     except Exception as e:
         logger.error(f"Report generation failed: {str(e)}")
         raise HTTPException(
@@ -503,7 +503,7 @@ async def generate_governance_report():
 async def get_model_status(model_id: str):
     """
     Get comprehensive status for a specific model
-    
+
     Returns governance compliance, bias metrics, drift status, and
     training history for a model.
     """
@@ -511,12 +511,12 @@ async def get_model_status(model_id: str):
         governor = ResponsibleAIGovernor()
         drift_monitor = ModelDriftMonitor()
         pipeline = ContinuousTrainingPipeline()
-        
+
         # Get all status information
         compliance = await governor.get_model_compliance(model_id)
         drift = await drift_monitor.get_drift_status(model_id)
         training_history = await pipeline.get_training_history(model_id)
-        
+
         return {
             "model_id": model_id,
             "compliance": compliance,
@@ -524,7 +524,7 @@ async def get_model_status(model_id: str):
             "training_history": training_history,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error(f"Status retrieval failed: {str(e)}")
         raise HTTPException(
@@ -537,19 +537,19 @@ async def get_model_status(model_id: str):
 async def get_scheduler_status():
     """
     Get status of the automated training scheduler
-    
+
     Returns information about scheduled jobs, currently training models,
     and training history.
     """
     try:
         scheduler = get_scheduler()
         status = scheduler.get_scheduler_status()
-        
+
         return {
             "scheduler": status,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error(f"Scheduler status retrieval failed: {str(e)}")
         raise HTTPException(
@@ -566,26 +566,26 @@ async def manually_trigger_training(
 ):
     """
     Manually trigger training for a specific model
-    
+
     Useful for testing or emergency retraining outside the
     automated schedule.
     """
     try:
         scheduler = get_scheduler()
-        
+
         result = await scheduler.manual_trigger_training(
             model_id=model_id,
             reason=reason,
             priority=priority
         )
-        
+
         return {
             "status": "triggered",
             "model_id": model_id,
             "result": result,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error(f"Manual training trigger failed: {str(e)}")
         raise HTTPException(
@@ -598,24 +598,24 @@ async def manually_trigger_training(
 async def trigger_main_brain_training():
     """
     Immediately trigger AIVO Main Brain training
-    
+
     This bypasses the schedule and trains the main AIVO Brain
     model immediately.
     """
     try:
         scheduler = get_scheduler()
-        
+
         logger.info("Manual trigger: AIVO Main Brain training")
-        
+
         result = await scheduler.train_aivo_main_brain()
-        
+
         return {
             "status": "completed",
             "model_id": "aivo-main-brain-v1",
             "result": result,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error(f"Main brain training failed: {str(e)}")
         raise HTTPException(

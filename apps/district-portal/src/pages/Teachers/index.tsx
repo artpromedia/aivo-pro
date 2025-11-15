@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from '../../hooks/useDebounce';
+import { fetchTeacherAnalytics } from '../../services/districtApi';
 import {
   Users,
   Search,
@@ -17,11 +20,11 @@ import {
   Save,
   Building2,
   GraduationCap,
-  CheckCircle
+  CheckCircle,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDebounce } from '../../hooks/useDebounce';
 
 // Mock teacher data
 const mockTeachersData = [
@@ -116,10 +119,11 @@ export const Teachers: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('all');
   const [selectedSubject, setSelectedSubject] = useState('all');
-  const [selectedTeacher, setSelectedTeacher] = useState<typeof mockTeachersData[0] | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState<typeof mockTeachersData[0] | null>(null);
+  const [editingTeacher, setEditingTeacher] = useState<any>(null);
+  const districtId = 'SD-12345'; // In production, get from auth context
 
   const queryClient = useQueryClient();
 
@@ -137,6 +141,13 @@ export const Teachers: React.FC = () => {
   });
 
   const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Fetch teachers data
+  const { data: teachersData, isLoading: isLoadingData, error } = useQuery({
+    queryKey: ['teachers-data', districtId],
+    queryFn: () => fetchTeacherAnalytics(districtId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // Mutations
   const addTeacherMutation = useMutation({
@@ -242,11 +253,11 @@ export const Teachers: React.FC = () => {
   };
 
   const { data: teachers, isLoading } = useQuery({
-    queryKey: ['teachers', debouncedSearch, selectedSchool, selectedSubject],
+    queryKey: ['teachers', debouncedSearch, selectedSchool, selectedSubject, teachersData],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      if (!teachersData) return [];
       
-      return mockTeachersData.filter(teacher => {
+      return teachersData.filter((teacher: any) => {
         const matchesSearch = teacher.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                             teacher.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                             teacher.school.toLowerCase().includes(debouncedSearch.toLowerCase());
@@ -255,8 +266,32 @@ export const Teachers: React.FC = () => {
         
         return matchesSearch && matchesSchool && matchesSubject;
       });
-    }
+    },
+    enabled: !!teachersData,
   });
+
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-coral-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading teachers data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !teachersData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-900 font-semibold mb-2">Failed to load teachers data</p>
+          <p className="text-gray-600">Using demo data</p>
+        </div>
+      </div>
+    );
+  }
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('');

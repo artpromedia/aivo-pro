@@ -1,9 +1,9 @@
-import { openDB, type IDBPDatabase, type IDBPTransaction } from 'idb';
+import { openDB, type IDBPDatabase } from 'idb';
 
 interface StateDB {
   state: {
     key: string;
-    value: any;
+    value: unknown;
   };
 }
 

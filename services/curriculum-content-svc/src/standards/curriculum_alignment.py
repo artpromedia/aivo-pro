@@ -15,28 +15,28 @@ class CurriculumSystem(str, Enum):
     US_COMMON_CORE = "us_common_core"
     US_NGSS = "us_ngss"  # Next Generation Science Standards
     US_STATE_STANDARDS = "us_state_standards"
-    
+
     # UK/Europe
     UK_NATIONAL = "uk_national_curriculum"
     GCSE = "gcse"
     A_LEVEL = "a_level"
     EUROPEAN_BACC = "european_baccalaureate"
-    
+
     # International
     IB_PYP = "ib_pyp"  # Primary Years
     IB_MYP = "ib_myp"  # Middle Years
     IB_DP = "ib_dp"  # Diploma
     CAMBRIDGE = "cambridge_international"
-    
+
     # Asia
     CHINA_NATIONAL = "china_national"
     GAOKAO = "gaokao_prep"
     SINGAPORE = "singapore_syllabus"
-    
+
     # Africa
     CAPS = "south_africa_caps"
     WAEC = "west_africa_examination"
-    
+
     # Middle East
     GCC_STANDARDS = "gcc_standards"
 
@@ -59,10 +59,10 @@ class CurriculumAlignmentEngine:
     Align content to various curriculum standards
     Supporting 15+ international educational systems
     """
-    
+
     def __init__(self):
         self.standards_database = self._initialize_standards()
-    
+
     def _initialize_standards(self) -> Dict[CurriculumSystem, Dict]:
         """Initialize standards for all systems"""
         return {
@@ -127,7 +127,7 @@ class CurriculumAlignmentEngine:
                     ]
                 }
             },
-            
+
             # NGSS (Science)
             CurriculumSystem.US_NGSS: {
                 "science": {
@@ -157,7 +157,7 @@ class CurriculumAlignmentEngine:
                     ]
                 }
             },
-            
+
             # UK National Curriculum
             CurriculumSystem.UK_NATIONAL: {
                 "mathematics": {
@@ -179,7 +179,7 @@ class CurriculumAlignmentEngine:
                     ]
                 }
             },
-            
+
             # IB Diploma Programme
             CurriculumSystem.IB_DP: {
                 "mathematics": {
@@ -203,7 +203,7 @@ class CurriculumAlignmentEngine:
                     ]
                 }
             },
-            
+
             # Chinese National Curriculum
             CurriculumSystem.CHINA_NATIONAL: {
                 "mathematics": {
@@ -225,7 +225,7 @@ class CurriculumAlignmentEngine:
                     ]
                 }
             },
-            
+
             # South African CAPS
             CurriculumSystem.CAPS: {
                 "mathematics": {
@@ -250,7 +250,7 @@ class CurriculumAlignmentEngine:
                 }
             }
         }
-    
+
     def align_content_to_standards(
         self,
         content: Dict[str, Any],
@@ -259,16 +259,16 @@ class CurriculumAlignmentEngine:
         grade_level: str
     ) -> Dict[str, Any]:
         """Align content to specific curriculum standards"""
-        
+
         # Get relevant standards
         standards = self._get_standards(curriculum_system, subject, grade_level)
-        
+
         # Map content to standards
         aligned_standards = []
         for standard in standards:
             if self._content_matches_standard(content, standard):
                 aligned_standards.append(standard)
-        
+
         # Add alignment metadata
         return {
             "content": content,
@@ -276,11 +276,11 @@ class CurriculumAlignmentEngine:
             "aligned_standards": aligned_standards,
             "coverage": self._calculate_coverage(aligned_standards, standards),
             "recommendations": self._get_recommendations(
-                aligned_standards, 
+                aligned_standards,
                 standards
             )
         }
-    
+
     def _get_standards(
         self,
         curriculum_system: CurriculumSystem,
@@ -291,9 +291,9 @@ class CurriculumAlignmentEngine:
         system_standards = self.standards_database.get(curriculum_system, {})
         subject_standards = system_standards.get(subject, {})
         grade_standards = subject_standards.get(grade_level, [])
-        
+
         return grade_standards
-    
+
     def _content_matches_standard(
         self,
         content: Dict,
@@ -303,17 +303,17 @@ class CurriculumAlignmentEngine:
         # Simple keyword matching (would be more sophisticated in practice)
         content_text = str(content).lower()
         standard_text = (
-            standard.get("name", "") + " " + 
+            standard.get("name", "") + " " +
             standard.get("description", "")
         ).lower()
-        
+
         # Check for keyword overlap
         content_words = set(content_text.split())
         standard_words = set(standard_text.split())
         overlap = content_words & standard_words
-        
+
         return len(overlap) > 3
-    
+
     def _calculate_coverage(
         self,
         aligned: List[Dict],
@@ -323,7 +323,7 @@ class CurriculumAlignmentEngine:
         if not total:
             return 0.0
         return len(aligned) / len(total)
-    
+
     def _get_recommendations(
         self,
         aligned: List[Dict],
@@ -332,15 +332,15 @@ class CurriculumAlignmentEngine:
         """Get recommendations for additional content"""
         aligned_codes = {s.get("code") for s in aligned}
         uncovered = [
-            s for s in all_standards 
+            s for s in all_standards
             if s.get("code") not in aligned_codes
         ]
-        
+
         return [
             f"Consider adding content for: {s.get('name')}"
             for s in uncovered[:3]  # Top 3 recommendations
         ]
-    
+
     def get_cross_curriculum_mapping(
         self,
         from_system: CurriculumSystem,
@@ -349,10 +349,10 @@ class CurriculumAlignmentEngine:
         grade_level: str
     ) -> Dict[str, Any]:
         """Map standards between curriculum systems"""
-        
+
         from_standards = self._get_standards(from_system, subject, grade_level)
         to_standards = self._get_standards(to_system, subject, grade_level)
-        
+
         mapping = []
         for from_std in from_standards:
             # Find equivalent standards in target system
@@ -365,7 +365,7 @@ class CurriculumAlignmentEngine:
                     equivalents
                 )
             })
-        
+
         return {
             "from_system": from_system.value,
             "to_system": to_system.value,
@@ -374,7 +374,7 @@ class CurriculumAlignmentEngine:
             "mappings": mapping,
             "coverage": len([m for m in mapping if m["target_equivalents"]]) / len(mapping) if mapping else 0
         }
-    
+
     def _find_equivalent_standards(
         self,
         source_standard: Dict,
@@ -382,18 +382,18 @@ class CurriculumAlignmentEngine:
     ) -> List[Dict]:
         """Find equivalent standards in target system"""
         equivalents = []
-        
+
         source_text = (
             source_standard.get("name", "") + " " +
             source_standard.get("description", "")
         ).lower()
-        
+
         for target in target_standards:
             target_text = (
                 target.get("name", "") + " " +
                 target.get("description", "")
             ).lower()
-            
+
             # Calculate similarity (simplified)
             similarity = self._calculate_text_similarity(source_text, target_text)
             if similarity > 0.5:
@@ -401,22 +401,22 @@ class CurriculumAlignmentEngine:
                     **target,
                     "similarity_score": similarity
                 })
-        
+
         return sorted(equivalents, key=lambda x: x["similarity_score"], reverse=True)
-    
+
     def _calculate_text_similarity(self, text1: str, text2: str) -> float:
         """Calculate text similarity (simplified Jaccard)"""
         words1 = set(text1.split())
         words2 = set(text2.split())
-        
+
         intersection = words1 & words2
         union = words1 | words2
-        
+
         if not union:
             return 0.0
-        
+
         return len(intersection) / len(union)
-    
+
     def _calculate_equivalence_confidence(
         self,
         source: Dict,
@@ -425,7 +425,7 @@ class CurriculumAlignmentEngine:
         """Calculate confidence in equivalence mapping"""
         if not equivalents:
             return 0.0
-        
+
         # Highest similarity score
         return equivalents[0].get("similarity_score", 0.0)
 

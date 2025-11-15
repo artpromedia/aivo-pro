@@ -1,5 +1,6 @@
 {
   "name": "@aivo/forms",
+  "type": "module",
   "version": "1.0.0",
   "description": "Advanced forms with validation, multi-step, and field arrays",
   "main": "./dist/index.js",

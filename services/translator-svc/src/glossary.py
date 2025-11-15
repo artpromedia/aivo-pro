@@ -31,7 +31,7 @@ IEP_TERMINOLOGY = {
         "preserve": True,
         "description": "Individuals with Disabilities Education Act"
     },
-    
+
     # Assessment Terms
     "Present Levels of Performance": {
         "category": "assessment",
@@ -65,7 +65,7 @@ IEP_TERMINOLOGY = {
             "fr": "Suivi des Progrès"
         }
     },
-    
+
     # Service Types
     "Speech Therapy": {
         "category": "services",
@@ -102,7 +102,7 @@ IEP_TERMINOLOGY = {
             "fr": "Services de Conseil"
         }
     },
-    
+
     # Disability Categories
     "Autism Spectrum Disorder": {
         "category": "disability",
@@ -135,7 +135,7 @@ IEP_TERMINOLOGY = {
             "ar": "عسر القراءة"
         }
     },
-    
+
     # Accommodations & Modifications
     "Extended Time": {
         "category": "accommodation",
@@ -170,7 +170,7 @@ IEP_TERMINOLOGY = {
             "fr": "Supports Visuels"
         }
     },
-    
+
     # Educational Settings
     "General Education Classroom": {
         "category": "setting",
@@ -197,7 +197,7 @@ IEP_TERMINOLOGY = {
             "ar": "الدمج"
         }
     },
-    
+
     # Standardized Test Terms
     "Standardized Assessment": {
         "category": "testing",
@@ -284,37 +284,37 @@ def get_term_translation(
 ) -> str:
     """
     Get translation for a specialized term
-    
+
     Args:
         term: Term to translate
         target_lang: Target language code
         category: Category (iep, math, programming, interface)
-    
+
     Returns:
         Translated term or original if not found
     """
     # Check IEP terminology
     if term in IEP_TERMINOLOGY:
         term_data = IEP_TERMINOLOGY[term]
-        
+
         # Preserve if marked
         if term_data.get("preserve", False):
             return term
-        
+
         # Get translation if available
         translations_obj = term_data.get("translations", {})
         if isinstance(translations_obj, dict):
             if target_lang in translations_obj:
                 return translations_obj[target_lang]
-    
+
     # Check interface terms
     if category == "interface" and term.lower() in INTERFACE_TERMS:
         translations = INTERFACE_TERMS[term.lower()]
         return translations.get(target_lang, term)
-    
+
     # Preserve math and programming terms
     if (category == "math" and term.lower() in MATH_TERMS) or \
        (category == "programming" and term.lower() in PROGRAMMING_TERMS):
         return term
-    
+
     return term

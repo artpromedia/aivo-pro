@@ -27,18 +27,18 @@ model_cloner: ModelCloner = None
 async def lifespan(app: FastAPI):
     """Initialize and cleanup resources"""
     global model_cloner
-    
+
     logger.info("🚀 Starting Model Cloning Service...")
-    
+
     try:
         model_cloner = ModelCloner()
         logger.info("✅ Model Cloner initialized")
     except Exception as e:
         logger.critical(f"❌ Failed to initialize cloner: {e}")
         raise
-    
+
     yield
-    
+
     logger.info("🛑 Shutting down Model Cloning Service...")
 
 
@@ -150,13 +150,13 @@ async def health_check():
 async def start_cloning(request: CloneRequest):
     """
     Start ACTUAL model cloning process.
-    
+
     This creates a real personalized model for the student based on:
     - Baseline assessment results
     - Learning style and preferences
     - Disability accommodations
     - Grade level and subject interests
-    
+
     **Example:**
     ```json
     {
@@ -180,16 +180,16 @@ async def start_cloning(request: CloneRequest):
     """
     if model_cloner is None:
         raise HTTPException(status_code=503, detail="Cloner not initialized")
-    
+
     try:
         result = await model_cloner.start_cloning(
             request.student_id,
             request.baseline_data.model_dump(),
             request.student_profile.model_dump()
         )
-        
+
         return CloneResponse(**result)
-        
+
     except Exception as e:
         logger.error(f"Error starting cloning: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -199,18 +199,18 @@ async def start_cloning(request: CloneRequest):
 async def get_clone_status(clone_id: str):
     """
     Get cloning progress.
-    
+
     Returns current status and progress percentage.
     Poll this endpoint to track cloning progress.
     """
     if model_cloner is None:
         raise HTTPException(status_code=503, detail="Cloner not initialized")
-    
+
     status = await model_cloner.get_status(clone_id)
-    
+
     if not status:
         raise HTTPException(status_code=404, detail="Clone job not found")
-    
+
     return StatusResponse(**status)
 
 
@@ -218,20 +218,20 @@ async def get_clone_status(clone_id: str):
 async def get_student_model(student_id: str):
     """
     Get student's personalized model information.
-    
+
     Returns model metadata including S3 location and profile.
     """
     if model_cloner is None:
         raise HTTPException(status_code=503, detail="Cloner not initialized")
-    
+
     model_info = await model_cloner.load_student_model(student_id)
-    
+
     if not model_info:
         raise HTTPException(
             status_code=404,
             detail=f"No model found for student {student_id}"
         )
-    
+
     return ModelInfo(**model_info)
 
 
@@ -243,15 +243,15 @@ async def update_student_model(
 ):
     """
     Update student model based on continued learning.
-    
+
     Applies incremental fine-tuning with new learning data.
     """
     if model_cloner is None:
         raise HTTPException(status_code=503, detail="Cloner not initialized")
-    
+
     # Would implement incremental learning here
     # For now, return acknowledgment
-    
+
     return {
         "student_id": student_id,
         "status": "update_queued",
@@ -263,14 +263,14 @@ async def update_student_model(
 async def delete_student_model(student_id: str):
     """
     Delete student's personalized model.
-    
+
     For data privacy compliance (COPPA, FERPA).
     """
     if model_cloner is None:
         raise HTTPException(status_code=503, detail="Cloner not initialized")
-    
+
     # Would implement model deletion here
-    
+
     return {
         "student_id": student_id,
         "status": "deleted",
@@ -280,7 +280,7 @@ async def delete_student_model(student_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         app,
         host="0.0.0.0",

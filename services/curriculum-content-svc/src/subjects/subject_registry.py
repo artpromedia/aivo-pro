@@ -41,10 +41,10 @@ class GlobalSubjectRegistry:
     Comprehensive registry of all K-12 subjects
     Based on UNESCO ISCED and global educational standards
     """
-    
+
     def __init__(self):
         self.subjects = self._initialize_subjects()
-    
+
     def _initialize_subjects(self) -> Dict[str, SubjectDefinition]:
         """Initialize all subject definitions"""
         return {
@@ -122,7 +122,7 @@ class GlobalSubjectRegistry:
                     "sw": "Hisabati"
                 }
             ),
-            
+
             # ==================== SCIENCES ====================
             "biology": SubjectDefinition(
                 id="biology",
@@ -192,7 +192,7 @@ class GlobalSubjectRegistry:
                     "sw": "Biolojia"
                 }
             ),
-            
+
             "chemistry": SubjectDefinition(
                 id="chemistry",
                 name="Chemistry",
@@ -230,7 +230,7 @@ class GlobalSubjectRegistry:
                     "ar": "الكيمياء"
                 }
             ),
-            
+
             "physics": SubjectDefinition(
                 id="physics",
                 name="Physics",
@@ -274,7 +274,7 @@ class GlobalSubjectRegistry:
                     "ar": "الفيزياء"
                 }
             ),
-            
+
             # ==================== LANGUAGE ARTS ====================
             "english_language_arts": SubjectDefinition(
                 id="ela",
@@ -322,7 +322,7 @@ class GlobalSubjectRegistry:
                     "fr": "Arts du Langage Anglais"
                 }
             ),
-            
+
             # ==================== WORLD LANGUAGES ====================
             "world_languages": SubjectDefinition(
                 id="world_lang",
@@ -363,7 +363,7 @@ class GlobalSubjectRegistry:
                     ]
                 }
             ),
-            
+
             # ==================== SOCIAL STUDIES ====================
             "history": SubjectDefinition(
                 id="history",
@@ -425,7 +425,7 @@ class GlobalSubjectRegistry:
                     "ar": "التاريخ"
                 }
             ),
-            
+
             "geography": SubjectDefinition(
                 id="geography",
                 name="Geography",
@@ -462,7 +462,7 @@ class GlobalSubjectRegistry:
                     "ar": "الجغرافيا"
                 }
             ),
-            
+
             # ==================== ARTS ====================
             "visual_arts": SubjectDefinition(
                 id="visual_arts",
@@ -508,7 +508,7 @@ class GlobalSubjectRegistry:
                     "ar": "الفنون البصرية"
                 }
             ),
-            
+
             "music": SubjectDefinition(
                 id="music",
                 name="Music",
@@ -563,7 +563,7 @@ class GlobalSubjectRegistry:
                     "ar": "الموسيقى"
                 }
             ),
-            
+
             # ==================== PHYSICAL EDUCATION ====================
             "physical_education": SubjectDefinition(
                 id="pe",
@@ -606,7 +606,7 @@ class GlobalSubjectRegistry:
                     "ar": "التربية البدنية"
                 }
             ),
-            
+
             # ==================== TECHNOLOGY ====================
             "computer_science": SubjectDefinition(
                 id="cs",
@@ -662,7 +662,7 @@ class GlobalSubjectRegistry:
                     "ar": "علوم الحاسوب"
                 }
             ),
-            
+
             # ==================== HEALTH & WELLNESS ====================
             "health_education": SubjectDefinition(
                 id="health",
@@ -711,25 +711,25 @@ class GlobalSubjectRegistry:
                 }
             )
         }
-    
+
     def get_subject(self, subject_id: str) -> Optional[SubjectDefinition]:
         """Get subject definition"""
         return self.subjects.get(subject_id)
-    
+
     def get_subjects_by_category(self, category: SubjectCategory) -> List[SubjectDefinition]:
         """Get all subjects in a category"""
         return [s for s in self.subjects.values() if s.category == category]
-    
+
     def get_subjects_by_grade(self, grade: str) -> List[SubjectDefinition]:
         """Get all subjects for a grade level"""
         return [
             s for s in self.subjects.values()
             if grade in s.grade_levels or "K-12" in s.grade_levels
         ]
-    
+
     def get_regional_adaptation(
-        self, 
-        subject_id: str, 
+        self,
+        subject_id: str,
         region: str
     ) -> Optional[Dict[str, Any]]:
         """Get regional adaptations for a subject"""

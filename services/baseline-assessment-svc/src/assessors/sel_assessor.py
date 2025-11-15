@@ -171,20 +171,20 @@ class ComprehensiveSELAssessment:
     assessment_date: datetime
     chronological_age: float
     grade_level: str
-    
+
     # CASEL Five Competencies
     self_awareness: SelfAwarenessAssessment
     self_management: SelfManagementAssessment
     social_awareness: SocialAwarenessAssessment
     relationship_skills: RelationshipSkillsAssessment
     responsible_decision_making: ResponsibleDecisionMakingAssessment
-    
+
     # Additional assessments
     emotional_intelligence: EmotionalIntelligenceAssessment
     resilience: ResilienceAssessment
     mental_health: MentalHealthScreening
     executive_function: ExecutiveFunctionAssessment
-    
+
     # Summary
     overall_sel_score: float
     overall_sel_level: CompetencyLevel
@@ -192,7 +192,7 @@ class ComprehensiveSELAssessment:
     strengths: List[str]
     intervention_recommended: bool
     recommendations: List[str] = field(default_factory=list)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for JSON serialization"""
         return {
@@ -306,25 +306,25 @@ class ComprehensiveSELAssessment:
 class SocialEmotionalAssessor:
     """
     Comprehensive Social-Emotional Learning Assessor
-    
+
     Conducts multi-domain SEL evaluation following CASEL framework:
     - Self-Awareness
     - Self-Management
     - Social Awareness
     - Relationship Skills
     - Responsible Decision-Making
-    
+
     Plus additional assessments:
     - Emotional Intelligence (RULER)
     - Resilience
     - Mental Health Screening
     - Executive Function
     """
-    
+
     def __init__(self, sel_api_url: str = "http://sel-agent-svc:8015"):
         self.sel_api_url = sel_api_url
         self.client = httpx.AsyncClient(timeout=30.0)
-    
+
     async def conduct_comprehensive_assessment(
         self,
         child_id: str,
@@ -334,18 +334,18 @@ class SocialEmotionalAssessor:
     ) -> ComprehensiveSELAssessment:
         """
         Conduct comprehensive SEL assessment
-        
+
         Args:
             child_id: Child's unique identifier
             age: Chronological age in years
             grade: Grade level (K, 1-12)
             assessment_data: Dict with assessment responses
-        
+
         Returns:
             ComprehensiveSELAssessment with all domain results
         """
         logger.info(f"Starting comprehensive SEL assessment for child {child_id}")
-        
+
         # Conduct CASEL Five Competencies Assessment
         self_awareness = await self._assess_self_awareness(
             child_id, age, assessment_data
@@ -362,7 +362,7 @@ class SocialEmotionalAssessor:
         responsible_decision = await self._assess_responsible_decision_making(
             child_id, age, assessment_data
         )
-        
+
         # Additional assessments
         emotional_intelligence = await self._assess_emotional_intelligence(
             child_id, age, assessment_data
@@ -376,34 +376,34 @@ class SocialEmotionalAssessor:
         executive_function = await self._assess_executive_function(
             child_id, age, assessment_data
         )
-        
+
         # Calculate overall SEL score and level
         overall_score = self._calculate_overall_score(
             self_awareness, self_management, social_awareness,
             relationship_skills, responsible_decision
         )
-        
+
         overall_level = self._determine_overall_level(overall_score)
-        
+
         # Identify priorities and strengths
         priority_areas = self._identify_priority_areas(
             self_awareness, self_management, social_awareness,
             relationship_skills, responsible_decision,
             emotional_intelligence, resilience, executive_function
         )
-        
+
         strengths = self._identify_strengths(
             self_awareness, self_management, social_awareness,
             relationship_skills, responsible_decision,
             emotional_intelligence, resilience, executive_function
         )
-        
+
         # Determine if intervention needed
         intervention_recommended = (
             overall_level in [CompetencyLevel.SIGNIFICANTLY_BELOW, CompetencyLevel.BELOW_EXPECTED]
             or mental_health.risk_level in [MentalHealthRisk.MODERATE_CONCERN, MentalHealthRisk.SIGNIFICANT_CONCERN]
         )
-        
+
         # Generate overall recommendations
         recommendations = self._generate_overall_recommendations(
             self_awareness, self_management, social_awareness,
@@ -411,7 +411,7 @@ class SocialEmotionalAssessor:
             emotional_intelligence, resilience, mental_health,
             executive_function, overall_level, priority_areas
         )
-        
+
         return ComprehensiveSELAssessment(
             child_id=child_id,
             assessment_date=datetime.now(),
@@ -433,7 +433,7 @@ class SocialEmotionalAssessor:
             intervention_recommended=intervention_recommended,
             recommendations=recommendations
         )
-    
+
     async def _assess_self_awareness(
         self,
         child_id: str,
@@ -441,21 +441,21 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> SelfAwarenessAssessment:
         """Assess self-awareness competency"""
-        
+
         data = assessment_data.get("self_awareness", {})
-        
+
         emotion_recognition = data.get("emotion_recognition", 70.0)
         self_perception = data.get("self_perception_accuracy", 70.0)
         strengths_recognition = data.get("strengths_recognition", 70.0)
         growth_mindset = data.get("growth_mindset", 70.0)
-        
+
         overall_score = (
             emotion_recognition + self_perception +
             strengths_recognition + growth_mindset
         ) / 4
-        
+
         level = self._score_to_level(overall_score)
-        
+
         recommendations = []
         if emotion_recognition < 60:
             recommendations.append("Emotion recognition activities and feeling charts")
@@ -463,7 +463,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Growth mindset curriculum and praise effort over ability")
         if level == CompetencyLevel.SIGNIFICANTLY_BELOW:
             recommendations.append("Intensive self-awareness intervention with counselor")
-        
+
         return SelfAwarenessAssessment(
             emotion_recognition=emotion_recognition,
             self_perception_accuracy=self_perception,
@@ -473,7 +473,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_self_management(
         self,
         child_id: str,
@@ -481,22 +481,22 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> SelfManagementAssessment:
         """Assess self-management competency"""
-        
+
         data = assessment_data.get("self_management", {})
-        
+
         impulse_control = data.get("impulse_control", 70.0)
         stress_management = data.get("stress_management", 70.0)
         self_discipline = data.get("self_discipline", 70.0)
         goal_setting = data.get("goal_setting", 70.0)
         organizational_skills = data.get("organizational_skills", 70.0)
-        
+
         overall_score = (
             impulse_control + stress_management + self_discipline +
             goal_setting + organizational_skills
         ) / 5
-        
+
         level = self._score_to_level(overall_score)
-        
+
         recommendations = []
         if impulse_control < 60:
             recommendations.append("Impulse control strategies and behavior management")
@@ -504,7 +504,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Stress reduction techniques and coping skills")
         if organizational_skills < 60:
             recommendations.append("Executive function coaching and organizational tools")
-        
+
         return SelfManagementAssessment(
             impulse_control=impulse_control,
             stress_management=stress_management,
@@ -515,7 +515,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_social_awareness(
         self,
         child_id: str,
@@ -523,28 +523,28 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> SocialAwarenessAssessment:
         """Assess social awareness competency"""
-        
+
         data = assessment_data.get("social_awareness", {})
-        
+
         empathy = data.get("empathy", 70.0)
         perspective_taking = data.get("perspective_taking", 70.0)
         appreciating_diversity = data.get("appreciating_diversity", 70.0)
         respect_for_others = data.get("respect_for_others", 70.0)
         understanding_norms = data.get("understanding_social_norms", 70.0)
-        
+
         overall_score = (
             empathy + perspective_taking + appreciating_diversity +
             respect_for_others + understanding_norms
         ) / 5
-        
+
         level = self._score_to_level(overall_score)
-        
+
         recommendations = []
         if empathy < 60:
             recommendations.append("Empathy-building activities and perspective-taking exercises")
         if appreciating_diversity < 60:
             recommendations.append("Diversity education and multicultural experiences")
-        
+
         return SocialAwarenessAssessment(
             empathy=empathy,
             perspective_taking=perspective_taking,
@@ -555,7 +555,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_relationship_skills(
         self,
         child_id: str,
@@ -563,22 +563,22 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> RelationshipSkillsAssessment:
         """Assess relationship skills competency"""
-        
+
         data = assessment_data.get("relationship_skills", {})
-        
+
         communication = data.get("communication", 70.0)
         cooperation = data.get("cooperation", 70.0)
         conflict_resolution = data.get("conflict_resolution", 70.0)
         help_seeking = data.get("help_seeking", 70.0)
         building_relationships = data.get("building_relationships", 70.0)
-        
+
         overall_score = (
             communication + cooperation + conflict_resolution +
             help_seeking + building_relationships
         ) / 5
-        
+
         level = self._score_to_level(overall_score)
-        
+
         recommendations = []
         if communication < 60:
             recommendations.append("Communication skills training and assertiveness practice")
@@ -586,7 +586,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Conflict resolution strategies and mediation skills")
         if building_relationships < 60:
             recommendations.append("Social skills groups and friendship coaching")
-        
+
         return RelationshipSkillsAssessment(
             communication=communication,
             cooperation=cooperation,
@@ -597,7 +597,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_responsible_decision_making(
         self,
         child_id: str,
@@ -605,28 +605,28 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> ResponsibleDecisionMakingAssessment:
         """Assess responsible decision-making competency"""
-        
+
         data = assessment_data.get("responsible_decision_making", {})
-        
+
         problem_identification = data.get("problem_identification", 70.0)
         solution_generation = data.get("solution_generation", 70.0)
         consequence_evaluation = data.get("consequence_evaluation", 70.0)
         ethical_responsibility = data.get("ethical_responsibility", 70.0)
         safety_awareness = data.get("safety_awareness", 70.0)
-        
+
         overall_score = (
             problem_identification + solution_generation +
             consequence_evaluation + ethical_responsibility + safety_awareness
         ) / 5
-        
+
         level = self._score_to_level(overall_score)
-        
+
         recommendations = []
         if consequence_evaluation < 60:
             recommendations.append("Decision-making frameworks and consequence thinking")
         if safety_awareness < 60:
             recommendations.append("Safety education and risk assessment training")
-        
+
         return ResponsibleDecisionMakingAssessment(
             problem_identification=problem_identification,
             solution_generation=solution_generation,
@@ -637,7 +637,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_emotional_intelligence(
         self,
         child_id: str,
@@ -645,10 +645,10 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> EmotionalIntelligenceAssessment:
         """Assess emotional intelligence using RULER framework"""
-        
+
         # Try to get detailed EI assessment from SEL service
         ei_data = assessment_data.get("emotional_intelligence", {})
-        
+
         try:
             response = await self.client.post(
                 f"{self.sel_api_url}/v1/sel/assess-emotional-intelligence",
@@ -663,17 +663,17 @@ class SocialEmotionalAssessor:
                 ei_data.update(analysis)
         except Exception as e:
             logger.warning(f"Could not get detailed EI analysis: {e}")
-        
+
         recognizing = ei_data.get("recognizing_emotions", 70.0)
         understanding = ei_data.get("understanding_emotions", 70.0)
         labeling = ei_data.get("labeling_emotions", 70.0)
         expressing = ei_data.get("expressing_emotions", 70.0)
         regulating = ei_data.get("regulating_emotions", 70.0)
-        
+
         overall_score = (
             recognizing + understanding + labeling + expressing + regulating
         ) / 5
-        
+
         if overall_score >= 85:
             level = EmotionalIntelligenceLevel.ADVANCED
         elif overall_score >= 70:
@@ -682,7 +682,7 @@ class SocialEmotionalAssessor:
             level = EmotionalIntelligenceLevel.DEVELOPING
         else:
             level = EmotionalIntelligenceLevel.EMERGING
-        
+
         recommendations = []
         if recognizing < 60:
             recommendations.append("Emotion recognition training with facial expressions")
@@ -690,7 +690,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Emotion regulation strategies and mindfulness practice")
         if level == EmotionalIntelligenceLevel.EMERGING:
             recommendations.append("Comprehensive RULER curriculum implementation")
-        
+
         return EmotionalIntelligenceAssessment(
             recognizing_emotions=recognizing,
             understanding_emotions=understanding,
@@ -701,7 +701,7 @@ class SocialEmotionalAssessor:
             level=level,
             recommendations=recommendations
         )
-    
+
     async def _assess_resilience(
         self,
         child_id: str,
@@ -709,20 +709,20 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> ResilienceAssessment:
         """Assess resilience and coping skills"""
-        
+
         res_data = assessment_data.get("resilience", {})
-        
+
         adaptability = res_data.get("adaptability", 70.0)
         problem_solving = res_data.get("problem_solving", 70.0)
         social_support = res_data.get("social_support", 70.0)
         optimism = res_data.get("optimism", 70.0)
         self_efficacy = res_data.get("self_efficacy", 70.0)
-        
+
         overall_score = (
             adaptability + problem_solving + social_support +
             optimism + self_efficacy
         ) / 5
-        
+
         if overall_score >= 80:
             level = ResilienceLevel.VERY_HIGH
         elif overall_score >= 70:
@@ -731,11 +731,11 @@ class SocialEmotionalAssessor:
             level = ResilienceLevel.MODERATE
         else:
             level = ResilienceLevel.LOW
-        
+
         coping_strategies = res_data.get("coping_strategies", [
             "deep_breathing", "talking_to_trusted_adult", "physical_activity"
         ])
-        
+
         recommendations = []
         if level == ResilienceLevel.LOW:
             recommendations.append("Resilience-building program and coping skills training")
@@ -744,7 +744,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Build support network through peer groups")
         if optimism < 60:
             recommendations.append("Positive psychology interventions and gratitude practice")
-        
+
         return ResilienceAssessment(
             adaptability=adaptability,
             problem_solving=problem_solving,
@@ -756,7 +756,7 @@ class SocialEmotionalAssessor:
             coping_strategies=coping_strategies,
             recommendations=recommendations
         )
-    
+
     async def _screen_mental_health(
         self,
         child_id: str,
@@ -764,22 +764,22 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> MentalHealthScreening:
         """Screen for mental health concerns"""
-        
+
         mh_data = assessment_data.get("mental_health", {})
-        
+
         anxiety_indicators = mh_data.get("anxiety_indicators", [])
         depression_indicators = mh_data.get("depression_indicators", [])
         behavioral_concerns = mh_data.get("behavioral_concerns", [])
         attention_concerns = mh_data.get("attention_concerns", [])
         trauma_indicators = mh_data.get("trauma_indicators", [])
-        
+
         # Calculate risk level based on indicators
         total_indicators = (
             len(anxiety_indicators) + len(depression_indicators) +
             len(behavioral_concerns) + len(attention_concerns) +
             len(trauma_indicators)
         )
-        
+
         if total_indicators >= 8 or len(trauma_indicators) >= 3:
             risk_level = MentalHealthRisk.SIGNIFICANT_CONCERN
             referral_recommended = True
@@ -795,7 +795,7 @@ class SocialEmotionalAssessor:
         else:
             risk_level = MentalHealthRisk.NO_CONCERNS
             referral_recommended = False
-        
+
         recommendations = []
         if risk_level == MentalHealthRisk.SIGNIFICANT_CONCERN:
             recommendations.append("URGENT: Refer to mental health professional immediately")
@@ -808,14 +808,14 @@ class SocialEmotionalAssessor:
             recommendations.append("Consider preventive interventions")
         elif risk_level == MentalHealthRisk.MONITOR:
             recommendations.append("Continue monitoring for changes")
-        
+
         if anxiety_indicators:
             recommendations.append("Anxiety management strategies and relaxation techniques")
         if depression_indicators:
             recommendations.append("Mood monitoring and depression screening")
         if attention_concerns:
             recommendations.append("ADHD screening and executive function support")
-        
+
         return MentalHealthScreening(
             anxiety_indicators=anxiety_indicators,
             depression_indicators=depression_indicators,
@@ -826,7 +826,7 @@ class SocialEmotionalAssessor:
             referral_recommended=referral_recommended,
             recommendations=recommendations
         )
-    
+
     async def _assess_executive_function(
         self,
         child_id: str,
@@ -834,22 +834,22 @@ class SocialEmotionalAssessor:
         assessment_data: Dict
     ) -> ExecutiveFunctionAssessment:
         """Assess executive function skills"""
-        
+
         ef_data = assessment_data.get("executive_function", {})
-        
+
         working_memory = ef_data.get("working_memory", 70.0)
         cognitive_flexibility = ef_data.get("cognitive_flexibility", 70.0)
         inhibitory_control = ef_data.get("inhibitory_control", 70.0)
         planning_organization = ef_data.get("planning_organization", 70.0)
         task_initiation = ef_data.get("task_initiation", 70.0)
-        
+
         overall_score = (
             working_memory + cognitive_flexibility + inhibitory_control +
             planning_organization + task_initiation
         ) / 5
-        
+
         age_appropriate = overall_score >= 60
-        
+
         recommendations = []
         if working_memory < 60:
             recommendations.append("Working memory training and mnemonic strategies")
@@ -859,7 +859,7 @@ class SocialEmotionalAssessor:
             recommendations.append("Task initiation strategies and structure")
         if not age_appropriate:
             recommendations.append("Executive function coaching and accommodations")
-        
+
         return ExecutiveFunctionAssessment(
             working_memory=working_memory,
             cognitive_flexibility=cognitive_flexibility,
@@ -870,7 +870,7 @@ class SocialEmotionalAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     def _calculate_overall_score(
         self,
         self_awareness: SelfAwarenessAssessment,
@@ -887,11 +887,11 @@ class SocialEmotionalAssessor:
             relationship_skills.overall_score +
             responsible_decision.overall_score
         ) / 5
-    
+
     def _determine_overall_level(self, score: float) -> CompetencyLevel:
         """Determine overall competency level from score"""
         return self._score_to_level(score)
-    
+
     def _score_to_level(self, score: float) -> CompetencyLevel:
         """Convert score to competency level"""
         if score >= 85:
@@ -904,14 +904,14 @@ class SocialEmotionalAssessor:
             return CompetencyLevel.BELOW_EXPECTED
         else:
             return CompetencyLevel.SIGNIFICANTLY_BELOW
-    
+
     def _identify_priority_areas(self, *assessments) -> List[str]:
         """Identify priority areas for intervention"""
         priorities = []
-        
+
         # Check CASEL competencies
         self_awareness, self_management, social_awareness, relationship_skills, responsible_decision = assessments[:5]
-        
+
         if self_awareness.level in [CompetencyLevel.SIGNIFICANTLY_BELOW, CompetencyLevel.BELOW_EXPECTED]:
             priorities.append("self_awareness")
         if self_management.level in [CompetencyLevel.SIGNIFICANTLY_BELOW, CompetencyLevel.BELOW_EXPECTED]:
@@ -922,27 +922,27 @@ class SocialEmotionalAssessor:
             priorities.append("relationship_skills")
         if responsible_decision.level in [CompetencyLevel.SIGNIFICANTLY_BELOW, CompetencyLevel.BELOW_EXPECTED]:
             priorities.append("responsible_decision_making")
-        
+
         # Check additional assessments
         if len(assessments) > 5:
             emotional_intelligence, resilience, executive_function = assessments[5:8]
-            
+
             if emotional_intelligence.level in [EmotionalIntelligenceLevel.EMERGING]:
                 priorities.append("emotional_intelligence")
             if resilience.level in [ResilienceLevel.LOW]:
                 priorities.append("resilience")
             if not executive_function.age_appropriate:
                 priorities.append("executive_function")
-        
+
         return priorities
-    
+
     def _identify_strengths(self, *assessments) -> List[str]:
         """Identify areas of strength"""
         strengths = []
-        
+
         # Check CASEL competencies
         self_awareness, self_management, social_awareness, relationship_skills, responsible_decision = assessments[:5]
-        
+
         if self_awareness.level == CompetencyLevel.ABOVE_EXPECTED:
             strengths.append("self_awareness")
         if self_management.level == CompetencyLevel.ABOVE_EXPECTED:
@@ -953,26 +953,26 @@ class SocialEmotionalAssessor:
             strengths.append("relationship_skills")
         if responsible_decision.level == CompetencyLevel.ABOVE_EXPECTED:
             strengths.append("responsible_decision_making")
-        
+
         # Check additional assessments
         if len(assessments) > 5:
             emotional_intelligence, resilience, _ = assessments[5:8]
-            
+
             if emotional_intelligence.level == EmotionalIntelligenceLevel.ADVANCED:
                 strengths.append("emotional_intelligence")
             if resilience.level == ResilienceLevel.VERY_HIGH:
                 strengths.append("resilience")
-        
+
         return strengths
-    
+
     def _generate_overall_recommendations(self, *args) -> List[str]:
         """Generate overall SEL recommendations"""
         (self_awareness, self_management, social_awareness, relationship_skills,
          responsible_decision, emotional_intelligence, resilience,
          mental_health, executive_function, overall_level, priority_areas) = args
-        
+
         recommendations = []
-        
+
         # Priority based on overall level
         if overall_level == CompetencyLevel.SIGNIFICANTLY_BELOW:
             recommendations.append("Comprehensive SEL intervention program recommended")
@@ -982,17 +982,17 @@ class SocialEmotionalAssessor:
             recommendations.append("Weekly counseling or SEL curriculum participation")
         elif overall_level == CompetencyLevel.DEVELOPING:
             recommendations.append("Continue SEL instruction and monitor progress")
-        
+
         # Mental health concerns
         if mental_health.referral_recommended:
             recommendations.extend(mental_health.recommendations[:2])
-        
+
         # Priority areas
         if priority_areas:
             recommendations.append(
                 f"Focus intervention on: {', '.join(priority_areas[:3])}"
             )
-        
+
         # Collect unique recommendations from all domains
         all_recs = (
             self_awareness.recommendations +
@@ -1003,12 +1003,12 @@ class SocialEmotionalAssessor:
             emotional_intelligence.recommendations +
             resilience.recommendations
         )
-        
+
         unique_recs = []
         for rec in all_recs:
             if rec not in unique_recs and rec not in recommendations:
                 unique_recs.append(rec)
-        
+
         recommendations.extend(unique_recs[:6])  # Top 6 specific recommendations
-        
+
         return recommendations

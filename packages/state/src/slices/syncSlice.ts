@@ -13,15 +13,15 @@ export const createSyncSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   SyncSlice
-> = (set, get) => ({
+> = (set, get, _store) => ({
   addOfflineAction: (action: OfflineAction) =>
-    set((state: any) => {
+    set((state) => {
       state.sync.offlineActions.push(action);
       state.sync.status.pendingActions = state.sync.offlineActions.length;
     }),
 
   removeOfflineAction: (id: string) =>
-    set((state: any) => {
+    set((state) => {
       state.sync.offlineActions = state.sync.offlineActions.filter(
         (action: OfflineAction) => action.id !== id
       );
@@ -29,7 +29,7 @@ export const createSyncSlice: StateCreator<
     }),
 
   updateSyncStatus: (status: Partial<GlobalState['sync']['status']>) =>
-    set((state: any) => {
+    set((state) => {
       state.sync.status = { ...state.sync.status, ...status };
     }),
 
@@ -40,7 +40,7 @@ export const createSyncSlice: StateCreator<
       return;
     }
 
-    set((state: any) => {
+    set((state) => {
       state.sync.status.isSyncing = true;
     });
 
@@ -54,14 +54,14 @@ export const createSyncSlice: StateCreator<
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Remove successful action
-          set((state: any) => {
+          set((state) => {
             state.sync.offlineActions = state.sync.offlineActions.filter(
               (a: OfflineAction) => a.id !== action.id
             );
           });
-        } catch (error) {
+  } catch {
           // Increment retry count
-          set((state: any) => {
+          set((state) => {
             const actionIndex = state.sync.offlineActions.findIndex(
               (a: OfflineAction) => a.id === action.id
             );
@@ -77,7 +77,7 @@ export const createSyncSlice: StateCreator<
         }
       }
 
-      set((state: any) => {
+      set((state) => {
         state.sync.status.lastSyncAt = new Date().toISOString();
         state.sync.status.pendingActions = state.sync.offlineActions.length;
         state.sync.status.isSyncing = false;
@@ -85,7 +85,7 @@ export const createSyncSlice: StateCreator<
 
     } catch (error) {
       console.error('Sync failed:', error);
-      set((state: any) => {
+      set((state) => {
         state.sync.status.isSyncing = false;
       });
     }

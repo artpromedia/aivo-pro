@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { fetchIntegrations } from '../../services/districtApi';
 import { 
   Link2, 
   X, 
@@ -14,7 +16,6 @@ import {
   CheckCircle,
   Zap
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 
 interface LMSIntegration {
   id: string;
@@ -249,22 +250,53 @@ const mockLMSIntegrations: LMSIntegration[] = [
 export const Integrations: React.FC = () => {
   const [selectedIntegration, setSelectedIntegration] = useState<LMSIntegration | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const districtId = 'SD-12345'; // In production, get from auth context
 
-  const { data: integrationsData, isLoading, refetch } = useQuery({
-    queryKey: ['lms-integrations'],
+  const { data: integrationsData, isLoading, error, refetch } = useQuery({
+    queryKey: ['lms-integrations', districtId],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const integrations = await fetchIntegrations(districtId);
       return {
-        integrations: mockLMSIntegrations,
+        integrations,
         stats: {
-          totalConnected: mockLMSIntegrations.filter(i => i.connected).length,
-          totalCourses: mockLMSIntegrations.reduce((sum, i) => sum + i.coursesCount, 0),
-          totalStudents: mockLMSIntegrations.reduce((sum, i) => sum + i.studentsCount, 0),
-          lastGlobalSync: '2024-11-06T12:00:00'
+          totalConnected: integrations.filter((i: LMSIntegration) => i.connected).length,
+          totalCourses: integrations.reduce((sum: number, i: LMSIntegration) => sum + i.coursesCount, 0),
+          totalStudents: integrations.reduce((sum: number, i: LMSIntegration) => sum + i.studentsCount, 0),
+          lastGlobalSync: new Date().toISOString()
         }
       };
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-coral-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading integrations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !integrationsData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-900 font-semibold mb-2">Failed to load integrations</p>
+          <p className="text-gray-600 mb-4">Using demo data</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-coral-600 text-white rounded-lg hover:bg-coral-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Filter integrations by category
   const filteredIntegrations = filterCategory === 'all' 
@@ -279,9 +311,9 @@ export const Integrations: React.FC = () => {
       });
 
   const categories = [
-    { id: 'all', name: 'All Platforms', count: mockLMSIntegrations.length },
-    { id: 'lms', name: 'Learning Management', count: mockLMSIntegrations.filter(i => i.id.startsWith('lms-')).length },
-    { id: 'learning-apps', name: 'Learning Apps', count: mockLMSIntegrations.filter(i => i.id.startsWith('app-')).length }
+    { id: 'all', name: 'All Platforms', count: integrationsData?.integrations?.length || 0 },
+    { id: 'lms', name: 'Learning Management', count: integrationsData?.integrations?.filter((i: LMSIntegration) => i.id.startsWith('lms-')).length || 0 },
+    { id: 'learning-apps', name: 'Learning Apps', count: integrationsData?.integrations?.filter((i: LMSIntegration) => i.id.startsWith('app-')).length || 0 }
   ];
 
   const handleSync = async (integrationId: string) => {

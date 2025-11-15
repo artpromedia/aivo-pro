@@ -28,12 +28,12 @@ pwd_context = CryptContext(
 
 class PasswordValidator:
     """Password strength validation and security"""
-    
+
     @staticmethod
     def validate_strength(password: str) -> Tuple[bool, list[str]]:
         """
         Validate password meets security requirements
-        
+
         Requirements:
         - Minimum 12 characters
         - At least 1 uppercase letter
@@ -41,84 +41,84 @@ class PasswordValidator:
         - At least 1 number
         - At least 1 special character
         - No common patterns
-        
+
         Args:
             password: Plain text password
-            
+
         Returns:
             Tuple of (is_valid, list of error messages)
         """
         errors = []
-        
+
         # Length check
         if len(password) < settings.password_min_length:
             errors.append(
                 f"Password must be at least {settings.password_min_length} characters"
             )
-        
+
         # Uppercase check
         if not re.search(r"[A-Z]", password):
             errors.append("Password must contain at least 1 uppercase letter")
-        
+
         # Lowercase check
         if not re.search(r"[a-z]", password):
             errors.append("Password must contain at least 1 lowercase letter")
-        
+
         # Number check
         if not re.search(r"\d", password):
             errors.append("Password must contain at least 1 number")
-        
+
         # Special character check
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
             errors.append("Password must contain at least 1 special character")
-        
+
         # Common patterns
         common_patterns = [
             r"(.)\1{2,}",  # Repeated characters (aaa, 111)
             r"(012|123|234|345|456|567|678|789|890)",  # Sequential numbers
             r"(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)",  # Sequential letters
         ]
-        
+
         for pattern in common_patterns:
             if re.search(pattern, password.lower()):
                 errors.append("Password contains common patterns")
                 break
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
     async def check_compromised(password: str) -> bool:
         """
         Check if password appears in HaveIBeenPwned database
         Uses k-anonymity model - only sends first 5 chars of hash
-        
+
         Args:
             password: Plain text password
-            
+
         Returns:
             True if password is compromised, False otherwise
         """
         if not settings.hibp_api_key:
             logger.warning("HIBP API key not configured, skipping breach check")
             return False
-        
+
         try:
             # SHA-1 hash of password
             sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
             prefix = sha1_hash[:5]
             suffix = sha1_hash[5:]
-            
+
             # Query HIBP API
             url = f"{settings.hibp_api_url}/{prefix}"
             headers = {
                 "hibp-api-key": settings.hibp_api_key,
                 "user-agent": "AIVO-Learning-Platform"
             }
-            
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, headers=headers, timeout=5.0)
                 response.raise_for_status()
-            
+
             # Check if suffix appears in results
             hashes = response.text.split("\r\n")
             for line in hashes:
@@ -128,22 +128,22 @@ class PasswordValidator:
                         f"Password found in {count} breaches"
                     )
                     return True
-            
+
             return False
-            
+
         except Exception as e:
             logger.error(f"Error checking HIBP: {e}")
             # Don't block signup if HIBP check fails
             return False
-    
+
     @staticmethod
     def check_common_passwords(password: str) -> bool:
         """
         Check against common password list
-        
+
         Args:
             password: Plain text password
-            
+
         Returns:
             True if password is common, False otherwise
         """
@@ -155,35 +155,35 @@ class PasswordValidator:
             "dragon", "master", "sunshine", "princess", "football", "shadow",
             "iloveyou", "starwars", "password1234", "trustno1", "freedom",
         }
-        
+
         return password.lower() in common
 
 
 class PasswordHasher:
     """Password hashing and verification"""
-    
+
     @staticmethod
     def hash_password(password: str) -> str:
         """
         Hash password using Argon2id
-        
+
         Args:
             password: Plain text password
-            
+
         Returns:
             Hashed password string
         """
         return pwd_context.hash(password)
-    
+
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
         Verify password against hash
-        
+
         Args:
             plain_password: Plain text password
             hashed_password: Hashed password from database
-            
+
         Returns:
             True if password matches, False otherwise
         """
@@ -192,15 +192,15 @@ class PasswordHasher:
         except Exception as e:
             logger.error(f"Password verification error: {e}")
             return False
-    
+
     @staticmethod
     def needs_rehash(hashed_password: str) -> bool:
         """
         Check if password needs rehashing (parameters changed)
-        
+
         Args:
             hashed_password: Hashed password from database
-            
+
         Returns:
             True if needs rehashing, False otherwise
         """

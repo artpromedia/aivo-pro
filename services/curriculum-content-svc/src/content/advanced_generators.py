@@ -38,12 +38,12 @@ class AdvancedMathGenerator:
     Advanced mathematics content generator
     With AI integration, differentiation, and scaffolding
     """
-    
+
     def __init__(self):
         self.topics_taxonomy = self._load_math_taxonomy()
         self.real_world_contexts = self._load_real_world_contexts()
         self.misconceptions = self._load_common_misconceptions()
-    
+
     def _load_math_taxonomy(self) -> Dict:
         """Load comprehensive math topics taxonomy"""
         return {
@@ -102,7 +102,7 @@ class AdvancedMathGenerator:
                 "prerequisites": ["algebra", "trigonometry"]
             }
         }
-    
+
     def _load_real_world_contexts(self) -> Dict:
         """Load real-world contexts for math problems"""
         return {
@@ -155,7 +155,7 @@ class AdvancedMathGenerator:
                 "market analysis"
             ]
         }
-    
+
     def _load_common_misconceptions(self) -> Dict:
         """Load common misconceptions to address"""
         return {
@@ -180,7 +180,7 @@ class AdvancedMathGenerator:
                 "Angles in any polygon sum to 180°"
             ]
         }
-    
+
     async def generate_differentiated_content(
         self,
         topic: str,
@@ -196,41 +196,41 @@ class AdvancedMathGenerator:
             base_difficulty,
             student_level
         )
-        
+
         # Generate core content
         content = await self._generate_core_content(
             topic,
             adjusted_difficulty
         )
-        
+
         # Add scaffolding for struggling students
         if student_level in ["emerging", "developing"]:
             content["scaffolding"] = await self._add_scaffolding(
                 topic,
                 content
             )
-        
+
         # Add extensions for advanced students
         if student_level in ["advanced", "expert"]:
             content["extensions"] = await self._add_extensions(
                 topic,
                 content
             )
-        
+
         # Adapt for learning style
         if learning_style:
             content = await self._adapt_for_learning_style(
                 content,
                 learning_style
             )
-        
+
         # Add metacognitive prompts
         content["reflection_questions"] = self._generate_reflection_questions(
             topic
         )
-        
+
         return content
-    
+
     def _adjust_difficulty(
         self,
         base_difficulty: float,
@@ -244,17 +244,17 @@ class AdvancedMathGenerator:
             "advanced": 0.1,
             "expert": 0.2
         }
-        
+
         adjusted = base_difficulty + adjustments.get(student_level, 0.0)
         return max(0.0, min(1.0, adjusted))  # Clamp to [0, 1]
-    
+
     async def _generate_core_content(
         self,
         topic: str,
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate core mathematical content"""
-        
+
         if "fraction" in topic.lower():
             return await self._generate_fraction_content(difficulty)
         elif "algebra" in topic.lower():
@@ -265,18 +265,18 @@ class AdvancedMathGenerator:
             return await self._generate_statistics_content(difficulty)
         else:
             return await self._generate_generic_math_content(topic, difficulty)
-    
+
     async def _generate_fraction_content(
         self,
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate fraction content with progression"""
-        
+
         if difficulty < 0.3:
             # Basic fraction understanding
             numerator = random.randint(1, 5)
             denominator = random.randint(2, 8)
-            
+
             return {
                 "type": "concept_introduction",
                 "concept": f"Understanding {numerator}/{denominator}",
@@ -289,13 +289,13 @@ class AdvancedMathGenerator:
                 "problem": f"Shade {numerator}/{denominator} of the circle",
                 "hint": f"Divide the circle into {denominator} equal parts, then shade {numerator} parts"
             }
-        
+
         elif difficulty < 0.5:
             # Adding fractions with same denominator
             denominator = random.randint(3, 10)
             num1 = random.randint(1, denominator - 2)
             num2 = random.randint(1, denominator - num1)
-            
+
             return {
                 "type": "worked_example",
                 "problem": f"Add: {num1}/{denominator} + {num2}/{denominator}",
@@ -313,16 +313,16 @@ class AdvancedMathGenerator:
                     for _ in range(3)
                 ]
             }
-        
+
         elif difficulty < 0.7:
             # Adding fractions with different denominators
             d1, d2 = random.randint(2, 8), random.randint(2, 8)
             n1, n2 = random.randint(1, d1 - 1), random.randint(1, d2 - 1)
-            
+
             # Calculate LCD
             import math
             lcd = (d1 * d2) // math.gcd(d1, d2)
-            
+
             return {
                 "type": "problem_solving",
                 "problem": f"Add: {n1}/{d1} + {n2}/{d2}",
@@ -339,7 +339,7 @@ class AdvancedMathGenerator:
                     f"Add: {n1 * (lcd // d1)}/{lcd} + {n2 * (lcd // d2)}/{lcd} = {n1 * (lcd // d1) + n2 * (lcd // d2)}/{lcd}"
                 ]
             }
-        
+
         else:
             # Complex fraction operations
             return {
@@ -358,18 +358,18 @@ class AdvancedMathGenerator:
                     "If flour costs $0.50 per cup, what's the cost?"
                 ]
             }
-    
+
     async def _generate_algebra_content(
         self,
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate algebra content"""
-        
+
         if difficulty < 0.4:
             # Basic variables and expressions
             coef = random.randint(2, 10)
             const = random.randint(1, 20)
-            
+
             return {
                 "type": "concept_introduction",
                 "concept": "Understanding Variables",
@@ -386,14 +386,14 @@ class AdvancedMathGenerator:
                     }
                 ]
             }
-        
+
         elif difficulty < 0.6:
             # Solving linear equations
             a = random.randint(2, 10)
             b = random.randint(1, 20)
             x = random.randint(1, 10)
             c = a * x + b
-            
+
             return {
                 "type": "worked_example",
                 "problem": f"Solve: {a}x + {b} = {c}",
@@ -406,13 +406,13 @@ class AdvancedMathGenerator:
                 },
                 "check": f"Verify: {a}({x}) + {b} = {a * x + b} = {c} ✓"
             }
-        
+
         else:
             # Quadratic equations
             a = random.randint(1, 3)
             b = random.randint(-10, 10)
             c = random.randint(-10, 10)
-            
+
             return {
                 "type": "problem_solving",
                 "problem": f"Solve using the quadratic formula: {a}x² + {b}x + {c} = 0",
@@ -425,18 +425,18 @@ class AdvancedMathGenerator:
                 ],
                 "real_world_connection": "Quadratic equations model projectile motion, area problems, and many physics phenomena"
             }
-    
+
     async def _generate_geometry_content(
         self,
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate geometry content"""
-        
+
         if difficulty < 0.4:
             # Basic shapes and area
             length = random.randint(5, 15)
             width = random.randint(3, 12)
-            
+
             return {
                 "type": "concept_application",
                 "problem": f"Find the area of a rectangle with length {length} units and width {width} units",
@@ -449,14 +449,14 @@ class AdvancedMathGenerator:
                 "solution": f"Area = {length} × {width} = {length * width} square units",
                 "real_world": f"This is like finding how much carpet you need for a room {length} feet by {width} feet"
             }
-        
+
         elif difficulty < 0.7:
             # Pythagorean theorem
             a = random.randint(3, 12)
             b = random.randint(4, 12)
             c_squared = a**2 + b**2
             c = round(c_squared ** 0.5, 2)
-            
+
             return {
                 "type": "problem_solving",
                 "problem": f"A right triangle has legs of {a} and {b} units. Find the hypotenuse.",
@@ -473,12 +473,12 @@ class AdvancedMathGenerator:
                     "Navigation and surveying"
                 ]
             }
-        
+
         else:
             # Trigonometry
             angle = random.choice([30, 45, 60])
             side = random.randint(5, 20)
-            
+
             return {
                 "type": "advanced_problem",
                 "problem": f"In a right triangle, one angle is {angle}° and the adjacent side is {side} units. Find the opposite side.",
@@ -491,19 +491,19 @@ class AdvancedMathGenerator:
                 ],
                 "real_world": "Used in surveying, architecture, and engineering to calculate heights and distances"
             }
-    
+
     async def _generate_statistics_content(
         self,
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate statistics content"""
-        
+
         if difficulty < 0.4:
             # Mean, median, mode
             data = sorted([random.randint(1, 100) for _ in range(7)])
             mean = sum(data) / len(data)
             median = data[len(data) // 2]
-            
+
             return {
                 "type": "data_analysis",
                 "problem": "Find the mean and median of this data set",
@@ -524,12 +524,12 @@ class AdvancedMathGenerator:
                 },
                 "interpretation": f"The average (mean) is {round(mean, 2)}, and half the values are below {median}"
             }
-        
+
         else:
             # Probability
             favorable = random.randint(1, 10)
             total = random.randint(favorable + 5, 20)
-            
+
             return {
                 "type": "probability_problem",
                 "problem": f"A bag contains {total} marbles, {favorable} are red. What is the probability of drawing a red marble?",
@@ -544,7 +544,7 @@ class AdvancedMathGenerator:
                     "How many red marbles needed for 50% probability?"
                 ]
             }
-    
+
     async def _generate_generic_math_content(
         self,
         topic: str,
@@ -558,7 +558,7 @@ class AdvancedMathGenerator:
             "explanation": f"Content for {topic} at difficulty {difficulty:.1f}",
             "note": "Specific content generator in development"
         }
-    
+
     def _get_difficulty_label(self, difficulty: float) -> str:
         """Convert numeric difficulty to label"""
         if difficulty < 0.2:
@@ -571,7 +571,7 @@ class AdvancedMathGenerator:
             return "Advanced"
         else:
             return "Expert"
-    
+
     async def _add_scaffolding(
         self,
         topic: str,
@@ -597,7 +597,7 @@ class AdvancedMathGenerator:
             ],
             "vocabulary_support": self._get_vocabulary_for_topic(topic)
         }
-    
+
     async def _add_extensions(
         self,
         topic: str,
@@ -626,43 +626,43 @@ class AdvancedMathGenerator:
                 f"Careers using {topic}"
             ]
         }
-    
+
     async def _adapt_for_learning_style(
         self,
         content: Dict,
         learning_style: str
     ) -> Dict:
         """Adapt content for learning style"""
-        
+
         if learning_style == "visual":
             content["enhanced_visuals"] = True
             content["visual_representations"] = [
                 "Diagrams", "Charts", "Color coding", "Graphic organizers"
             ]
-        
+
         elif learning_style == "auditory":
             content["discussion_prompts"] = [
                 "Explain your thinking out loud",
                 "Discuss with a partner",
                 "Use verbal reasoning"
             ]
-        
+
         elif learning_style == "kinesthetic":
             content["hands_on_activities"] = [
                 "Use manipulatives",
                 "Draw or build models",
                 "Act out the problem"
             ]
-        
+
         elif learning_style == "reading_writing":
             content["written_explanations"] = True
             content["journaling_prompts"] = [
                 "Write about what you learned",
                 "Explain the steps in your own words"
             ]
-        
+
         return content
-    
+
     def _generate_reflection_questions(self, topic: str) -> List[str]:
         """Generate metacognitive reflection questions"""
         return [
@@ -672,7 +672,7 @@ class AdvancedMathGenerator:
             "How confident are you with this topic? (1-5)",
             f"Where else might you use {topic}?"
         ]
-    
+
     def _get_vocabulary_for_topic(self, topic: str) -> Dict[str, str]:
         """Get key vocabulary with definitions"""
         vocab_bank = {
@@ -692,13 +692,13 @@ class AdvancedMathGenerator:
                 "volume": "Amount of space inside a 3D object"
             }
         }
-        
+
         for key in vocab_bank:
             if key in topic.lower():
                 return vocab_bank[key]
-        
+
         return {}
-    
+
     async def generate_real_world_problem(
         self,
         topic: str,
@@ -706,14 +706,14 @@ class AdvancedMathGenerator:
         difficulty: float
     ) -> Dict[str, Any]:
         """Generate real-world application problem"""
-        
+
         contexts = self.real_world_contexts.get(context, [])
         if not contexts:
             context = "shopping"  # Default
             contexts = self.real_world_contexts["shopping"]
-        
+
         scenario = random.choice(contexts)
-        
+
         # Generate context-specific problem
         if context == "shopping" and "fraction" in topic:
             return {
@@ -731,7 +731,7 @@ class AdvancedMathGenerator:
                     "Which is better: 1/3 off or $10 off?"
                 ]
             }
-        
+
         elif context == "cooking" and "fraction" in topic:
             return {
                 "context": "Cooking",
@@ -744,7 +744,7 @@ class AdvancedMathGenerator:
                     "Calculate: 6/6 = 1 cup sugar"
                 ]
             }
-        
+
         # Generic real-world problem
         return {
             "context": context,
@@ -764,12 +764,12 @@ class AdvancedScienceGenerator:
     Advanced science content generator
     Biology, Chemistry, Physics, Earth Science
     """
-    
+
     def __init__(self):
         self.science_domains = self._load_science_domains()
         self.lab_activities = self._load_lab_activities()
         self.phenomena = self._load_phenomena()
-    
+
     def _load_science_domains(self) -> Dict:
         """Load science domains and topics"""
         return {
@@ -802,7 +802,7 @@ class AdvancedScienceGenerator:
                 "skills": ["data_collection", "mapping", "prediction"]
             }
         }
-    
+
     def _load_lab_activities(self) -> Dict:
         """Load inquiry-based lab activities"""
         return {
@@ -859,7 +859,7 @@ class AdvancedScienceGenerator:
                 }
             ]
         }
-    
+
     def _load_phenomena(self) -> Dict:
         """Load observable phenomena for investigation"""
         return {
@@ -888,7 +888,7 @@ class AdvancedScienceGenerator:
                 "How do mountains form?"
             ]
         }
-    
+
     async def generate_science_content(
         self,
         domain: str,  # biology, chemistry, physics, earth_science
@@ -898,7 +898,7 @@ class AdvancedScienceGenerator:
         include_lab: bool = True
     ) -> Dict[str, Any]:
         """Generate comprehensive science content"""
-        
+
         content = {
             "domain": domain,
             "topic": topic,
@@ -906,46 +906,46 @@ class AdvancedScienceGenerator:
             "student_level": student_level,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         # 1. Phenomenon/Hook
         phenomena = self.phenomena.get(domain, [])
         if phenomena:
             content["phenomenon"] = random.choice(phenomena)
-        
+
         # 2. Core Content
         content["core_content"] = self._generate_science_explanation(
             domain, topic, student_level
         )
-        
+
         # 3. Lab Activity (if requested)
         if include_lab:
             labs = self.lab_activities.get(domain, [])
             if labs:
                 content["lab_activity"] = random.choice(labs)
-        
+
         # 4. Differentiation
         if student_level == "struggling":
             content["scaffolding"] = self._add_science_scaffolding(domain, topic)
         elif student_level == "advanced":
             content["extensions"] = self._add_science_extensions(domain, topic)
-        
+
         # 5. Practice Questions
         content["practice_questions"] = self._generate_science_questions(
             domain, topic, student_level
         )
-        
+
         # 6. Real-World Connections
         content["real_world_connections"] = self._get_real_world_science(
             domain, topic
         )
-        
+
         return content
-    
+
     def _generate_science_explanation(
         self, domain: str, topic: str, level: str
     ) -> Dict:
         """Generate science concept explanation"""
-        
+
         if domain == "biology" and "cell" in topic:
             return {
                 "concept": "Cells are the basic units of life",
@@ -967,7 +967,7 @@ class AdvancedScienceGenerator:
                     "Microscope image of real cells"
                 ]
             }
-        
+
         return {
             "concept": f"Core concept for {topic} in {domain}",
             "key_points": [
@@ -976,7 +976,7 @@ class AdvancedScienceGenerator:
             "vocabulary": {},
             "visuals_needed": []
         }
-    
+
     def _add_science_scaffolding(self, domain: str, topic: str) -> Dict:
         """Add scaffolding for struggling students"""
         return {
@@ -997,7 +997,7 @@ class AdvancedScienceGenerator:
             "simplified_text": "Break down into shorter sentences",
             "hands_on_models": "Use physical models before abstract concepts"
         }
-    
+
     def _add_science_extensions(self, domain: str, topic: str) -> Dict:
         """Add extensions for advanced students"""
         return {
@@ -1017,7 +1017,7 @@ class AdvancedScienceGenerator:
                 "Connect to social studies (science history, impact)"
             ]
         }
-    
+
     def _generate_science_questions(
         self, domain: str, topic: str, level: str
     ) -> List[Dict]:
@@ -1044,7 +1044,7 @@ class AdvancedScienceGenerator:
                 "bloom_level": "analyze"
             }
         ]
-    
+
     def _get_real_world_science(self, domain: str, topic: str) -> List[str]:
         """Get real-world applications"""
         connections = {
@@ -1081,12 +1081,12 @@ class AdvancedELAGenerator:
     Advanced English Language Arts content generator
     Reading, Writing, Speaking, Listening
     """
-    
+
     def __init__(self):
         self.reading_skills = self._load_reading_skills()
         self.writing_genres = self._load_writing_genres()
         self.literary_elements = self._load_literary_elements()
-    
+
     def _load_reading_skills(self) -> Dict:
         """Load reading comprehension skills"""
         return {
@@ -1109,7 +1109,7 @@ class AdvancedELAGenerator:
                 "evaluate_sources", "synthesize_information"
             ]
         }
-    
+
     def _load_writing_genres(self) -> Dict:
         """Load writing genres and structures"""
         return {
@@ -1174,7 +1174,7 @@ class AdvancedELAGenerator:
                 ]
             }
         }
-    
+
     def _load_literary_elements(self) -> Dict:
         """Load literary elements for analysis"""
         return {
@@ -1195,7 +1195,7 @@ class AdvancedELAGenerator:
                 "point_of_view": "Who tells the story"
             }
         }
-    
+
     async def generate_ela_content(
         self,
         skill_area: str,  # reading, writing, grammar, vocabulary
@@ -1205,7 +1205,7 @@ class AdvancedELAGenerator:
         genre: Optional[str] = None
     ) -> Dict[str, Any]:
         """Generate comprehensive ELA content"""
-        
+
         content = {
             "skill_area": skill_area,
             "topic": topic,
@@ -1213,7 +1213,7 @@ class AdvancedELAGenerator:
             "student_level": student_level,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if skill_area == "reading":
             content["reading_content"] = await self._generate_reading_content(
                 topic, grade_level, student_level
@@ -1230,27 +1230,27 @@ class AdvancedELAGenerator:
             content["vocabulary_content"] = self._generate_vocabulary_content(
                 topic, grade_level, student_level
             )
-        
+
         # Add differentiation
         if student_level == "struggling":
             content["scaffolding"] = self._add_ela_scaffolding(skill_area)
         elif student_level == "advanced":
             content["extensions"] = self._add_ela_extensions(skill_area)
-        
+
         return content
-    
+
     async def _generate_reading_content(
         self, topic: str, grade: str, level: str
     ) -> Dict:
         """Generate reading comprehension content"""
-        
+
         # Sample passage (would be retrieved from library)
         passage_complexity = {
             "struggling": "simple sentences, common words",
             "proficient": "varied sentences, grade-level vocabulary",
             "advanced": "complex sentences, sophisticated vocabulary"
         }
-        
+
         return {
             "passage": {
                 "title": f"Sample Text about {topic}",
@@ -1285,14 +1285,14 @@ class AdvancedELAGenerator:
                 "What's the author's message?"
             ]
         }
-    
+
     async def _generate_writing_content(
         self, genre: str, grade: str, level: str
     ) -> Dict:
         """Generate writing assignment"""
-        
+
         genre_data = self.writing_genres.get(genre, {})
-        
+
         return {
             "genre": genre,
             "purpose": genre_data.get("purpose"),
@@ -1317,10 +1317,10 @@ class AdvancedELAGenerator:
             ],
             "rubric": self._generate_writing_rubric(genre)
         }
-    
+
     def _generate_grammar_content(self, topic: str, level: str) -> Dict:
         """Generate grammar lesson"""
-        
+
         grammar_topics = {
             "parts_of_speech": {
                 "nouns": "Person, place, thing, or idea",
@@ -1340,7 +1340,7 @@ class AdvancedELAGenerator:
                 "apostrophe": "Possession or contraction"
             }
         }
-        
+
         return {
             "topic": topic,
             "explanation": "Grammar concept explanation...",
@@ -1357,12 +1357,12 @@ class AdvancedELAGenerator:
             ],
             "application": "Write 5 sentences using this concept"
         }
-    
+
     def _generate_vocabulary_content(
         self, topic: str, grade: str, level: str
     ) -> Dict:
         """Generate vocabulary lesson"""
-        
+
         return {
             "words": [
                 {
@@ -1386,7 +1386,7 @@ class AdvancedELAGenerator:
             "context_practice": "Short paragraph using all vocabulary words",
             "assessment": "Quiz on word meanings and usage"
         }
-    
+
     def _add_ela_scaffolding(self, skill_area: str) -> Dict:
         """Add scaffolding for struggling students"""
         return {
@@ -1410,7 +1410,7 @@ class AdvancedELAGenerator:
                 "Step-by-step guides"
             ]
         }
-    
+
     def _add_ela_extensions(self, skill_area: str) -> Dict:
         """Add extensions for advanced students"""
         return {
@@ -1435,7 +1435,7 @@ class AdvancedELAGenerator:
                 "Research author's other works"
             ]
         }
-    
+
     def _get_lexile_for_grade(self, grade: str) -> str:
         """Get appropriate Lexile range"""
         lexile_ranges = {
@@ -1454,7 +1454,7 @@ class AdvancedELAGenerator:
             "12": "1185-1385L"
         }
         return lexile_ranges.get(grade, "varies")
-    
+
     def _get_organizer_for_genre(self, genre: str) -> Dict:
         """Get graphic organizer for writing genre"""
         organizers = {
@@ -1481,7 +1481,7 @@ class AdvancedELAGenerator:
             }
         }
         return organizers.get(genre, {"name": "Generic organizer"})
-    
+
     def _generate_writing_rubric(self, genre: str) -> Dict:
         """Generate writing rubric"""
         return {
@@ -1502,11 +1502,11 @@ class WorldLanguagesGenerator:
     World Languages content generator
     Supports 50+ languages with CEFR levels
     """
-    
+
     def __init__(self):
         self.cefr_levels = self._load_cefr_framework()
         self.language_families = self._load_language_families()
-    
+
     def _load_cefr_framework(self) -> Dict:
         """Load CEFR (Common European Framework) levels"""
         return {
@@ -1576,7 +1576,7 @@ class WorldLanguagesGenerator:
                 "grammar": "Native-like proficiency"
             }
         }
-    
+
     def _load_language_families(self) -> Dict:
         """Load language families for transfer strategies"""
         return {
@@ -1587,7 +1587,7 @@ class WorldLanguagesGenerator:
             "sinitic": ["Mandarin", "Cantonese"],
             "indo_aryan": ["Hindi", "Urdu", "Bengali"]
         }
-    
+
     async def generate_language_lesson(
         self,
         language: str,
@@ -1596,9 +1596,9 @@ class WorldLanguagesGenerator:
         skill: str = "integrated"  # speaking, listening, reading, writing, integrated
     ) -> Dict[str, Any]:
         """Generate comprehensive language lesson"""
-        
+
         level_data = self.cefr_levels.get(cefr_level, {})
-        
+
         content = {
             "language": language,
             "cefr_level": cefr_level,
@@ -1607,40 +1607,40 @@ class WorldLanguagesGenerator:
             "skill_focus": skill,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         # 1. Vocabulary
         content["vocabulary"] = self._generate_vocabulary_list(
             language, topic, cefr_level
         )
-        
+
         # 2. Grammar Point
         content["grammar"] = self._select_grammar_point(language, cefr_level)
-        
+
         # 3. Authentic Materials
         content["authentic_materials"] = self._get_authentic_materials(
             language, cefr_level, topic
         )
-        
+
         # 4. Communicative Activities
         content["activities"] = self._generate_language_activities(
             language, cefr_level, skill
         )
-        
+
         # 5. Cultural Context
         content["cultural_notes"] = self._add_cultural_context(language, topic)
-        
+
         # 6. Assessment
         content["assessment"] = self._generate_language_assessment(
             language, cefr_level, skill
         )
-        
+
         return content
-    
+
     def _generate_vocabulary_list(
         self, language: str, topic: str, level: str
     ) -> Dict:
         """Generate vocabulary for lesson"""
-        
+
         # Example for Spanish
         if language == "Spanish" and topic == "family":
             vocab = {
@@ -1666,7 +1666,7 @@ class WorldLanguagesGenerator:
                 {"word": f"{language} word 1", "english": "English translation"},
                 {"word": f"{language} word 2", "english": "English translation"}
             ]
-        
+
         return {
             "words": words,
             "practice_activities": [
@@ -1677,10 +1677,10 @@ class WorldLanguagesGenerator:
             ],
             "pronunciation_guide": "Audio files for each word"
         }
-    
+
     def _select_grammar_point(self, language: str, level: str) -> Dict:
         """Select appropriate grammar point"""
-        
+
         grammar_progression = {
             "A1": [
                 "Present tense regular verbs",
@@ -1700,9 +1700,9 @@ class WorldLanguagesGenerator:
                 "Complex sentence structures"
             ]
         }
-        
+
         topics = grammar_progression.get(level, grammar_progression["A1"])
-        
+
         return {
             "topic": random.choice(topics),
             "explanation": "Grammar rule explanation",
@@ -1713,12 +1713,12 @@ class WorldLanguagesGenerator:
                 "Error correction"
             ]
         }
-    
+
     def _get_authentic_materials(
         self, language: str, level: str, topic: str
     ) -> Dict:
         """Get authentic materials in target language"""
-        
+
         return {
             "reading": {
                 "type": "Short text/dialogue",
@@ -1746,14 +1746,14 @@ class WorldLanguagesGenerator:
                 "tasks": ["Watch and answer questions"]
             }
         }
-    
+
     def _generate_language_activities(
         self, language: str, level: str, skill: str
     ) -> List[Dict]:
         """Generate communicative activities"""
-        
+
         activities = []
-        
+
         # Speaking activities
         activities.append({
             "skill": "speaking",
@@ -1763,7 +1763,7 @@ class WorldLanguagesGenerator:
             "time": "5-10 minutes",
             "example": "Order food at a restaurant"
         })
-        
+
         # Listening activities
         activities.append({
             "skill": "listening",
@@ -1772,7 +1772,7 @@ class WorldLanguagesGenerator:
             "format": "individual",
             "time": "10 minutes"
         })
-        
+
         # Reading activities
         activities.append({
             "skill": "reading",
@@ -1781,7 +1781,7 @@ class WorldLanguagesGenerator:
             "format": "individual or pairs",
             "time": "15 minutes"
         })
-        
+
         # Writing activities
         activities.append({
             "skill": "writing",
@@ -1790,12 +1790,12 @@ class WorldLanguagesGenerator:
             "format": "individual",
             "time": "15-20 minutes"
         })
-        
+
         return activities
-    
+
     def _add_cultural_context(self, language: str, topic: str) -> Dict:
         """Add cultural information"""
-        
+
         return {
             "cultural_notes": [
                 f"In {language}-speaking countries...",
@@ -1811,12 +1811,12 @@ class WorldLanguagesGenerator:
                 "Foods", "Music", "Art", "Literature", "Celebrations"
             ]
         }
-    
+
     def _generate_language_assessment(
         self, language: str, level: str, skill: str
     ) -> Dict:
         """Generate language assessment"""
-        
+
         return {
             "formative_assessment": [
                 "Exit ticket (one thing learned today)",

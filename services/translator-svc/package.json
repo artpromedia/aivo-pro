@@ -1,5 +1,6 @@
 {
   "name": "@aivo/translator-svc",
+  "type": "module",
   "version": "1.0.0",
   "description": "Language Translator Agent - Multi-language support for AIVO Learning Platform",
   "main": "src/main.py",

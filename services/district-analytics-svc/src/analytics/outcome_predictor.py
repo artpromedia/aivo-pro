@@ -5,14 +5,14 @@ from typing import Dict
 
 class OutcomePredictor:
     """Predict learning outcomes"""
-    
+
     def __init__(self):
         self.model = None
-    
+
     async def load_models(self):
         """Load ML models"""
         print("✅ Outcome predictor initialized")
-    
+
     async def predict_outcomes(
         self,
         historical_data: Dict,

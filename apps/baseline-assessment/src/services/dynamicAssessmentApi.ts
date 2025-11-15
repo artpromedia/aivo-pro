@@ -49,19 +49,56 @@ class DynamicAssessmentAPI {
     try {
       console.log('🧠 Requesting question from AIVO Main Brain (trained education model)...');
       
+      // Grade-specific context for appropriate complexity
+      const gradeContext = request.grade >= 9 
+        ? 'HIGH SCHOOL level - Use algebra, geometry, advanced concepts, literary analysis, complex vocabulary'
+        : request.grade >= 6 
+        ? 'MIDDLE SCHOOL level - Use pre-algebra, fractions, inference, vocabulary'
+        : request.grade >= 3
+        ? 'UPPER ELEMENTARY level - Use multiplication, division, basic fractions'
+        : 'EARLY ELEMENTARY level - Use simple addition, subtraction, basic concepts';
+      
+      // Subject-specific depth indicators
+      const subjectDepth = {
+        'Math': request.grade >= 9 
+          ? 'algebra, quadratic equations, functions, trigonometry, statistics' 
+          : request.grade >= 6 
+          ? 'pre-algebra, ratios, percentages, equations with variables'
+          : 'basic operations, word problems, fractions',
+        'Reading': request.grade >= 9 
+          ? 'literary analysis, rhetorical devices, complex inference, theme analysis'
+          : request.grade >= 6
+          ? 'main idea, inference, context clues, author\'s purpose'
+          : 'comprehension, vocabulary, simple inference',
+        'Science': request.grade >= 9
+          ? 'chemistry, physics, biology concepts, scientific method, data analysis'
+          : request.grade >= 6
+          ? 'life science, physical science, earth science, experiments'
+          : 'simple observations, basic life cycles, weather',
+        'SEL': request.grade >= 9
+          ? 'complex emotional regulation, peer relationships, conflict resolution, identity'
+          : 'emotions, empathy, friendship, problem-solving'
+      };
+      
       // Construct a detailed prompt for question generation
-      const questionPrompt = `Generate a ${request.difficulty || 'medium'} difficulty ${request.subject} assessment question for grade ${request.grade}.
+      const questionPrompt = `You are creating a ${request.difficulty || 'medium'} difficulty ${request.subject} assessment question for GRADE ${request.grade} (${gradeContext}).
+
+CRITICAL REQUIREMENTS FOR GRADE ${request.grade}:
+- Content must be appropriate for ${request.grade >= 9 ? 'HIGH SCHOOL (9-12)' : request.grade >= 6 ? 'MIDDLE SCHOOL (6-8)' : request.grade >= 3 ? 'UPPER ELEMENTARY (3-5)' : 'EARLY ELEMENTARY (K-2)'} students
+- Use concepts from: ${subjectDepth[request.subject as keyof typeof subjectDepth] || 'grade-appropriate material'}
+- Language and vocabulary must match Grade ${request.grade} reading level
+- Examples and scenarios must relate to ${request.grade >= 13 ? 'young adults' : request.grade >= 9 ? 'teenagers' : request.grade >= 6 ? 'pre-teens' : 'children'}
 
 Create ONE complete multiple-choice question with 4 options. Return ONLY valid JSON:
 
 {
-  "question": "Complete specific question with all context needed",
+  "question": "Complete specific question with all context needed - NO placeholders",
   "options": ["Option A with full text", "Option B with full text", "Option C with full text", "Option D with full text"],
   "correct_answer": "The correct option text (must match exactly)",
   "explanation": "Why this answer is correct"
 }
 
-Make it age-appropriate, specific, and engaging for grade ${request.grade} students.`;
+Make it challenging yet fair for Grade ${request.grade} students.`;
 
       const response = await fetch(`${this.aivoBaseUrl}/v1/generate`, {
         method: 'POST',
@@ -139,26 +176,63 @@ Make it age-appropriate, specific, and engaging for grade ${request.grade} stude
       // Fallback to LocalAI with enhanced prompting
       console.log('🔄 Trying LocalAI for question generation...');
       
-      // Subject-specific examples for better quality
-      const subjectExamples: { [key: string]: string } = {
-        'Math': `Example: "Sarah has 12 cookies and wants to share them equally with 3 friends. How many cookies will each person get?"
+      // Grade-appropriate examples
+      const getGradeExample = (subject: string, grade: number): string => {
+        if (grade >= 9) {
+          // High school examples
+          const highSchoolExamples: { [key: string]: string } = {
+            'Math': `Example: "Solve for x: 2x² - 8x + 6 = 0"
+Options: ["x = 1 or x = 3", "x = 2 or x = 4", "x = -1 or x = -3", "x = 0 or x = 2"]
+Correct: "x = 1 or x = 3"`,
+            'Reading': `Example: "In Shakespeare's use of metaphor 'All the world's a stage,' what literary device is primarily employed?"
+Options: ["Simile", "Extended metaphor", "Hyperbole", "Personification"]
+Correct: "Extended metaphor"`,
+            'Science': `Example: "What is the primary function of mitochondria in eukaryotic cells?"
+Options: ["Protein synthesis", "Energy production through cellular respiration", "DNA replication", "Photosynthesis"]
+Correct: "Energy production through cellular respiration"`,
+            'SEL': `Example: "You witness a friend being cyberbullied. What is the most effective first step?"
+Options: ["Join in to fit in with the group", "Screenshot evidence and report it to a trusted adult", "Tell the friend to just ignore it", "Post about it on social media"]
+Correct: "Screenshot evidence and report it to a trusted adult"`
+          };
+          return highSchoolExamples[subject] || highSchoolExamples['Math'];
+        } else if (grade >= 6) {
+          // Middle school examples
+          const middleSchoolExamples: { [key: string]: string } = {
+            'Math': `Example: "What is 25% of 80?"
+Options: ["15", "20", "25", "30"]
+Correct: "20"`,
+            'Reading': `Example: "What is the author's main purpose in writing a persuasive essay?"
+Options: ["To entertain", "To inform", "To convince", "To describe"]
+Correct: "To convince"`,
+            'Science': `Example: "Which organelle controls cell activities and contains DNA?"
+Options: ["Mitochondria", "Nucleus", "Ribosome", "Cell membrane"]
+Correct: "Nucleus"`
+          };
+          return middleSchoolExamples[subject] || middleSchoolExamples['Math'];
+        } else {
+          // Elementary examples
+          const elementaryExamples: { [key: string]: string } = {
+            'Math': `Example: "Sarah has 12 cookies and wants to share them equally with 3 friends. How many cookies will each person get?"
 Options: ["3 cookies", "4 cookies", "5 cookies", "6 cookies"]
 Correct: "4 cookies"`,
-        'Reading': `Example: "In the sentence 'The quick brown fox jumps over the lazy dog,' which word is an adjective describing the dog?"
+            'Reading': `Example: "In the sentence 'The quick brown fox jumps over the lazy dog,' which word is an adjective describing the dog?"
 Options: ["quick", "lazy", "jumps", "brown"]
 Correct: "lazy"`,
-        'Science': `Example: "What happens to water when it freezes?"
+            'Science': `Example: "What happens to water when it freezes?"
 Options: ["It becomes a solid called ice", "It evaporates into the air", "It becomes warmer", "It stays liquid but gets colder"]
-Correct: "It becomes a solid called ice"`,
-        'SEL': `Example: "Your friend looks sad at recess. What is the BEST way to show empathy?"
-Options: ["Ask them how they're feeling and listen", "Ignore them and play with someone else", "Tell them to stop being sad", "Laugh to cheer them up"]
-Correct: "Ask them how they're feeling and listen"`,
-        'Speech Therapy': `Example: "Which word has the same beginning sound as 'cat'?"
-Options: ["kite", "dog", "fish", "sun"]
-Correct: "kite"`
+Correct: "It becomes a solid called ice"`
+          };
+          return elementaryExamples[subject] || elementaryExamples['Math'];
+        }
       };
       
-      const exampleText = subjectExamples[request.subject] || subjectExamples['Math'];
+      const exampleText = getGradeExample(request.subject, request.grade);
+      
+      const gradeLevel = request.grade >= 9 
+        ? `HIGH SCHOOL (Grade ${request.grade}) - Use advanced concepts, complex problem-solving`
+        : request.grade >= 6
+        ? `MIDDLE SCHOOL (Grade ${request.grade}) - Use intermediate concepts`
+        : `ELEMENTARY (Grade ${request.grade}) - Use foundational concepts`;
       
       const localAIResponse = await fetch('http://localhost:8080/v1/chat/completions', {
         method: 'POST',
@@ -169,18 +243,18 @@ Correct: "kite"`
           model: 'ibm-granite.granite-4.0-1b',
           messages: [{
             role: 'system',
-            content: `You are an expert teacher creating assessment questions. Create a ${request.difficulty || 'medium'} difficulty ${request.subject} question for grade ${request.grade}.
+            content: `You are an expert teacher creating assessment questions. Create a ${request.difficulty || 'medium'} difficulty ${request.subject} question for ${gradeLevel}.
 
-CRITICAL REQUIREMENTS:
-- Write a COMPLETE, SPECIFIC question with clear context
-- NO placeholders like "Sample content" or generic text
+CRITICAL REQUIREMENTS FOR GRADE ${request.grade}:
+- Content MUST be appropriate for Grade ${request.grade} students
+- Use vocabulary and concepts for ${request.grade >= 9 ? 'HIGH SCHOOL' : request.grade >= 6 ? 'MIDDLE SCHOOL' : 'ELEMENTARY'} level
+- NO placeholders like "Sample content" or generic text  
 - Include 4 distinct, realistic multiple choice options
 - Make wrong answers plausible but clearly incorrect
-- Use age-appropriate language for grade ${request.grade}
 - For word problems, include names and specific numbers
 - For concepts, provide clear scenarios
 
-Example format for ${request.subject}:
+Example format for ${request.subject} at this grade level:
 ${exampleText}
 
 Return ONLY valid JSON in this exact format:
@@ -192,7 +266,7 @@ Return ONLY valid JSON in this exact format:
 }`
           }, {
             role: 'user', 
-            content: `Create ONE unique ${request.subject} assessment question for grade ${request.grade} at ${request.difficulty} difficulty. Make it specific and complete with realistic options. Session: ${this.sessionId.slice(-8)}`
+            content: `Create ONE unique ${request.subject} assessment question for Grade ${request.grade} at ${request.difficulty} difficulty. Make it specific, complete, and appropriate for ${request.grade >= 9 ? 'high school' : request.grade >= 6 ? 'middle school' : 'elementary'} students. Session: ${this.sessionId.slice(-8)}`
           }],
           temperature: 0.8,
           max_tokens: 600
@@ -359,6 +433,104 @@ Return ONLY valid JSON in this exact format:
             { q: 'A recipe calls for 2 1/4 cups of flour. If you double the recipe, how much flour do you need?', options: ['4 1/4 cups', '4 1/2 cups', '4 2/4 cups', '5 cups'], correct: '4 1/2 cups' },
             { q: 'What is the volume of a cube with sides of 3 cm?', options: ['9 cm³', '18 cm³', '27 cm³', '36 cm³'], correct: '27 cm³' }
           ]
+        },
+        '6': {
+          easy: [
+            { q: 'What is 20% of 50?', options: ['5', '10', '15', '20'], correct: '10' },
+            { q: 'Simplify: 12/16', options: ['2/3', '3/4', '4/5', '1/2'], correct: '3/4' }
+          ],
+          medium: [
+            { q: 'Solve: 3x + 5 = 20', options: ['x = 3', 'x = 4', 'x = 5', 'x = 6'], correct: 'x = 5' },
+            { q: 'What is the mean of 12, 15, 18, and 23?', options: ['16', '17', '18', '19'], correct: '17' }
+          ],
+          hard: [
+            { q: 'A circle has a radius of 7 cm. What is its circumference? (Use π ≈ 3.14)', options: ['21.98 cm', '43.96 cm', '153.86 cm', '14 cm'], correct: '43.96 cm' },
+            { q: 'If y = 2x + 3, what is y when x = 4?', options: ['9', '10', '11', '12'], correct: '11' }
+          ]
+        },
+        '7': {
+          easy: [
+            { q: 'What is 0.25 as a fraction?', options: ['1/2', '1/4', '1/3', '2/5'], correct: '1/4' },
+            { q: 'Solve: x - 7 = 15', options: ['x = 8', 'x = 20', 'x = 22', 'x = 24'], correct: 'x = 22' }
+          ],
+          medium: [
+            { q: 'What is the slope of a line passing through (2,3) and (4,7)?', options: ['1', '2', '3', '4'], correct: '2' },
+            { q: 'Simplify: 3(x + 4)', options: ['3x + 4', '3x + 12', 'x + 12', '3x + 7'], correct: '3x + 12' }
+          ],
+          hard: [
+            { q: 'What is the probability of rolling a sum of 7 with two dice?', options: ['1/12', '1/9', '1/6', '1/3'], correct: '1/6' },
+            { q: 'A rectangle has a perimeter of 40 cm and a width of 8 cm. What is its area?', options: ['96 cm²', '120 cm²', '160 cm²', '192 cm²'], correct: '96 cm²' }
+          ]
+        },
+        '8': {
+          easy: [
+            { q: 'Evaluate: 5² - 3²', options: ['4', '8', '16', '24'], correct: '16' },
+            { q: 'What is 30% of 200?', options: ['50', '60', '70', '80'], correct: '60' }
+          ],
+          medium: [
+            { q: 'Factor: x² + 5x + 6', options: ['(x+2)(x+3)', '(x+1)(x+6)', '(x+2)(x+4)', '(x+3)(x+3)'], correct: '(x+2)(x+3)' },
+            { q: 'What is the surface area of a cube with side length 4 cm?', options: ['64 cm²', '80 cm²', '96 cm²', '112 cm²'], correct: '96 cm²' }
+          ],
+          hard: [
+            { q: 'Solve: 2(x - 3) = x + 4', options: ['x = 8', 'x = 10', 'x = 12', 'x = 14'], correct: 'x = 10' },
+            { q: 'If f(x) = 2x² - 3x + 1, what is f(2)?', options: ['1', '3', '5', '7'], correct: '3' }
+          ]
+        },
+        '9': {
+          easy: [
+            { q: 'Solve: 3x - 12 = 0', options: ['x = 2', 'x = 3', 'x = 4', 'x = 5'], correct: 'x = 4' },
+            { q: 'What is the slope of the line y = 4x + 7?', options: ['4', '7', '-4', '1/4'], correct: '4' }
+          ],
+          medium: [
+            { q: 'Factor completely: x² - 16', options: ['(x-4)(x-4)', '(x+4)(x-4)', '(x+8)(x-8)', 'Cannot factor'], correct: '(x+4)(x-4)' },
+            { q: 'What is the vertex of the parabola y = (x - 3)² + 2?', options: ['(3, 2)', '(-3, 2)', '(3, -2)', '(2, 3)'], correct: '(3, 2)' }
+          ],
+          hard: [
+            { q: 'Solve the system: 2x + y = 10 and x - y = 2', options: ['x=3, y=4', 'x=4, y=2', 'x=5, y=0', 'x=2, y=6'], correct: 'x=4, y=2' },
+            { q: 'Simplify: (3x²y³)/(xy²)', options: ['3xy', '3x²y', '3xy²', 'xy'], correct: '3xy' }
+          ]
+        },
+        '10': {
+          easy: [
+            { q: 'What is the value of sin(30°)?', options: ['0', '1/2', '√2/2', '1'], correct: '1/2' },
+            { q: 'Expand: (x + 5)²', options: ['x² + 25', 'x² + 5x + 25', 'x² + 10x + 25', 'x² + 10x + 5'], correct: 'x² + 10x + 25' }
+          ],
+          medium: [
+            { q: 'Solve for x: x² - 5x + 6 = 0', options: ['x = 1 or x = 6', 'x = 2 or x = 3', 'x = -2 or x = -3', 'x = -1 or x = -6'], correct: 'x = 2 or x = 3' },
+            { q: 'What is the domain of f(x) = √(x - 4)?', options: ['x ≥ 4', 'x ≤ 4', 'x > 4', 'All real numbers'], correct: 'x ≥ 4' }
+          ],
+          hard: [
+            { q: 'If log₂(x) = 5, what is x?', options: ['10', '16', '25', '32'], correct: '32' },
+            { q: 'What is the equation of a circle with center (2, -3) and radius 5?', options: ['(x-2)² + (y+3)² = 25', '(x+2)² + (y-3)² = 25', '(x-2)² + (y-3)² = 5', 'x² + y² = 25'], correct: '(x-2)² + (y+3)² = 25' }
+          ]
+        },
+        '11': {
+          easy: [
+            { q: 'Simplify: log(100)', options: ['1', '2', '10', '100'], correct: '2' },
+            { q: 'What is the period of y = sin(x)?', options: ['π/2', 'π', '2π', '4π'], correct: '2π' }
+          ],
+          medium: [
+            { q: 'Evaluate: lim(x→2) (x² - 4)/(x - 2)', options: ['0', '2', '4', 'undefined'], correct: '4' },
+            { q: 'What is the inverse of f(x) = 2x + 3?', options: ['f⁻¹(x) = (x-3)/2', 'f⁻¹(x) = (x+3)/2', 'f⁻¹(x) = x/2 - 3', 'f⁻¹(x) = 2x - 3'], correct: 'f⁻¹(x) = (x-3)/2' }
+          ],
+          hard: [
+            { q: 'What is the derivative of f(x) = 3x² + 5x - 2?', options: ['6x + 5', '3x + 5', '6x² + 5x', '3x² + 5'], correct: '6x + 5' },
+            { q: 'Solve: 2^(x+1) = 32', options: ['x = 3', 'x = 4', 'x = 5', 'x = 6'], correct: 'x = 4' }
+          ]
+        },
+        '12': {
+          easy: [
+            { q: 'What is ∫2x dx?', options: ['x²', 'x² + C', '2x²', '2x² + C'], correct: 'x² + C' },
+            { q: 'Evaluate: d/dx(x³)', options: ['x²', '2x²', '3x²', '3x'], correct: '3x²' }
+          ],
+          medium: [
+            { q: 'What is the integral of cos(x) dx?', options: ['-sin(x) + C', 'sin(x) + C', '-cos(x) + C', 'cos(x) + C'], correct: 'sin(x) + C' },
+            { q: 'Find the maximum of f(x) = -x² + 4x + 5', options: ['(2, 9)', '(4, 5)', '(0, 5)', '(2, 5)'], correct: '(2, 9)' }
+          ],
+          hard: [
+            { q: 'Solve the differential equation: dy/dx = 2y', options: ['y = Ce^(2x)', 'y = 2e^x + C', 'y = Ce^x', 'y = x² + C'], correct: 'y = Ce^(2x)' },
+            { q: 'What is the Taylor series expansion of e^x at x=0 up to the x² term?', options: ['1 + x + x²', '1 + x + x²/2', '1 + x + x²/2!', '1 + x'], correct: '1 + x + x²/2!' }
+          ]
         }
       },
       'Reading': {
@@ -420,6 +592,104 @@ Return ONLY valid JSON in this exact format:
           hard: [
             { q: 'What can you infer if a character is wearing a coat and gloves?', options: ['It is hot', 'It is cold', 'It is raining', 'It is sunny'], correct: 'It is cold' },
             { q: 'Which sentence has a metaphor?', options: ['The sun is bright.', 'She runs like the wind.', 'Her voice is music.', 'The dog barked loudly.'], correct: 'Her voice is music.' }
+          ]
+        },
+        '6': {
+          easy: [
+            { q: 'What is a protagonist?', options: ['The villain', 'The main character', 'The setting', 'The conflict'], correct: 'The main character' },
+            { q: 'What does "chronological order" mean?', options: ['By importance', 'By time order', 'By size', 'Alphabetically'], correct: 'By time order' }
+          ],
+          medium: [
+            { q: 'What is the theme of a story?', options: ['The plot summary', 'The main character', 'The central message or lesson', 'The setting'], correct: 'The central message or lesson' },
+            { q: 'Which is an example of alliteration?', options: ['She sells seashells', 'The wind howled', 'It was as cold as ice', 'The sun smiled'], correct: 'She sells seashells' }
+          ],
+          hard: [
+            { q: 'What is the author\'s purpose in a persuasive essay?', options: ['To entertain', 'To inform', 'To convince the reader', 'To describe'], correct: 'To convince the reader' },
+            { q: 'What is foreshadowing?', options: ['Looking back at past events', 'Hints about future events', 'Exaggeration', 'Comparison using like or as'], correct: 'Hints about future events' }
+          ]
+        },
+        '7': {
+          easy: [
+            { q: 'What is a biography?', options: ['A fictional story', 'A story about someone\'s life', 'A poem', 'An opinion piece'], correct: 'A story about someone\'s life' },
+            { q: 'What does "tone" mean in literature?', options: ['The volume', 'The author\'s attitude', 'The setting', 'The plot'], correct: 'The author\'s attitude' }
+          ],
+          medium: [
+            { q: 'Which is an example of irony?', options: ['A fire station burns down', 'The sun is hot', 'She ran quickly', 'The tree is tall'], correct: 'A fire station burns down' },
+            { q: 'What is the climax of a story?', options: ['The beginning', 'The turning point or highest tension', 'The resolution', 'The introduction of characters'], correct: 'The turning point or highest tension' }
+          ],
+          hard: [
+            { q: 'What is the difference between theme and main idea?', options: ['They are the same thing', 'Theme is the lesson; main idea is what the text is mostly about', 'Theme is for fiction only', 'Main idea is longer'], correct: 'Theme is the lesson; main idea is what the text is mostly about' },
+            { q: 'What literary device is "The classroom was a zoo"?', options: ['Simile', 'Metaphor', 'Personification', 'Hyperbole'], correct: 'Metaphor' }
+          ]
+        },
+        '8': {
+          easy: [
+            { q: 'What is an autobiography?', options: ['Someone else\'s life story', 'Your own life story', 'A fictional story', 'A historical document'], correct: 'Your own life story' },
+            { q: 'What does "context clues" mean?', options: ['The main idea', 'Words around an unknown word that help define it', 'The author\'s opinion', 'The setting'], correct: 'Words around an unknown word that help define it' }
+          ],
+          medium: [
+            { q: 'What is satire?', options: ['Serious criticism', 'Using humor to criticize', 'A sad story', 'Historical fiction'], correct: 'Using humor to criticize' },
+            { q: 'Which point of view uses "I" and "me"?', options: ['Third person', 'Second person', 'First person', 'Omniscient'], correct: 'First person' }
+          ],
+          hard: [
+            { q: 'What is an unreliable narrator?', options: ['A narrator who tells the truth', 'A narrator whose credibility is compromised', 'A narrator who is omniscient', 'A third-person narrator'], correct: 'A narrator whose credibility is compromised' },
+            { q: 'What is the purpose of a rhetorical question?', options: ['To get an answer', 'To make a point without expecting an answer', 'To confuse the reader', 'To end a speech'], correct: 'To make a point without expecting an answer' }
+          ]
+        },
+        '9': {
+          easy: [
+            { q: 'What is an antagonist?', options: ['The hero', 'The character opposing the protagonist', 'The narrator', 'The setting'], correct: 'The character opposing the protagonist' },
+            { q: 'What is "imagery" in literature?', options: ['The plot', 'Descriptive language that creates mental pictures', 'The theme', 'The characters'], correct: 'Descriptive language that creates mental pictures' }
+          ],
+          medium: [
+            { q: 'In Romeo and Juliet, what literary device is the phrase "O Romeo, Romeo, wherefore art thou Romeo?"', options: ['Metaphor', 'Apostrophe', 'Simile', 'Allusion'], correct: 'Apostrophe' },
+            { q: 'What is the difference between denotation and connotation?', options: ['They mean the same', 'Denotation is literal meaning; connotation is emotional meaning', 'Connotation is literal; denotation is emotional', 'Neither are important'], correct: 'Denotation is literal meaning; connotation is emotional meaning' }
+          ],
+          hard: [
+            { q: 'What is a paradox?', options: ['A contradiction that reveals truth', 'A simple statement', 'A type of poem', 'An exaggeration'], correct: 'A contradiction that reveals truth' },
+            { q: 'What is the function of a foil character?', options: ['To be the villain', 'To contrast with another character to highlight qualities', 'To narrate the story', 'To provide comic relief'], correct: 'To contrast with another character to highlight qualities' }
+          ]
+        },
+        '10': {
+          easy: [
+            { q: 'What is an allegory?', options: ['A true story', 'A story with symbolic meaning', 'A biography', 'A short poem'], correct: 'A story with symbolic meaning' },
+            { q: 'What does "archetype" mean?', options: ['A new idea', 'A universal symbol or character type', 'A specific setting', 'A type of conflict'], correct: 'A universal symbol or character type' }
+          ],
+          medium: [
+            { q: 'What is the purpose of a soliloquy?', options: ['To speak to another character', 'To reveal inner thoughts to the audience', 'To describe the setting', 'To advance the plot quickly'], correct: 'To reveal inner thoughts to the audience' },
+            { q: 'Which work is an example of epic poetry?', options: ['A sonnet', 'The Odyssey', 'A haiku', 'A limerick'], correct: 'The Odyssey' }
+          ],
+          hard: [
+            { q: 'What is the "tragic flaw" in classical literature?', options: ['A minor mistake', 'A character defect that leads to downfall', 'Perfect virtue', 'Comic relief'], correct: 'A character defect that leads to downfall' },
+            { q: 'In "The Great Gatsby," what does the green light symbolize?', options: ['Jealousy', 'Money', 'Hope and the American Dream', 'Nature'], correct: 'Hope and the American Dream' }
+          ]
+        },
+        '11': {
+          easy: [
+            { q: 'What is a motif?', options: ['The main character', 'A recurring element that has symbolic significance', 'The setting', 'The climax'], correct: 'A recurring element that has symbolic significance' },
+            { q: 'What is stream of consciousness?', options: ['Organized thoughts', 'A narrative technique showing continuous flow of thoughts', 'Dialogue only', 'Third person narration'], correct: 'A narrative technique showing continuous flow of thoughts' }
+          ],
+          medium: [
+            { q: 'What literary period emphasized emotion and nature over reason?', options: ['Realism', 'Romanticism', 'Modernism', 'Naturalism'], correct: 'Romanticism' },
+            { q: 'What is an oxymoron?', options: ['A long speech', 'Contradictory terms together (like "deafening silence")', 'A comparison', 'A question'], correct: 'Contradictory terms together (like "deafening silence")' }
+          ],
+          hard: [
+            { q: 'What is the purpose of dramatic irony?', options: ['To confuse the audience', 'The audience knows something characters don\'t', 'To make characters laugh', 'To end the play'], correct: 'The audience knows something characters don\'t' },
+            { q: 'What characterizes American Transcendentalism?', options: ['Focus on sin', 'Belief in inherent goodness, nature, and self-reliance', 'Urban life themes', 'Pessimism'], correct: 'Belief in inherent goodness, nature, and self-reliance' }
+          ]
+        },
+        '12': {
+          easy: [
+            { q: 'What is postmodern literature known for?', options: ['Clear linear narratives', 'Experimentation and challenging conventions', 'Simple themes', 'Happy endings'], correct: 'Experimentation and challenging conventions' },
+            { q: 'What is ekphrasis?', options: ['A type of rhyme', 'Vivid description of visual art in writing', 'A short story', 'An introduction'], correct: 'Vivid description of visual art in writing' }
+          ],
+          medium: [
+            { q: 'What is the Harlem Renaissance?', options: ['A scientific movement', 'A cultural/artistic African American movement in 1920s', 'A political party', 'A war'], correct: 'A cultural/artistic African American movement in 1920s' },
+            { q: 'What narrative technique did William Faulkner often use?', options: ['Simple chronology', 'Multiple perspectives and stream of consciousness', 'Always third person', 'Present tense only'], correct: 'Multiple perspectives and stream of consciousness' }
+          ],
+          hard: [
+            { q: 'What is metafiction?', options: ['Historical fiction', 'Fiction that self-consciously addresses its own fictional nature', 'Fantasy', 'Biography'], correct: 'Fiction that self-consciously addresses its own fictional nature' },
+            { q: 'In "1984," what does Newspeak represent?', options: ['Progress', 'Language control as thought control', 'Freedom', 'Education'], correct: 'Language control as thought control' }
           ]
         }
       },

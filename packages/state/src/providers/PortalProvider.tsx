@@ -11,7 +11,6 @@ interface PortalProviderProps {
 
 export function PortalProvider({
   children,
-  portalType,
   autoSync = true,
   syncInterval = 30000 // 30 seconds
 }: PortalProviderProps) {
@@ -25,7 +24,7 @@ export function PortalProvider({
     });
 
     // Set up auto-sync if enabled
-    let syncIntervalId: NodeJS.Timeout | null = null;
+  let syncIntervalId: ReturnType<typeof setInterval> | null = null;
     if (autoSync) {
       syncIntervalId = setInterval(() => {
         if (navigator.onLine) {

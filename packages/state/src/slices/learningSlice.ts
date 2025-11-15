@@ -5,8 +5,8 @@ export interface LearningSlice {
   startLearningSession: (session: LearningSession) => void;
   updateLearningSession: (updates: Partial<LearningSession>) => void;
   endLearningSession: () => void;
-  addActivity: (activity: any) => void;
-  updateProgress: (studentId: string, progress: any) => void;
+  addActivity: (activity: unknown) => void;
+  updateProgress: (studentId: string, progress: Record<string, unknown>) => void;
 }
 
 export const createLearningSlice: StateCreator<
@@ -14,14 +14,14 @@ export const createLearningSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   LearningSlice
-> = (set, get) => ({
+> = (set, _get, _store) => ({
   startLearningSession: (session: LearningSession) =>
-    set((state: any) => {
+    set((state) => {
       state.learning.currentSession = session;
     }),
 
   updateLearningSession: (updates: Partial<LearningSession>) =>
-    set((state: any) => {
+    set((state) => {
       if (state.learning.currentSession) {
         state.learning.currentSession = {
           ...state.learning.currentSession,
@@ -32,7 +32,7 @@ export const createLearningSlice: StateCreator<
     }),
 
   endLearningSession: () =>
-    set((state: any) => {
+    set((state) => {
       if (state.learning.currentSession) {
         // Archive the session to recent activities
         state.learning.recentActivities.unshift({
@@ -49,10 +49,10 @@ export const createLearningSlice: StateCreator<
       }
     }),
 
-  addActivity: (activity: any) =>
-    set((state: any) => {
+  addActivity: (activity: unknown) =>
+    set((state) => {
       state.learning.recentActivities.unshift({
-        ...activity,
+        ...(activity as Record<string, unknown>),
         timestamp: new Date().toISOString()
       });
       
@@ -62,8 +62,8 @@ export const createLearningSlice: StateCreator<
       }
     }),
 
-  updateProgress: (studentId: string, progress: any) =>
-    set((state: any) => {
+  updateProgress: (studentId: string, progress: Record<string, unknown>) =>
+    set((state) => {
       if (state.students.profiles[studentId]) {
         state.students.profiles[studentId].learningProgress = {
           ...state.students.profiles[studentId].learningProgress,

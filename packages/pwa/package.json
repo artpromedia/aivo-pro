@@ -1,5 +1,6 @@
 {
   "name": "@aivo/pwa",
+  "type": "module",
   "version": "1.0.0",
   "description": "Progressive Web App features for AIVO Learning Platform",
   "main": "./dist/index.js",

@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     DATABASE_URL: str = "postgresql+asyncpg://localhost/aivo_speech_therapy"
     API_GATEWAY_URL: str = "http://localhost:8000"
-    
+
     class Config:
         env_file = ".env"
 
@@ -73,10 +73,10 @@ class SpeechAnalysisEngine:
     Advanced speech analysis using multiple AI models
     Based on Stanford's speech therapy research
     """
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
-        
+
         # Age-specific norms
         self.developmental_norms = {
             "3-4": {
@@ -100,7 +100,7 @@ class SpeechAnalysisEngine:
                 "vocabulary_size": 10000
             }
         }
-        
+
         # Phoneme sets for different languages
         self.phoneme_sets = {
             "english": {
@@ -112,12 +112,12 @@ class SpeechAnalysisEngine:
                 "vowels": ["a", "e", "i", "o", "u"]
             }
         }
-    
+
     async def initialize(self):
         """Initialize speech analysis engine"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         print("✅ Speech Analysis Engine initialized")
-    
+
     async def analyze_speech_sample(
         self,
         audio_data: bytes,
@@ -131,17 +131,17 @@ class SpeechAnalysisEngine:
         Audio + optional video for articulation assessment
         """
         analysis_id = str(uuid.uuid4())
-        
+
         # Simulated transcription (in production, use Whisper)
         transcription = await self._transcribe_speech(audio_data)
-        
+
         # Phonetic Analysis
         phonetic_analysis = await self._analyze_phonetics(
             audio_data,
             transcription,
             language
         )
-        
+
         # Articulation Assessment
         articulation_scores = await self._assess_articulation(
             audio_data,
@@ -149,28 +149,28 @@ class SpeechAnalysisEngine:
             target_task,
             child_age
         )
-        
+
         # Fluency Analysis
         fluency_metrics = await self._analyze_fluency(
             audio_data,
             transcription
         )
-        
+
         # Voice Quality Analysis
         voice_metrics = await self._analyze_voice_quality(audio_data)
-        
+
         # Visual Analysis (if video provided)
         visual_analysis = None
         if video_data:
             visual_analysis = await self._analyze_oral_motor(video_data)
-        
+
         # Compare to developmental norms
         norm_comparison = self._compare_to_norms(
             child_age,
             articulation_scores,
             fluency_metrics
         )
-        
+
         # Generate feedback
         feedback = await self._generate_feedback(
             articulation_scores,
@@ -178,7 +178,7 @@ class SpeechAnalysisEngine:
             voice_metrics,
             norm_comparison
         )
-        
+
         return {
             "analysis_id": analysis_id,
             "transcription": transcription,
@@ -194,7 +194,7 @@ class SpeechAnalysisEngine:
                 child_age
             )
         }
-    
+
     async def _transcribe_speech(self, audio_data: bytes) -> Dict:
         """Transcribe speech (simulated for now)"""
         # In production: Use Whisper model
@@ -210,7 +210,7 @@ class SpeechAnalysisEngine:
             ],
             "confidence": 0.92
         }
-    
+
     async def _analyze_phonetics(
         self,
         audio_data: bytes,
@@ -219,7 +219,7 @@ class SpeechAnalysisEngine:
     ) -> Dict:
         """Detailed phonetic analysis"""
         phonemes = self.phoneme_sets.get(language, {}).get("consonants", [])
-        
+
         phoneme_analysis = []
         for phoneme in phonemes[:5]:  # Analyze top sounds
             analysis = {
@@ -229,13 +229,13 @@ class SpeechAnalysisEngine:
                 "suggestions": [f"Practice {phoneme} sound in isolation", f"Use {phoneme} in word-initial position"]
             }
             phoneme_analysis.append(analysis)
-        
+
         return {
             "phonemes": phoneme_analysis,
             "overall_accuracy": np.mean([p["accuracy"] for p in phoneme_analysis]),
             "problem_sounds": [p["phoneme"] for p in phoneme_analysis if p["accuracy"] < 0.7]
         }
-    
+
     async def _assess_articulation(
         self,
         audio_data: bytes,
@@ -245,7 +245,7 @@ class SpeechAnalysisEngine:
     ) -> Dict:
         """Assess articulation accuracy"""
         target_sounds = ["s", "r", "l", "th", "sh"]
-        
+
         articulation_scores = {}
         for sound in target_sounds:
             articulation_scores[sound] = {
@@ -254,9 +254,9 @@ class SpeechAnalysisEngine:
                 "occurrences": random.randint(3, 10),
                 "errors": ["substitution", "distortion"] if random.random() > 0.5 else []
             }
-        
+
         return articulation_scores
-    
+
     async def _analyze_fluency(
         self,
         audio_data: bytes,
@@ -269,10 +269,10 @@ class SpeechAnalysisEngine:
             "blocks": random.randint(0, 1),
             "interjections": random.randint(0, 2)
         }
-        
+
         total_words = len(transcription.get("words", []))
         total_disfluencies = sum(disfluencies.values())
-        
+
         return {
             "disfluencies": disfluencies,
             "stuttering_frequency": (total_disfluencies / max(total_words, 1)) * 100,
@@ -280,7 +280,7 @@ class SpeechAnalysisEngine:
             "speech_rate": random.uniform(120, 160),  # words per minute
             "naturalness": random.uniform(0.7, 0.95)
         }
-    
+
     async def _analyze_voice_quality(self, audio_data: bytes) -> Dict:
         """Analyze voice quality"""
         return {
@@ -290,7 +290,7 @@ class SpeechAnalysisEngine:
             "resonance": "normal",
             "breath_support": random.uniform(0.75, 0.95)
         }
-    
+
     async def _analyze_oral_motor(self, video_data: bytes) -> Dict:
         """Analyze oral-motor movements from video"""
         return {
@@ -300,7 +300,7 @@ class SpeechAnalysisEngine:
             "facial_symmetry": random.uniform(0.9, 1.0),
             "coordination": random.uniform(0.75, 0.92)
         }
-    
+
     def _compare_to_norms(
         self,
         child_age: int,
@@ -310,7 +310,7 @@ class SpeechAnalysisEngine:
         """Compare to developmental norms"""
         age_group = "3-4" if child_age < 5 else "5-6" if child_age < 7 else "7-8" if child_age < 9 else "9+"
         norms = self.developmental_norms.get(age_group, {})
-        
+
         return {
             "age_group": age_group,
             "expected_sounds": norms.get("sounds_mastered", []),
@@ -318,7 +318,7 @@ class SpeechAnalysisEngine:
             "performance": "within_norms" if random.random() > 0.3 else "below_expected",
             "areas_of_concern": ["r sound", "th sound"] if random.random() > 0.5 else []
         }
-    
+
     async def _generate_feedback(
         self,
         articulation_scores: Dict,
@@ -344,7 +344,7 @@ class SpeechAnalysisEngine:
                 "Record progress weekly"
             ]
         }
-    
+
     async def _generate_recommendations(
         self,
         articulation_scores: Dict,
@@ -378,7 +378,7 @@ class TherapyPlanGenerator:
     Generate personalized therapy plans
     Evidence-based interventions
     """
-    
+
     def __init__(self):
         self.therapy_approaches = {
             SpeechDisorderType.ARTICULATION: [
@@ -405,13 +405,13 @@ class TherapyPlanGenerator:
                 "script_therapy"
             ]
         }
-        
+
         self.weekly_themes = [
             "Animals", "Space", "Ocean", "Dinosaurs", "Sports",
             "Food", "Weather", "Transportation", "Fantasy", "Nature",
             "Community Helpers", "Seasons"
         ]
-    
+
     async def create_therapy_plan(
         self,
         assessment_results: Dict,
@@ -421,17 +421,17 @@ class TherapyPlanGenerator:
     ) -> Dict:
         """Create personalized therapy plan"""
         plan_id = str(uuid.uuid4())
-        
+
         # Identify primary concerns
         primary_concerns = self._identify_primary_concerns(assessment_results)
-        
+
         # Select therapy approach
         approach = self._select_therapy_approach(
             primary_concerns,
             child_profile["age"],
             child_profile.get("learning_style", "visual")
         )
-        
+
         # Generate weekly sessions
         weekly_plans = []
         for week in range(1, duration_weeks + 1):
@@ -443,14 +443,14 @@ class TherapyPlanGenerator:
                 previous_weeks=weekly_plans
             )
             weekly_plans.append(week_plan)
-        
+
         # Create home practice activities
         home_activities = await self._generate_home_activities(
             primary_concerns,
             child_profile["age"],
             parent_goals
         )
-        
+
         return {
             "plan_id": plan_id,
             "duration_weeks": duration_weeks,
@@ -462,11 +462,11 @@ class TherapyPlanGenerator:
             "progress_milestones": self._define_milestones(primary_concerns, duration_weeks),
             "created_at": datetime.utcnow().isoformat()
         }
-    
+
     def _identify_primary_concerns(self, assessment_results: Dict) -> List[Dict]:
         """Identify primary areas for therapy"""
         concerns = []
-        
+
         articulation = assessment_results.get("articulation", {})
         for sound, scores in articulation.items():
             if scores.get("accuracy", 1.0) < 0.75:
@@ -476,7 +476,7 @@ class TherapyPlanGenerator:
                     "severity": "moderate" if scores.get("accuracy") < 0.6 else "mild",
                     "priority": 1 if scores.get("accuracy") < 0.6 else 2
                 })
-        
+
         fluency = assessment_results.get("fluency", {})
         if fluency.get("stuttering_frequency", 0) > 5:
             concerns.append({
@@ -485,9 +485,9 @@ class TherapyPlanGenerator:
                 "severity": "moderate",
                 "priority": 1
             })
-        
+
         return sorted(concerns, key=lambda x: x["priority"])
-    
+
     def _select_therapy_approach(
         self,
         primary_concerns: List[Dict],
@@ -497,9 +497,9 @@ class TherapyPlanGenerator:
         """Select appropriate therapy approach"""
         if not primary_concerns:
             return "traditional_articulation"
-        
+
         concern_type = primary_concerns[0]["type"]
-        
+
         if concern_type == "articulation":
             if child_age < 6:
                 return "traditional_articulation"
@@ -509,7 +509,7 @@ class TherapyPlanGenerator:
             return "integrated_approach"
         else:
             return "language_stimulation"
-    
+
     async def _generate_week_plan(
         self,
         week: int,
@@ -520,13 +520,13 @@ class TherapyPlanGenerator:
     ) -> Dict:
         """Generate plan for specific week"""
         difficulty = min(0.3 + (week * 0.05), 1.0)
-        
+
         week_plan = {
             "week": week,
             "theme": self.weekly_themes[(week - 1) % len(self.weekly_themes)],
             "sessions": []
         }
-        
+
         # Generate 3 sessions per week
         for session_num in range(1, 4):
             session = {
@@ -534,7 +534,7 @@ class TherapyPlanGenerator:
                 "duration_minutes": self._get_session_duration(child_age),
                 "activities": []
             }
-            
+
             # Warm-up activity (5 minutes)
             session["activities"].append({
                 "type": "warmup",
@@ -542,7 +542,7 @@ class TherapyPlanGenerator:
                 "duration": 5,
                 "description": "Deep breathing and vocal exercises"
             })
-            
+
             # Main therapy activities
             if concerns:
                 session["activities"].append({
@@ -552,7 +552,7 @@ class TherapyPlanGenerator:
                     "description": f"Practice {concerns[0]['target']} sound in words and sentences",
                     "difficulty": difficulty
                 })
-            
+
             # Game activity (10 minutes)
             session["activities"].append({
                 "type": "game",
@@ -560,7 +560,7 @@ class TherapyPlanGenerator:
                 "duration": 10,
                 "description": f"Fun game incorporating {week_plan['theme']} theme"
             })
-            
+
             # Cool-down/Review (5 minutes)
             session["activities"].append({
                 "type": "cooldown",
@@ -568,11 +568,11 @@ class TherapyPlanGenerator:
                 "duration": 5,
                 "description": "Review what was learned today"
             })
-            
+
             week_plan["sessions"].append(session)
-        
+
         return week_plan
-    
+
     def _get_session_duration(self, child_age: int) -> int:
         """Get appropriate session duration based on age"""
         if child_age < 6:
@@ -581,7 +581,7 @@ class TherapyPlanGenerator:
             return 40
         else:
             return 50
-    
+
     async def _generate_home_activities(
         self,
         primary_concerns: List[Dict],
@@ -627,9 +627,9 @@ class TherapyPlanGenerator:
                 ]
             }
         ]
-        
+
         return activities
-    
+
     async def _generate_parent_resources(self, primary_concerns: List[Dict]) -> Dict:
         """Generate parent resources"""
         return {
@@ -660,11 +660,11 @@ class TherapyPlanGenerator:
                 }
             ]
         }
-    
+
     def _define_milestones(self, primary_concerns: List[Dict], duration_weeks: int) -> List[Dict]:
         """Define progress milestones"""
         milestones = []
-        
+
         for i in range(1, 5):
             week = (duration_weeks // 4) * i
             milestones.append({
@@ -673,7 +673,7 @@ class TherapyPlanGenerator:
                 "criteria": f"80% accuracy in structured activities",
                 "assessment_method": "Clinician observation and recording"
             })
-        
+
         return milestones
 
 
@@ -682,7 +682,7 @@ class InteractiveSpeechGames:
     Engaging speech therapy games
     Age-appropriate and fun
     """
-    
+
     def __init__(self):
         self.game_templates = {
             "K-2": [
@@ -742,7 +742,7 @@ class InteractiveSpeechGames:
                 }
             ]
         }
-    
+
     async def generate_speech_game(
         self,
         target_skills: str,
@@ -752,12 +752,12 @@ class InteractiveSpeechGames:
     ) -> Dict:
         """Generate interactive speech game"""
         templates = self.game_templates.get(age_group, [])
-        
+
         if not templates:
             templates = self.game_templates["K-2"]  # Default
-        
+
         game_template = random.choice(templates)
-        
+
         game = {
             "name": game_template["name"],
             "description": game_template["description"],
@@ -781,14 +781,14 @@ class InteractiveSpeechGames:
                 "Celebrate small improvements"
             ]
         }
-        
+
         return game
-    
+
     def _generate_game_levels(self, difficulty: float) -> List[Dict]:
         """Generate game levels"""
         num_levels = 3
         levels = []
-        
+
         for i in range(1, num_levels + 1):
             levels.append({
                 "level": i,
@@ -797,7 +797,7 @@ class InteractiveSpeechGames:
                 "num_trials": 5 + (i * 2),
                 "time_limit_seconds": 60 if i == 1 else None
             })
-        
+
         return levels
 
 
@@ -806,7 +806,7 @@ class ParentInvolvementSystem:
     Engage parents in therapy process
     Provide resources and support
     """
-    
+
     async def generate_parent_guide(
         self,
         therapy_plan: Dict,
@@ -885,9 +885,9 @@ class ParentInvolvementSystem:
                 ]
             }
         }
-        
+
         return guide
-    
+
     def _explain_development(self, age: int) -> Dict:
         """Explain typical speech development for age"""
         if age < 6:
@@ -908,7 +908,7 @@ class ParentInvolvementSystem:
                 "common_errors": "Errors at this age indicate need for therapy",
                 "what_to_expect": "Good prognosis with intervention"
             }
-    
+
     def _create_practice_schedule(self, age: int) -> Dict:
         """Create age-appropriate practice schedule"""
         if age < 6:
@@ -929,20 +929,20 @@ class ParentInvolvementSystem:
 
 class SpeechTherapyService:
     """Main Speech Therapy Service"""
-    
+
     def __init__(self):
         self.analysis_engine = SpeechAnalysisEngine()
         self.plan_generator = TherapyPlanGenerator()
         self.game_system = InteractiveSpeechGames()
         self.parent_system = ParentInvolvementSystem()
         self.redis_client: Optional[redis.Redis] = None
-    
+
     async def initialize(self):
         """Initialize service"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         await self.analysis_engine.initialize()
         print("✅ Speech Therapy Service initialized")
-    
+
     async def conduct_assessment(
         self,
         child_id: str,
@@ -953,7 +953,7 @@ class SpeechTherapyService:
     ) -> Dict:
         """Conduct comprehensive speech assessment"""
         therapy_sessions_completed.inc()
-        
+
         # Analyze speech
         analysis = await self.analysis_engine.analyze_speech_sample(
             audio_data=audio_data,
@@ -962,7 +962,7 @@ class SpeechTherapyService:
             target_task="comprehensive_assessment",
             language="english"
         )
-        
+
         # Create therapy plan
         therapy_plan = await self.plan_generator.create_therapy_plan(
             assessment_results=analysis,
@@ -970,13 +970,13 @@ class SpeechTherapyService:
             parent_goals=concerns,
             duration_weeks=12
         )
-        
+
         # Generate parent guide
         parent_guide = await self.parent_system.generate_parent_guide(
             therapy_plan=therapy_plan,
             child_profile={"age": child_age}
         )
-        
+
         return {
             "assessment": analysis,
             "therapy_plan": therapy_plan,
@@ -987,7 +987,7 @@ class SpeechTherapyService:
                 "Track progress weekly"
             ]
         }
-    
+
     async def get_daily_activity(
         self,
         child_id: str,
@@ -996,18 +996,18 @@ class SpeechTherapyService:
     ) -> Dict:
         """Get daily therapy activity"""
         words_practiced.inc(10)
-        
+
         age_group = self._get_age_group(age)
-        
+
         game = await self.game_system.generate_speech_game(
             target_skills="articulation",
             age_group=age_group,
             duration_minutes=10,
             difficulty=0.5
         )
-        
+
         return game
-    
+
     def _get_age_group(self, age: int) -> str:
         """Get age group string"""
         if age < 8:
@@ -1081,7 +1081,7 @@ async def conduct_assessment(
     """Conduct speech assessment"""
     audio_data = await audio_file.read()
     video_data = await video_file.read() if video_file else None
-    
+
     result = await speech_service.conduct_assessment(
         child_id=child_id,
         audio_data=audio_data,
@@ -1089,7 +1089,7 @@ async def conduct_assessment(
         child_age=child_age,
         concerns=json.loads(concerns)
     )
-    
+
     return result
 
 
@@ -1101,7 +1101,7 @@ async def get_daily_activity(request: ActivityRequest):
         age=request.age,
         session_id=request.session_id
     )
-    
+
     return activity
 
 
@@ -1109,21 +1109,21 @@ async def get_daily_activity(request: ActivityRequest):
 async def live_therapy_session(websocket: WebSocket):
     """Real-time speech therapy session"""
     await websocket.accept()
-    
+
     try:
         while True:
             # Receive audio data
             data = await websocket.receive_bytes()
-            
+
             # Process and send feedback
             feedback = {
                 "message": "Keep practicing!",
                 "accuracy": random.uniform(0.7, 0.95),
                 "encouragement": "Great job!"
             }
-            
+
             await websocket.send_json(feedback)
-    
+
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:

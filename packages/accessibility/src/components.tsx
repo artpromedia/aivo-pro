@@ -2,14 +2,20 @@
  * Accessible Components
  */
 
-import { useRef, useEffect } from 'react';
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  HTMLProps,
+  JSX,
+  ReactNode
+} from 'react';
 import { useDialog, useFocusTrap, useEscapeKey } from './hooks';
 import { srOnlyStyles } from './utils';
 
 /**
  * Screen Reader Only component
  */
-export function ScreenReaderOnly({ children, ...props }: React.HTMLProps<HTMLDivElement>) {
+export function ScreenReaderOnly({ children, ...props }: HTMLProps<HTMLDivElement>) {
   return (
     <div style={srOnlyStyles} {...props}>
       {children}
@@ -22,7 +28,7 @@ export function ScreenReaderOnly({ children, ...props }: React.HTMLProps<HTMLDiv
  */
 export interface SkipLinkProps {
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function SkipLink({ href, children }: SkipLinkProps) {
@@ -58,12 +64,12 @@ export interface DialogProps {
   onClose: () => void;
   title: string;
   description?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Dialog({ isOpen, onClose, title, description, children }: DialogProps) {
-  const dialogRef = useDialog(isOpen);
-  const trapRef = useFocusTrap(isOpen);
+  const dialogRef = useDialog<HTMLDivElement>(isOpen);
+  const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
   useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
@@ -75,8 +81,8 @@ export function Dialog({ isOpen, onClose, title, description, children }: Dialog
       aria-labelledby="dialog-title"
       aria-describedby={description ? 'dialog-description' : undefined}
       ref={(el) => {
-        (dialogRef as any).current = el;
-        (trapRef as any).current = el;
+        dialogRef.current = el;
+        trapRef.current = el;
       }}
       tabIndex={-1}
       style={{
@@ -132,14 +138,14 @@ export function LiveRegion({ message, politeness = 'polite' }: LiveRegionProps) 
  */
 export interface FocusTrapProps {
   active?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function FocusTrap({ active = true, children }: FocusTrapProps) {
-  const ref = useFocusTrap(active);
+  const ref = useFocusTrap<HTMLDivElement>(active);
 
   return (
-    <div ref={ref as any}>
+    <div ref={ref}>
       {children}
     </div>
   );
@@ -148,8 +154,8 @@ export function FocusTrap({ active = true, children }: FocusTrapProps) {
 /**
  * Accessible Button
  */
-export interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+export interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   'aria-label'?: string;
 }
 
@@ -167,9 +173,9 @@ export function AccessibleButton({ children, ...props }: AccessibleButtonProps) 
 /**
  * Accessible Icon Button
  */
-export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   'aria-label': string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function IconButton({ 'aria-label': ariaLabel, children, ...props }: IconButtonProps) {
@@ -188,9 +194,9 @@ export function IconButton({ 'aria-label': ariaLabel, children, ...props }: Icon
 /**
  * Accessible Link
  */
-export interface AccessibleLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface AccessibleLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
   external?: boolean;
 }
 
@@ -213,7 +219,7 @@ export function AccessibleLink({ href, children, external, ...props }: Accessibl
  */
 export interface HeadingProps {
   level: 1 | 2 | 3 | 4 | 5 | 6;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   id?: string;
 }
@@ -226,10 +232,10 @@ export function Heading({ level, children, ...props }: HeadingProps) {
 /**
  * Accessible Landmark
  */
-export interface LandmarkProps extends React.HTMLAttributes<HTMLElement> {
+export interface LandmarkProps extends HTMLProps<HTMLDivElement> {
   type: 'banner' | 'navigation' | 'main' | 'complementary' | 'contentinfo' | 'region';
   label?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Landmark({ type, label, children, ...props }: LandmarkProps) {
@@ -252,7 +258,7 @@ export function Landmark({ type, label, children, ...props }: LandmarkProps) {
 /**
  * Visually Hidden component (visible to screen readers)
  */
-export function VisuallyHidden({ children, ...props }: React.HTMLProps<HTMLSpanElement>) {
+export function VisuallyHidden({ children, ...props }: HTMLProps<HTMLSpanElement>) {
   return (
     <span style={srOnlyStyles} {...props}>
       {children}

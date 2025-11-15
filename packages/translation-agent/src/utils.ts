@@ -1,10 +1,16 @@
 import type { TranslationEntry } from './types';
 
+type TranslationTree = Record<string, unknown>;
+const isTranslationRecord = (value: unknown): value is TranslationTree =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+const hasDefaultExport = (value: unknown): value is { default: unknown } =>
+  typeof value === 'object' && value !== null && 'default' in value;
+
 /**
  * Flatten nested translation object into dot-notation keys
  */
 export function flattenTranslations(
-  obj: Record<string, any>,
+  obj: TranslationTree,
   prefix = ''
 ): Record<string, string> {
   const result: Record<string, string> = {};
@@ -12,7 +18,7 @@ export function flattenTranslations(
   for (const [key, value] of Object.entries(obj)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (isTranslationRecord(value)) {
       Object.assign(result, flattenTranslations(value, fullKey));
     } else {
       result[fullKey] = String(value);
@@ -41,11 +47,21 @@ export function parseTranslationFiles(
  */
 export async function loadTranslations(
   localePath: string
-): Promise<Record<string, any>> {
+): Promise<TranslationTree> {
   try {
-    const module = await import(localePath);
-    // Handle both default and named exports
-    return module.default || module;
+    const moduleExports: unknown = await import(localePath);
+    const normalized = hasDefaultExport(moduleExports)
+      ? moduleExports.default
+      : moduleExports;
+
+    if (isTranslationRecord(normalized)) {
+      return normalized;
+    }
+
+    console.warn(
+      `Loaded translations from ${localePath} but data was not an object; returning empty record.`
+    );
+    return {};
   } catch (error) {
     console.error(`Failed to load translations from ${localePath}:`, error);
     return {};

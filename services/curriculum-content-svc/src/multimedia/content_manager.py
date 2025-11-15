@@ -44,7 +44,7 @@ class MultimediaContent:
     duration_seconds: Optional[int] = None
     accessibility_features: List[AccessibilityFeature] = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.accessibility_features is None:
             self.accessibility_features = []
@@ -57,13 +57,13 @@ class AdvancedMultimediaManager:
     Comprehensive multimedia content management
     with accessibility and internationalization
     """
-    
+
     def __init__(self):
         self.tts_engines = self._initialize_tts_engines()
         self.caption_service = CaptionService()
         self.accessibility_checker = AccessibilityChecker()
         self.image_processor = ImageProcessor()
-    
+
     def _initialize_tts_engines(self) -> Dict[str, Dict]:
         """Initialize TTS engines for 50+ languages"""
         return {
@@ -200,7 +200,7 @@ class AdvancedMultimediaManager:
             "ka-GE": {"engine": "azure_tts", "quality": "neural"},
             "az-AZ": {"engine": "azure_tts", "quality": "neural"}
         }
-    
+
     async def generate_audio(
         self,
         text: str,
@@ -212,20 +212,20 @@ class AdvancedMultimediaManager:
         """
         Generate TTS audio for text content
         """
-        
+
         # Get TTS engine for language
         tts_config = self.tts_engines.get(
             language,
             self.tts_engines.get("en-US")  # Fallback
         )
-        
+
         # Select voice
         available_voices = tts_config.get("voices", ["default"])
         if voice_preference in available_voices:
             voice = voice_preference
         else:
             voice = available_voices[0]
-        
+
         # Generate audio using available TTS services
         audio_data = await self._generate_tts_audio(
             text=text,
@@ -235,9 +235,9 @@ class AdvancedMultimediaManager:
             pitch=pitch,
             tts_config=tts_config
         )
-        
+
         return audio_data
-    
+
     async def _generate_tts_audio(
         self,
         text: str,
@@ -253,24 +253,24 @@ class AdvancedMultimediaManager:
         """
         import hashlib
         import os
-        
+
         # Generate cache key for audio
         cache_key = hashlib.md5(
             f"{text}:{language}:{voice}:{speed}:{pitch}".encode()
         ).hexdigest()
-        
+
         try:
             # Try Google Cloud TTS first (if API key available)
             if os.getenv("GOOGLE_CLOUD_TTS_KEY"):
                 return await self._generate_with_google_tts(
                     text, language, voice, speed, pitch, cache_key
                 )
-            
+
             # Fallback to gTTS (free, no API key required)
             return await self._generate_with_gtts(
                 text, language, speed, cache_key
             )
-            
+
         except Exception as e:
             print(f"⚠️ TTS generation error: {str(e)}")
             # Return placeholder audio data
@@ -287,7 +287,7 @@ class AdvancedMultimediaManager:
                 "transcript": text,
                 "status": "queued"
             }
-    
+
     async def _generate_with_gtts(
         self,
         text: str,
@@ -299,14 +299,14 @@ class AdvancedMultimediaManager:
         try:
             from gtts import gTTS
             import tempfile
-            
+
             # Create TTS object
             tts = gTTS(
                 text=text,
                 lang=language[:2],  # gTTS uses 2-letter codes
                 slow=(speed < 0.9)
             )
-            
+
             # Save to temp file
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -314,7 +314,7 @@ class AdvancedMultimediaManager:
             ) as tmp:
                 tts.save(tmp.name)
                 audio_url = f"/audio/{cache_key}.mp3"
-                
+
                 return {
                     "audio_url": audio_url,
                     "local_path": tmp.name,
@@ -333,14 +333,14 @@ class AdvancedMultimediaManager:
                         "transcript_available": True
                     }
                 }
-                
+
         except ImportError:
             print("⚠️ gTTS not installed. Install: pip install gTTS")
             raise
         except Exception as e:
             print(f"⚠️ gTTS generation failed: {str(e)}")
             raise
-    
+
     async def _generate_with_google_tts(
         self,
         text: str,
@@ -353,33 +353,33 @@ class AdvancedMultimediaManager:
         """Generate audio using Google Cloud TTS (Premium)"""
         try:
             from google.cloud import texttospeech
-            
+
             client = texttospeech.TextToSpeechClient()
-            
+
             synthesis_input = texttospeech.SynthesisInput(text=text)
-            
+
             voice_params = texttospeech.VoiceSelectionParams(
                 language_code=language,
                 name=voice if voice != "default" else None
             )
-            
+
             audio_config = texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
                 speaking_rate=speed,
                 pitch=pitch
             )
-            
+
             response = client.synthesize_speech(
                 input=synthesis_input,
                 voice=voice_params,
                 audio_config=audio_config
             )
-            
+
             # Save audio file
             audio_path = f"/tmp/audio_{cache_key}.mp3"
             with open(audio_path, 'wb') as out:
                 out.write(response.audio_content)
-            
+
             return {
                 "audio_url": f"/audio/{cache_key}.mp3",
                 "local_path": audio_path,
@@ -398,14 +398,14 @@ class AdvancedMultimediaManager:
                     "transcript_available": True
                 }
             }
-            
+
         except ImportError:
             print("⚠️ Google Cloud TTS not available")
             raise
         except Exception as e:
             print(f"⚠️ Google TTS failed: {str(e)}")
             raise
-    
+
     async def generate_captions(
         self,
         video_url: str,
@@ -415,12 +415,12 @@ class AdvancedMultimediaManager:
         """
         Generate captions for video content
         """
-        
+
         captions = await self.caption_service.generate_captions(
             video_url=video_url,
             source_language=language
         )
-        
+
         # Translate to additional languages
         translated_captions = {}
         if additional_languages:
@@ -430,7 +430,7 @@ class AdvancedMultimediaManager:
                     target_language=target_lang
                 )
                 translated_captions[target_lang] = translated
-        
+
         return {
             "video_url": video_url,
             "source_language": language,
@@ -444,7 +444,7 @@ class AdvancedMultimediaManager:
                 "position_adjustable": True
             }
         }
-    
+
     async def add_audio_description(
         self,
         video_url: str,
@@ -453,10 +453,10 @@ class AdvancedMultimediaManager:
         """
         Add audio description track for visually impaired
         """
-        
+
         # Analyze video for describable content
         visual_events = await self._analyze_video_content(video_url)
-        
+
         # Generate descriptions
         descriptions = []
         for event in visual_events:
@@ -467,7 +467,7 @@ class AdvancedMultimediaManager:
                 "importance": event["importance"]
             }
             descriptions.append(description)
-        
+
         # Generate audio from descriptions
         audio_tracks = []
         for desc in descriptions:
@@ -481,7 +481,7 @@ class AdvancedMultimediaManager:
                 "audio_url": audio["audio_url"],
                 "text": desc["text"]
             })
-        
+
         return {
             "video_url": video_url,
             "language": language,
@@ -494,7 +494,7 @@ class AdvancedMultimediaManager:
                 "ducking_main_audio": True
             }
         }
-    
+
     async def _analyze_video_content(
         self,
         video_url: str
@@ -505,43 +505,43 @@ class AdvancedMultimediaManager:
             import numpy as np
             import tempfile
             import urllib.request
-            
+
             # Download video to temp file
             with tempfile.NamedTemporaryFile(
                 suffix='.mp4', delete=False
             ) as tmp:
                 urllib.request.urlretrieve(video_url, tmp.name)
                 video_path = tmp.name
-            
+
             # Open video with OpenCV
             cap = cv2.VideoCapture(video_path)
-            
+
             if not cap.isOpened():
                 print(f"⚠️ Could not open video: {video_url}")
                 return self._generate_fallback_video_analysis()
-            
+
             events = []
             fps = cap.get(cv2.CAP_PROP_FPS)
             frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            
+
             # Sample frames at regular intervals
             sample_interval = max(1, int(fps * 5))  # Every 5 seconds
             prev_frame = None
-            
+
             for frame_num in range(0, frame_count, sample_interval):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
                 ret, frame = cap.read()
-                
+
                 if not ret:
                     continue
-                
+
                 timestamp = frame_num / fps if fps > 0 else 0
-                
+
                 # Detect scene changes
                 if prev_frame is not None:
                     diff = cv2.absdiff(prev_frame, frame)
                     mean_diff = diff.mean()
-                    
+
                     if mean_diff > 30:  # Threshold for scene change
                         events.append({
                             "time": self._format_timestamp(timestamp),
@@ -551,20 +551,20 @@ class AdvancedMultimediaManager:
                             "content": "Scene transition detected",
                             "frame_number": frame_num
                         })
-                
+
                 # Detect motion
                 if prev_frame is not None:
                     gray_prev = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
                     gray_curr = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    
+
                     flow = cv2.calcOpticalFlowFarneback(
                         gray_prev, gray_curr, None,
                         0.5, 3, 15, 3, 5, 1.2, 0
                     )
-                    
+
                     magnitude = np.sqrt(flow[..., 0]**2 + flow[..., 1]**2)
                     motion_level = magnitude.mean()
-                    
+
                     if motion_level > 2:
                         events.append({
                             "time": self._format_timestamp(timestamp),
@@ -574,20 +574,20 @@ class AdvancedMultimediaManager:
                             "content": "Significant activity detected",
                             "motion_level": float(motion_level)
                         })
-                
+
                 prev_frame = frame.copy()
-            
+
             cap.release()
-            
+
             # Clean up temp file
             import os
             os.unlink(video_path)
-            
+
             if events:
                 return events
             else:
                 return self._generate_fallback_video_analysis()
-            
+
         except ImportError:
             msg = "⚠️ OpenCV not installed. Install: "
             msg += "pip install opencv-python"
@@ -596,7 +596,7 @@ class AdvancedMultimediaManager:
         except Exception as e:
             print(f"⚠️ Video analysis error: {str(e)}")
             return self._generate_fallback_video_analysis()
-    
+
     def _generate_fallback_video_analysis(self) -> List[Dict]:
         """Generate basic video analysis when CV is unavailable"""
         return [
@@ -617,31 +617,31 @@ class AdvancedMultimediaManager:
                 "note": "Basic analysis - install OpenCV for detailed insights"
             }
         ]
-    
+
     def _format_timestamp(self, seconds: float) -> str:
         """Format seconds as HH:MM:SS"""
         hours = int(seconds // 3600)
         minutes = int((seconds % 3600) // 60)
         secs = int(seconds % 60)
         return f"{hours:02d}:{minutes:02d}:{secs:02d}"
-    
+
     def _generate_visual_description(self, event: Dict) -> str:
         """Generate description for visual event"""
         event_type = event.get("type")
         content = event.get("content")
-        
+
         descriptions = {
             "scene_change": f"The scene changes to show {content}",
             "demonstration": f"On screen: {content}",
             "text_display": f"Text appears: {content}",
             "graph_chart": f"A {content} is displayed"
         }
-        
+
         return descriptions.get(
             event_type,
             f"Visual content: {content}"
         )
-    
+
     async def create_interactive_element(
         self,
         element_type: str,
@@ -651,7 +651,7 @@ class AdvancedMultimediaManager:
         """
         Create interactive multimedia element
         """
-        
+
         interactive_types = {
             "drag_drop": self._create_drag_drop,
             "hotspot": self._create_hotspot,
@@ -660,21 +660,21 @@ class AdvancedMultimediaManager:
             "quiz": self._create_interactive_quiz,
             "3d_model": self._create_3d_model
         }
-        
+
         creator_func = interactive_types.get(element_type)
         if not creator_func:
             raise ValueError(f"Unknown interactive type: {element_type}")
-        
+
         element = await creator_func(content)
-        
+
         # Add accessibility features
         element["accessibility"] = await self._add_interactive_accessibility(
             element,
             accessibility_options or {}
         )
-        
+
         return element
-    
+
     async def _create_drag_drop(self, content: Dict) -> Dict:
         """Create drag-and-drop activity"""
         return {
@@ -693,7 +693,7 @@ class AdvancedMultimediaManager:
                 "space to pick up and drop items"
             )
         }
-    
+
     async def _create_hotspot(self, content: Dict) -> Dict:
         """Create hotspot activity"""
         return {
@@ -714,7 +714,7 @@ class AdvancedMultimediaManager:
             "keyboard_navigation": "tab through hotspots",
             "screen_reader_accessible": True
         }
-    
+
     async def _create_slider(self, content: Dict) -> Dict:
         """Create interactive slider"""
         return {
@@ -730,7 +730,7 @@ class AdvancedMultimediaManager:
             "aria_label": content.get("label"),
             "aria_valuetext": "dynamic"
         }
-    
+
     async def _create_simulation(self, content: Dict) -> Dict:
         """Create interactive simulation"""
         return {
@@ -750,7 +750,7 @@ class AdvancedMultimediaManager:
                 "audio_cues": True
             }
         }
-    
+
     async def _create_interactive_quiz(self, content: Dict) -> Dict:
         """Create interactive quiz element"""
         return {
@@ -763,7 +763,7 @@ class AdvancedMultimediaManager:
             "screen_reader_optimized": True,
             "focus_management": "auto"
         }
-    
+
     async def _create_3d_model(self, content: Dict) -> Dict:
         """Create 3D model viewer"""
         return {
@@ -786,14 +786,14 @@ class AdvancedMultimediaManager:
                 "alternative_2d_views": True
             }
         }
-    
+
     async def _add_interactive_accessibility(
         self,
         element: Dict,
         options: Dict
     ) -> Dict:
         """Add accessibility features to interactive element"""
-        
+
         return {
             "keyboard_navigation": True,
             "screen_reader_compatible": True,
@@ -815,7 +815,7 @@ class AdvancedMultimediaManager:
                 "haptic": options.get("haptic_feedback", False)
             }
         }
-    
+
     async def optimize_image(
         self,
         image_url: str,
@@ -825,7 +825,7 @@ class AdvancedMultimediaManager:
         """
         Optimize and adapt image for audience and culture
         """
-        
+
         optimizations = await self.image_processor.process_image(
             image_url=image_url,
             operations=[
@@ -835,7 +835,7 @@ class AdvancedMultimediaManager:
                 "color_contrast_check"
             ]
         )
-        
+
         # Cultural adaptations
         if cultural_context:
             cultural_check = await self._check_cultural_appropriateness(
@@ -843,7 +843,7 @@ class AdvancedMultimediaManager:
                 cultural_context
             )
             optimizations["cultural_notes"] = cultural_check
-        
+
         return {
             "original_url": image_url,
             "optimized_versions": optimizations.get("versions", {}),
@@ -856,7 +856,7 @@ class AdvancedMultimediaManager:
             },
             "cultural_appropriateness": optimizations.get("cultural_notes")
         }
-    
+
     async def _check_cultural_appropriateness(
         self,
         image_url: str,
@@ -869,7 +869,7 @@ class AdvancedMultimediaManager:
             "concerns": [],
             "recommendations": []
         }
-    
+
     async def create_multimedia_lesson(
         self,
         lesson_content: Dict,
@@ -879,9 +879,9 @@ class AdvancedMultimediaManager:
         """
         Create comprehensive multimedia lesson package
         """
-        
+
         multimedia_components = []
-        
+
         # Process text content
         if "text" in lesson_content:
             text_component = {
@@ -898,7 +898,7 @@ class AdvancedMultimediaManager:
                 }
             }
             multimedia_components.append(text_component)
-        
+
         # Process images
         if "images" in lesson_content:
             for image in lesson_content["images"]:
@@ -911,7 +911,7 @@ class AdvancedMultimediaManager:
                     "type": "image",
                     **image_component
                 })
-        
+
         # Process videos
         if "videos" in lesson_content:
             for video in lesson_content["videos"]:
@@ -933,7 +933,7 @@ class AdvancedMultimediaManager:
                     }
                 }
                 multimedia_components.append(video_component)
-        
+
         # Process interactive elements
         if "interactives" in lesson_content:
             for interactive in lesson_content["interactives"]:
@@ -943,14 +943,14 @@ class AdvancedMultimediaManager:
                     accessibility_options=interactive.get("accessibility")
                 )
                 multimedia_components.append(interactive_component)
-        
+
         # Validate accessibility
         validator = self.accessibility_checker
         accessibility_report = await validator.validate_content(
             multimedia_components,
             standard=accessibility_level
         )
-        
+
         return {
             "lesson_id": lesson_content.get("id"),
             "language": language,
@@ -973,7 +973,7 @@ class AdvancedMultimediaManager:
                 )
             }
         }
-    
+
     def _get_accessibility_features(
         self,
         components: List[Dict]
@@ -984,7 +984,7 @@ class AdvancedMultimediaManager:
             if "accessibility" in component:
                 features.update(component["accessibility"].keys())
         return list(features)
-    
+
     def _calculate_total_duration(
         self,
         components: List[Dict]
@@ -1002,7 +1002,7 @@ class AdvancedMultimediaManager:
 
 class CaptionService:
     """Service for caption generation and translation"""
-    
+
     async def generate_captions(
         self,
         video_url: str,
@@ -1018,7 +1018,7 @@ class CaptionService:
                 "speaker": "Teacher"
             }
         ]
-    
+
     async def translate_captions(
         self,
         captions: List[Dict],
@@ -1031,7 +1031,7 @@ class CaptionService:
 
 class AccessibilityChecker:
     """Check content for accessibility compliance"""
-    
+
     async def validate_content(
         self,
         components: List[Dict],
@@ -1048,7 +1048,7 @@ class AccessibilityChecker:
 
 class ImageProcessor:
     """Process and optimize images"""
-    
+
     async def process_image(
         self,
         image_url: str,

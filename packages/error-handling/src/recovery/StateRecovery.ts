@@ -120,7 +120,7 @@ export class StateRecovery {
   private async handleChunkError(): Promise<boolean> {
     try {
       // Clear module cache
-      if ('serviceWorker' in navigator) {
+      if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
           await registration.unregister();
@@ -128,13 +128,18 @@ export class StateRecovery {
       }
       
       // Clear caches
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        const cacheStorage = window.caches;
+        if (cacheStorage) {
+          const cacheNames = await cacheStorage.keys();
+          await Promise.all(cacheNames.map(name => cacheStorage.delete(name)));
+        }
       }
 
       // Force reload
-      window.location.reload();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
       return true;
     } catch (error) {
       console.warn('Failed to handle chunk error:', error);
@@ -209,7 +214,12 @@ export class StateRecovery {
 
   private async clearIndexedDB(): Promise<void> {
     try {
-      const databases = await indexedDB.databases();
+      const dbAPI = typeof window !== 'undefined' ? window.indexedDB : undefined;
+      if (!dbAPI || typeof dbAPI.databases !== 'function') {
+        return;
+      }
+
+      const databases = await dbAPI.databases();
       await Promise.all(
         databases
           .filter(db => db.name?.startsWith('aivo_'))
@@ -219,7 +229,7 @@ export class StateRecovery {
                 resolve();
                 return;
               }
-              const deleteReq = indexedDB.deleteDatabase(db.name);
+              const deleteReq = dbAPI.deleteDatabase(db.name);
               deleteReq.onsuccess = () => resolve();
               deleteReq.onerror = () => reject(deleteReq.error);
             });
@@ -232,7 +242,11 @@ export class StateRecovery {
 
   private enableOfflineMode(): void {
     // Dispatch offline mode event
-    window.dispatchEvent(new CustomEvent('aivo:offline-mode', { detail: { enabled: true } }));
+    if (typeof window === 'undefined' || typeof window.CustomEvent !== 'function') {
+      return;
+    }
+
+    window.dispatchEvent(new window.CustomEvent('aivo:offline-mode', { detail: { enabled: true } }));
   }
 
   private async retryWithBackoff(maxRetries: number): Promise<void> {
@@ -249,7 +263,11 @@ export class StateRecovery {
 
   private resetToDefaultState(): void {
     // Dispatch state reset event
-    window.dispatchEvent(new CustomEvent('aivo:state-reset'));
+    if (typeof window === 'undefined' || typeof window.CustomEvent !== 'function') {
+      return;
+    }
+
+    window.dispatchEvent(new window.CustomEvent('aivo:state-reset'));
   }
 
   private clearOldCache(): void {

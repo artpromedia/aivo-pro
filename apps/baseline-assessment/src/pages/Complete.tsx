@@ -20,10 +20,28 @@ export const Complete: React.FC = () => {
   const proceedToModelCloning = () => {
     setRedirecting(true);
     
+    // Convert answers object to responses array for model cloning service
+    const responsesArray = Object.values(assessmentResults?.answers || {}).map((answer: any) => ({
+      question: answer.question,
+      answer: answer.answer,
+      correct: answer.correct,
+      subject: answer.subject,
+      difficulty: answer.difficulty,
+      timestamp: answer.timestamp,
+      correct_answer: answer.correct ? answer.answer : '' // Include correct answer when available
+    }));
+    
+    console.log('📊 Sending baseline data to model cloning:', {
+      totalResponses: responsesArray.length,
+      subjects: [...new Set(responsesArray.map(r => r.subject))],
+      correctCount: responsesArray.filter(r => r.correct).length
+    });
+    
     // Prepare enhanced assessment data to pass to model cloning
     const assessmentData = {
       totalQuestions: assessmentResults?.totalQuestions || 15,
-      answers: assessmentResults?.answers || {},
+      responses: responsesArray, // ✅ Model cloning expects 'responses' array, not 'answers' object
+      answers: assessmentResults?.answers || {}, // Keep for backward compatibility
       subjectPerformance: assessmentResults?.subjectPerformance || {},
       overallPerformance: assessmentResults?.overallPerformance || {},
       recommendedLevel: assessmentResults?.recommendedLevel || `Grade ${sessionData.grade}`,

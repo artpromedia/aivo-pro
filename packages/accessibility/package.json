@@ -1,5 +1,6 @@
 {
   "name": "@aivo/accessibility",
+  "type": "module",
   "version": "1.0.0",
   "description": "Accessibility utilities and WCAG 2.1 compliance tools",
   "main": "./dist/index.js",

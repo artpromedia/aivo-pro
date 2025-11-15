@@ -2,10 +2,9 @@
 Configuration for Homework Helper Service
 """
 
-import os
 from pydantic_settings import BaseSettings
 from pydantic import model_validator
-from typing import List, Any
+from typing import Any
 
 
 class Settings(BaseSettings):
@@ -28,18 +27,18 @@ class Settings(BaseSettings):
     # AI Provider Selection
     AI_PROVIDER: str = "openai"  # Options: openai, anthropic, localai, ollama
     USE_LOCAL_MODELS: bool = False
-    
+
     # LocalAI Configuration (fallback)
     LOCALAI_BASE_URL: str = "http://localai:8080"
-    
+
     # Ollama Configuration (fallback)
     OLLAMA_BASE_URL: str = "http://ollama:11434"
-    
+
     # Model Configuration
     CHAT_MODEL: str = "gpt-4o-mini"
     MATH_MODEL: str = "gpt-4o"
     VISION_MODEL: str = "gpt-4o"
-    
+
     # OpenAI
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str = "gpt-4o-mini"
@@ -47,7 +46,7 @@ class Settings(BaseSettings):
     # Anthropic (Alternative)
     ANTHROPIC_API_KEY: str | None = None
     ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
-    
+
     # Google (Alternative)
     GOOGLE_API_KEY: str | None = None
     GOOGLE_MODEL: str = "gemini-1.5-pro"
@@ -80,21 +79,23 @@ class Settings(BaseSettings):
         if 'ALLOWED_FILE_TYPES' in values:
             val = values['ALLOWED_FILE_TYPES']
             if isinstance(val, str):
-                values['ALLOWED_FILE_TYPES'] = [item.strip() for item in val.split(',')]
+                values['ALLOWED_FILE_TYPES'] = [
+                    item.strip() for item in val.split(',')
+                ]
         return values
-    
+
     # Session Management
     SESSION_TIMEOUT_MINUTES: int = 120
     CONVERSATION_HISTORY_LIMIT: int = 50
-    
+
     # Monitoring
     PROMETHEUS_ENABLED: bool = True
     SENTRY_DSN: str | None = None
-    
+
     # Rate Limiting
     MAX_UPLOADS_PER_HOUR: int = 10
     MAX_CHAT_MESSAGES_PER_MINUTE: int = 20
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True

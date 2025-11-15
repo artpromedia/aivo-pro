@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class ResponsibleAIGovernor:
     """Ensures AI models comply with ethical guidelines"""
-    
+
     def __init__(self):
         self.governance_rules = {
             "no_harmful_content": True,
@@ -18,7 +18,7 @@ class ResponsibleAIGovernor:
             "explainable_decisions": True,
             "educational_alignment": True
         }
-    
+
     async def validate_model_output(
         self,
         model_id: str,
@@ -27,11 +27,11 @@ class ResponsibleAIGovernor:
         rules: Optional[List[str]] = None
     ) -> Dict:
         """Validate model outputs against governance rules"""
-        
+
         validations = {}
         violations = []
         recommendations = []
-        
+
         # Check harmful content
         if not rules or "no_harmful_content" in rules:
             harmful_check = await self.check_harmful_content(output)
@@ -39,7 +39,7 @@ class ResponsibleAIGovernor:
             if not harmful_check["passed"]:
                 violations.append(harmful_check["reason"])
                 recommendations.append("Apply content filtering")
-        
+
         # Check age appropriateness
         if not rules or "age_appropriate" in rules:
             age_check = await self.check_age_appropriate(output, context)
@@ -47,7 +47,7 @@ class ResponsibleAIGovernor:
             if not age_check["passed"]:
                 violations.append(age_check["reason"])
                 recommendations.append("Adjust content for child's age")
-        
+
         # Check bias
         if not rules or "bias_mitigation" in rules:
             bias_check = await self.check_bias(output, context)
@@ -55,7 +55,7 @@ class ResponsibleAIGovernor:
             if not bias_check["passed"]:
                 violations.append(bias_check["reason"])
                 recommendations.extend(bias_check["recommendations"])
-        
+
         # Check educational alignment
         if not rules or "educational_alignment" in rules:
             edu_check = await self.check_educational_alignment(output, context)
@@ -63,20 +63,20 @@ class ResponsibleAIGovernor:
             if not edu_check["passed"]:
                 violations.append(edu_check["reason"])
                 recommendations.append("Align with curriculum standards")
-        
+
         return {
             "compliant": all(validations.values()),
             "validations": validations,
             "violations": violations,
             "recommendations": recommendations
         }
-    
+
     async def check_harmful_content(self, output: str) -> Dict:
         """Check for harmful or inappropriate content"""
         # Simple keyword check for demonstration
         # Production: Use content moderation API
         harmful_keywords = ["violence", "weapon", "drug", "alcohol"]
-        
+
         for keyword in harmful_keywords:
             if keyword.lower() in output.lower():
                 return {
@@ -86,16 +86,16 @@ class ResponsibleAIGovernor:
                         f"{keyword}"
                     )
                 }
-        
+
         return {"passed": True, "reason": None}
-    
+
     async def check_age_appropriate(self, output: str, context: Dict) -> Dict:
         """Check if content is age-appropriate"""
         age = context.get("child_age", 8)
-        
+
         # Simple complexity check based on sentence length
         avg_sentence_length = len(output.split()) / max(output.count('.'), 1)
-        
+
         # Age-appropriate thresholds
         if age < 6 and avg_sentence_length > 8:
             return {
@@ -107,29 +107,29 @@ class ResponsibleAIGovernor:
                 "passed": False,
                 "reason": "Content too complex for age group"
             }
-        
+
         return {"passed": True, "reason": None}
-    
+
     async def check_bias(self, output: str, context: Dict) -> Dict:
         """Detect and measure bias in model outputs"""
         # Simplified bias detection for demonstration
         # Production: Use comprehensive bias detection models
         _ = context  # Context available for future use
-        
+
         bias_indicators = {
             "gender": ["boys are", "girls are", "men are", "women are"],
             "racial": ["people from", "those people"],
             "disability": ["normal children", "special needs kids"]
         }
-        
+
         detected_bias = []
-        
+
         for bias_type, indicators in bias_indicators.items():
             for indicator in indicators:
                 if indicator.lower() in output.lower():
                     detected_bias.append(bias_type)
                     break
-        
+
         if detected_bias:
             bias_list = ', '.join(detected_bias)
             return {
@@ -141,9 +141,9 @@ class ResponsibleAIGovernor:
                     "Apply bias mitigation techniques"
                 ]
             }
-        
+
         return {"passed": True, "reason": None}
-    
+
     async def check_educational_alignment(
         self,
         output: str,
@@ -153,9 +153,9 @@ class ResponsibleAIGovernor:
         # Educational alignment check placeholder
         # Production: Check against Common Core, state standards, etc.
         _ = (output, context)  # Parameters available for future use
-        
+
         return {"passed": True, "reason": None}
-    
+
     async def log_compliance_violation(self, validation_results: Dict):
         """Log compliance violations for audit trail"""
         violations = validation_results['violations']
@@ -163,7 +163,7 @@ class ResponsibleAIGovernor:
             "Compliance violation: %s", violations
         )
         # Store in database for audit trail (future implementation)
-    
+
     async def get_model_compliance(self, model_id: str) -> Dict:
         """Get compliance metrics for a specific model"""
         # Fetch from database (future implementation)
@@ -174,7 +174,7 @@ class ResponsibleAIGovernor:
             "violations": 23,
             "last_check": datetime.utcnow()
         }
-    
+
     async def generate_governance_report(self) -> Dict:
         """Generate comprehensive governance report"""
         # Aggregate data from database (future implementation)

@@ -20,7 +20,7 @@ export type GovernanceRule =
 export interface AlignmentValidationRequest {
   model_id: string;
   output: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   rules?: GovernanceRule[];
 }
 
@@ -44,7 +44,7 @@ export interface BiasMetrics {
 export interface BiasCheckRequest {
   model_id: string;
   output: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface BiasCheckResponse {
@@ -59,7 +59,7 @@ export interface TrainingRequest {
   reason: string;
   priority?: 'low' | 'normal' | 'high' | 'critical';
   data_sources?: string[];
-  hyperparameters?: Record<string, any>;
+  hyperparameters?: Record<string, unknown>;
 }
 
 export interface TrainingResponse {
@@ -214,7 +214,7 @@ export interface ChurnPrediction {
 
 export interface RetentionIntervention {
   type: 'discount' | 'support' | 'education';
-  value: any;
+  value: unknown;
   expected_impact: number;
 }
 
@@ -260,7 +260,7 @@ export type NotificationType =
 export interface NotificationRequest {
   user_id: string;
   type: NotificationType;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   channels?: NotificationChannel[];
 }
 
@@ -290,7 +290,7 @@ export interface NotificationResponse {
 export interface BatchNotificationRequest {
   user_ids: string[];
   type: NotificationType;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export interface BatchNotificationResponse {

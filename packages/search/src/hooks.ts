@@ -26,7 +26,7 @@ export function useSearch<T>(
 
   const searchEngine = useMemo(
     () => new SearchEngine(data, options),
-    [data, options?.keys, options?.threshold]
+    [data, options]
   );
 
   // Debounce query
@@ -133,7 +133,7 @@ export function useFacets<T>(
   );
 
   const facets = useMemo(() => {
-    const result: Record<string, Map<any, number>> = {};
+    const result: Record<string, Map<unknown, number>> = {};
     
     fields.forEach(field => {
       result[field as string] = searchEngine.getFacets(field);
@@ -165,8 +165,11 @@ export function useSearchSuggestions<T>(
     const results = searchEngine.search(query);
     return results
       .slice(0, limit)
-      .map(item => String((item as any)[field]))
-      .filter((value, index, self) => self.indexOf(value) === index);
+      .map(item => {
+        const value = (item as Record<string, unknown>)[field as string];
+        return String(value ?? '');
+      })
+    .filter((value, index, self) => value.trim().length > 0 && self.indexOf(value) === index);
   }, [searchEngine, query, field, limit]);
 
   return suggestions;

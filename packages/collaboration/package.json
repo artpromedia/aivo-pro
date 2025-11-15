@@ -1,5 +1,6 @@
 {
   "name": "@aivo/collaboration",
+  "type": "module",
   "version": "1.0.0",
   "description": "Real-time collaboration with WebRTC and collaborative features",
   "main": "./dist/index.js",

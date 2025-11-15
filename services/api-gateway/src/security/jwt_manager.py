@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class JWTManager:
     """JWT token creation and validation"""
-    
+
     def __init__(self):
         self.algorithm = settings.jwt_algorithm
         self.access_token_expire = timedelta(
@@ -27,21 +27,21 @@ class JWTManager:
         self.refresh_token_expire = timedelta(
             days=settings.jwt_refresh_token_expire_days
         )
-        
+
         # Load or generate RSA keys for RS256
         if self.algorithm == "RS256":
             self.private_key, self.public_key = self._load_or_generate_keys()
         else:
             self.secret_key = settings.jwt_secret_key
-    
+
     def _load_or_generate_keys(self):
         """Load existing RSA keys or generate new ones"""
         private_key_path = Path(settings.jwt_private_key_path or "keys/jwt_private.pem")
         public_key_path = Path(settings.jwt_public_key_path or "keys/jwt_public.pem")
-        
+
         # Create keys directory if it doesn't exist
         private_key_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if private_key_path.exists() and public_key_path.exists():
             # Load existing keys
             logger.info("Loading existing RSA keys")
@@ -65,7 +65,7 @@ class JWTManager:
                 backend=default_backend()
             )
             public_key = private_key.public_key()
-            
+
             # Save keys
             with open(private_key_path, "wb") as f:
                 f.write(
@@ -83,9 +83,9 @@ class JWTManager:
                     )
                 )
             logger.info(f"RSA keys saved to {private_key_path.parent}")
-        
+
         return private_key, public_key
-    
+
     def create_access_token(
         self,
         user_id: str,
@@ -95,19 +95,19 @@ class JWTManager:
     ) -> str:
         """
         Create JWT access token
-        
+
         Args:
             user_id: User UUID
             email: User email
             role: User role (parent, teacher, admin)
             additional_claims: Extra claims to include
-            
+
         Returns:
             Encoded JWT token
         """
         now = datetime.utcnow()
         expires = now + self.access_token_expire
-        
+
         claims = {
             "sub": str(user_id),
             "email": email,
@@ -117,10 +117,10 @@ class JWTManager:
             "exp": expires,
             "jti": str(uuid.uuid4()),  # Unique token ID
         }
-        
+
         if additional_claims:
             claims.update(additional_claims)
-        
+
         if self.algorithm == "RS256":
             # Serialize private key for jose
             private_pem = self.private_key.private_bytes(
@@ -131,21 +131,21 @@ class JWTManager:
             return jwt.encode(claims, private_pem, algorithm=self.algorithm)
         else:
             return jwt.encode(claims, self.secret_key, algorithm=self.algorithm)
-    
+
     def create_refresh_token(self, user_id: str, session_id: str) -> str:
         """
         Create JWT refresh token
-        
+
         Args:
             user_id: User UUID
             session_id: Session UUID
-            
+
         Returns:
             Encoded JWT token
         """
         now = datetime.utcnow()
         expires = now + self.refresh_token_expire
-        
+
         claims = {
             "sub": str(user_id),
             "session_id": str(session_id),
@@ -154,7 +154,7 @@ class JWTManager:
             "exp": expires,
             "jti": str(uuid.uuid4()),
         }
-        
+
         if self.algorithm == "RS256":
             private_pem = self.private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -164,18 +164,18 @@ class JWTManager:
             return jwt.encode(claims, private_pem, algorithm=self.algorithm)
         else:
             return jwt.encode(claims, self.secret_key, algorithm=self.algorithm)
-    
+
     def verify_token(self, token: str, token_type: str = "access") -> Dict:
         """
         Verify and decode JWT token
-        
+
         Args:
             token: JWT token string
             token_type: Expected token type (access or refresh)
-            
+
         Returns:
             Decoded token claims
-            
+
         Raises:
             JWTError: If token is invalid
         """
@@ -193,36 +193,36 @@ class JWTManager:
                     self.secret_key,
                     algorithms=[self.algorithm]
                 )
-            
+
             # Verify token type
             if claims.get("type") != token_type:
                 raise JWTError(f"Invalid token type. Expected {token_type}")
-            
+
             return claims
-            
+
         except JWTError as e:
             logger.warning(f"JWT verification failed: {e}")
             raise
-    
+
     def decode_token_unsafe(self, token: str) -> Dict:
         """
         Decode token without verification (for debugging)
-        
+
         Args:
             token: JWT token string
-            
+
         Returns:
             Decoded token claims
         """
         return jwt.get_unverified_claims(token)
-    
+
     def get_token_expiry(self, token: str) -> Optional[datetime]:
         """
         Get token expiration time
-        
+
         Args:
             token: JWT token string
-            
+
         Returns:
             Expiration datetime or None if invalid
         """
@@ -234,14 +234,14 @@ class JWTManager:
             return None
         except Exception:
             return None
-    
+
     def is_token_expired(self, token: str) -> bool:
         """
         Check if token is expired
-        
+
         Args:
             token: JWT token string
-            
+
         Returns:
             True if expired, False otherwise
         """

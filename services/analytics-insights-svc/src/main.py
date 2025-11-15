@@ -118,7 +118,7 @@ async def root():
 async def get_platform_kpis(time_range: TimeRange = TimeRange.MONTH):
     """
     Get platform-wide KPIs
-    
+
     Includes:
     - User metrics (total, active, retention)
     - Session metrics (count, duration)
@@ -127,9 +127,9 @@ async def get_platform_kpis(time_range: TimeRange = TimeRange.MONTH):
     try:
         analyzer = PlatformKPIAnalyzer()
         kpis = await analyzer.calculate_kpis(time_range.value)
-        
+
         return PlatformKPIs(**kpis)
-    
+
     except Exception as e:
         logger.error("Failed to calculate platform KPIs: %s", str(e))
         raise HTTPException(
@@ -142,7 +142,7 @@ async def get_platform_kpis(time_range: TimeRange = TimeRange.MONTH):
 async def get_platform_dashboard():
     """
     Get comprehensive platform dashboard
-    
+
     Combines all key metrics in single view
     """
     try:
@@ -151,12 +151,12 @@ async def get_platform_dashboard():
         learning_analyzer = LearningMetricsAnalyzer()
         revenue_analyzer = RevenueAnalyzer()
         engagement_analyzer = EngagementAnalyzer()
-        
+
         kpis = await kpi_analyzer.calculate_kpis("month")
         learning = await learning_analyzer.calculate_metrics("month")
         revenue = await revenue_analyzer.calculate_metrics("month")
         engagement = await engagement_analyzer.calculate_metrics("month")
-        
+
         return {
             "platform_kpis": kpis,
             "learning_metrics": learning,
@@ -164,7 +164,7 @@ async def get_platform_dashboard():
             "engagement_metrics": engagement,
             "timestamp": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error("Failed to generate dashboard: %s", str(e))
         raise HTTPException(
@@ -183,7 +183,7 @@ async def get_learning_metrics(
 ):
     """
     Get learning effectiveness metrics
-    
+
     Tracks:
     - Practice hours
     - Skills mastered
@@ -193,9 +193,9 @@ async def get_learning_metrics(
     try:
         analyzer = LearningMetricsAnalyzer()
         metrics = await analyzer.calculate_metrics(time_range.value)
-        
+
         return LearningMetrics(**metrics)
-    
+
     except Exception as e:
         logger.error("Failed to calculate learning metrics: %s", str(e))
         raise HTTPException(
@@ -210,15 +210,15 @@ async def get_student_analytics(student_id: str):
     try:
         analyzer = LearningMetricsAnalyzer()
         analytics = await analyzer.get_student_analytics(student_id)
-        
+
         if not analytics:
             raise HTTPException(
                 status_code=404,
                 detail="Student not found"
             )
-        
+
         return analytics
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -237,7 +237,7 @@ async def get_student_analytics(student_id: str):
 async def get_revenue_metrics(time_range: TimeRange = TimeRange.MONTH):
     """
     Get revenue analytics
-    
+
     Includes:
     - MRR/ARR
     - ARPU and LTV
@@ -247,9 +247,9 @@ async def get_revenue_metrics(time_range: TimeRange = TimeRange.MONTH):
     try:
         analyzer = RevenueAnalyzer()
         metrics = await analyzer.calculate_metrics(time_range.value)
-        
+
         return RevenueMetrics(**metrics)
-    
+
     except Exception as e:
         logger.error("Failed to calculate revenue metrics: %s", str(e))
         raise HTTPException(
@@ -262,19 +262,19 @@ async def get_revenue_metrics(time_range: TimeRange = TimeRange.MONTH):
 async def get_revenue_forecast(months: int = Query(default=6, ge=1, le=24)):
     """
     Generate revenue forecast
-    
+
     Uses historical data to predict future revenue
     """
     try:
         analyzer = RevenueAnalyzer()
         forecast = await analyzer.generate_forecast(months)
-        
+
         return {
             "forecast_months": months,
             "projections": forecast,
             "confidence_interval": 0.95
         }
-    
+
     except Exception as e:
         logger.error("Failed to generate forecast: %s", str(e))
         raise HTTPException(
@@ -293,7 +293,7 @@ async def get_engagement_metrics(
 ):
     """
     Get user engagement metrics
-    
+
     Tracks:
     - Daily/Monthly Active Users
     - Session frequency and duration
@@ -302,9 +302,9 @@ async def get_engagement_metrics(
     try:
         analyzer = EngagementAnalyzer()
         metrics = await analyzer.calculate_metrics(time_range.value)
-        
+
         return EngagementMetrics(**metrics)
-    
+
     except Exception as e:
         logger.error("Failed to calculate engagement: %s", str(e))
         raise HTTPException(
@@ -317,15 +317,15 @@ async def get_engagement_metrics(
 async def get_cohort_analysis(cohort_date: str):
     """
     Perform cohort analysis
-    
+
     Track retention for users who joined in specific period
     """
     try:
         analyzer = EngagementAnalyzer()
         cohort = await analyzer.analyze_cohort(cohort_date)
-        
+
         return cohort
-    
+
     except Exception as e:
         logger.error("Failed to analyze cohort: %s", str(e))
         raise HTTPException(
@@ -342,19 +342,19 @@ async def get_cohort_analysis(cohort_date: str):
 async def get_recommendations():
     """
     Get AI-powered insights and recommendations
-    
+
     Analyzes patterns and suggests actions
     """
     try:
         # Gather insights from all analyzers
         kpi_analyzer = PlatformKPIAnalyzer()
         insights = await kpi_analyzer.generate_insights()
-        
+
         return {
             "insights": insights,
             "generated_at": datetime.utcnow()
         }
-    
+
     except Exception as e:
         logger.error("Failed to generate insights: %s", str(e))
         raise HTTPException(

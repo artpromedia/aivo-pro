@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { fetchDistrictOverview, type DistrictData } from '../services/districtApi';
 import {
   Line,
   BarChart,
@@ -46,150 +47,13 @@ import {
   ComposedChart
 } from 'recharts';
 
-// Mock data for development with complete enterprise features
-const mockDistrictData = {
-  districtName: 'Springfield School District',
-  districtId: 'SD-12345',
-  totalSchools: 15,
-  activeTeachers: 245,
-  totalStudents: 4823,
-  licenseUtilization: 87,
-  licensesRemaining: 125,
-  totalLicenses: 2500,
-  budget: {
-    total: 500000,
-    spent: 375000,
-  },
-  topSchools: [
-    { id: '1', name: 'Lincoln Elementary', studentCount: 425, teacherCount: 28, avgProgress: 94 },
-    { id: '2', name: 'Washington Middle School', studentCount: 580, teacherCount: 42, avgProgress: 91 },
-    { id: '3', name: 'Roosevelt High School', studentCount: 892, teacherCount: 58, avgProgress: 88 },
-  ],
-  recentActivity: [
-    { type: 'enrollment', description: '52 new students enrolled at Lincoln Elementary', timestamp: '2 hours ago' },
-    { type: 'license', description: '15 licenses allocated to Washington Middle School', timestamp: '5 hours ago' },
-    { type: 'compliance', description: 'FERPA compliance audit passed with 98% score', timestamp: '1 day ago' },
-    { type: 'performance', description: 'Roosevelt High achieved 88% average progress this month', timestamp: '2 days ago' },
-  ],
-  compliance: {
-    status: 'compliant',
-    score: 98,
-    lastAudit: '2024-11-01',
-    ferpa: { status: 'compliant', lastCheck: '2024-11-01' },
-    coppa: { status: 'compliant', lastCheck: '2024-10-28' },
-    statePrivacy: { status: 'compliant', lastCheck: '2024-10-25' },
-    dataEncryption: 100,
-    auditTrail: 'active',
-  },
-  supportManager: {
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@aivo.com',
-    phone: '1-800-AIVO-HELP',
-  },
-  licenseDistribution: [
-    { school: 'Lincoln Elementary', allocated: 450, used: 425 },
-    { school: 'Washington Middle', allocated: 600, used: 580 },
-    { school: 'Roosevelt High', allocated: 900, used: 892 },
-    { school: 'Jefferson Elementary', allocated: 350, used: 298 },
-  ],
-  schools: [
-    { id: '1', name: 'Lincoln Elementary', progress: 94 },
-    { id: '2', name: 'Washington Middle School', progress: 91 },
-    { id: '3', name: 'Roosevelt High School', progress: 88 },
-  ],
-  criticalAlerts: [
-    { type: 'license', severity: 'warning', message: 'License capacity at 87% - consider purchasing additional seats', timestamp: '1 hour ago' },
-  ],
-  teacherMetrics: {
-    totalActive: 245,
-    professionalDevelopment: 189,
-    averageClassSize: 24,
-    retention: 94,
-  },
-  studentInsights: {
-    totalEnrolled: 4823,
-    iepStudents: 412,
-    gradeLevels: {
-      'K-5': 2145,
-      '6-8': 1456,
-      '9-12': 1222,
-    },
-    demographics: {
-      diverse: 68,
-      economicallyDisadvantaged: 42,
-      hispanic: 35,
-      black: 22,
-      white: 28,
-      asian: 12,
-      other: 3,
-    },
-  },
-  performanceTrends: [
-    { month: 'Jun', students: 4621, engagement: 82, performance: 78, licenses: 2300 },
-    { month: 'Jul', students: 4598, engagement: 79, performance: 76, licenses: 2280 },
-    { month: 'Aug', students: 4712, engagement: 85, performance: 81, licenses: 2350 },
-    { month: 'Sep', students: 4789, engagement: 88, performance: 84, licenses: 2420 },
-    { month: 'Oct', students: 4823, engagement: 91, performance: 87, licenses: 2500 },
-    { month: 'Nov', students: 4823, engagement: 93, performance: 89, licenses: 2500 },
-  ],
-  engagementBySchool: [
-    { name: 'Lincoln Elem', value: 94, students: 425 },
-    { name: 'Washington MS', value: 91, students: 580 },
-    { name: 'Roosevelt HS', value: 88, students: 892 },
-    { name: 'Jefferson Elem', value: 86, students: 350 },
-    { name: 'Madison MS', value: 89, students: 485 },
-  ],
-  budgetBreakdown: [
-    { category: 'Licenses', value: 250000, percent: 50 },
-    { category: 'Professional Dev', value: 75000, percent: 15 },
-    { category: 'Infrastructure', value: 100000, percent: 20 },
-    { category: 'Support', value: 50000, percent: 10 },
-    { category: 'Other', value: 25000, percent: 5 },
-  ],
-  predictiveInsights: [
-    {
-      id: 1,
-      type: 'capacity',
-      priority: 'high',
-      title: 'License Capacity Alert',
-      message: 'Based on current trends, you will need 200 additional licenses by March 2026',
-      impact: 'high',
-      recommendation: 'Purchase licenses now to benefit from early-bird pricing',
-      confidence: 94,
-    },
-    {
-      id: 2,
-      type: 'performance',
-      priority: 'medium',
-      title: 'Performance Improvement Opportunity',
-      message: 'Jefferson Elementary showing 12% lower engagement than district average',
-      impact: 'medium',
-      recommendation: 'Schedule professional development session for Jefferson Elementary staff',
-      confidence: 87,
-    },
-    {
-      id: 3,
-      type: 'budget',
-      priority: 'low',
-      title: 'Budget Optimization',
-      message: 'Infrastructure costs trending 8% below forecast',
-      impact: 'low',
-      recommendation: 'Consider reallocating surplus to professional development',
-      confidence: 78,
-    },
-  ],
-  benchmarks: {
-    districtAverage: 89,
-    stateAverage: 82,
-    nationalAverage: 78,
-    topPerformer: 96,
-  },
-  keyMetricsTrends: {
-    studentGrowth: { value: 8.5, trend: 'up', period: '6 months' },
-    teacherRetention: { value: 94, trend: 'up', period: 'YoY' },
-    licenseEfficiency: { value: 87, trend: 'stable', period: 'month' },
-    budgetUtilization: { value: 75, trend: 'down', period: 'quarter' },
-  },
+// Chart colors for AIVO branding
+const COLORS = {
+  primary: '#a855f7', // purple-500
+  secondary: '#ec4899', // pink-500
+  tertiary: '#8b5cf6', // violet-500
+  info: '#3b82f6', // blue-500
+  success: '#10b981', // green-500
 };
 
 export const Dashboard: React.FC = () => {
@@ -197,17 +61,52 @@ export const Dashboard: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState<'students' | 'engagement' | 'performance' | 'licenses'>('engagement');
   const [showInsights, setShowInsights] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
+  const [selectedTab, setSelectedTab] = useState('overview');
+  const districtId = 'SD-12345'; // In production, get from auth context
 
-  // Chart colors for AIVO branding
-  const COLORS = {
-    primary: '#a855f7', // purple-500
-    secondary: '#ec4899', // pink-500
-    tertiary: '#8b5cf6', // violet-500
-    success: '#10b981', // green-500
-    warning: '#f59e0b', // amber-500
-    danger: '#ef4444', // red-500
-    info: '#3b82f6', // blue-500
-  };
+  // Fetch district data from API with real-time updates
+  const { data: districtData, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: ['district-overview', districtId],
+    queryFn: async () => {
+      const data = await fetchDistrictOverview(districtId);
+      setLastRefresh(new Date());
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds for live updates
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-coral-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading district data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !districtData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-900 font-semibold mb-2">Failed to load district data</p>
+          <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : 'Using demo/cached data'}</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-coral-600 text-white rounded-lg hover:bg-coral-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Use districtData from API
+  const mockDistrictData = districtData; // Keep variable name for backwards compatibility
 
   const pieColors = [COLORS.primary, COLORS.secondary, COLORS.tertiary, COLORS.info, COLORS.success];
 
@@ -258,18 +157,6 @@ export const Dashboard: React.FC = () => {
     };
     return styles[priority as keyof typeof styles] || styles.low;
   };
-
-  // In production, this would fetch from the API
-  const { data: districtData, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['district-overview'],
-    queryFn: async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setLastRefresh(new Date());
-      return mockDistrictData;
-    },
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
-  });
 
   const stats = [
     {
@@ -943,21 +830,25 @@ export const Dashboard: React.FC = () => {
                 </ResponsiveContainer>
 
                 <div className="space-y-3">
-                  {districtData?.budgetBreakdown?.map((item, index) => (
-                    <div key={item.category} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: pieColors[index % pieColors.length] }}
-                        />
-                        <span className="text-sm text-gray-700">{item.category}</span>
+                  {districtData?.budgetBreakdown?.map((item, index) => {
+                    const total = districtData.budgetBreakdown?.reduce((sum, i) => sum + i.value, 0) || 1;
+                    const percent = ((item.value / total) * 100).toFixed(1);
+                    return (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: pieColors[index % pieColors.length] }}
+                          />
+                          <span className="text-sm text-gray-700">{item.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-900">${(item.value / 1000).toFixed(0)}k</p>
+                          <p className="text-xs text-gray-500">{percent}%</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900">${(item.value / 1000).toFixed(0)}k</p>
-                        <p className="text-xs text-gray-500">{item.percent}%</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

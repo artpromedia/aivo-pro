@@ -5,6 +5,10 @@
 
 import SimplePeer from 'simple-peer';
 
+type SimplePeerWithInternal = SimplePeer.Instance & {
+  _pc?: RTCPeerConnection;
+};
+
 export interface PeerConfig {
   iceServers?: RTCIceServer[];
   mediaConstraints?: MediaStreamConstraints;
@@ -21,8 +25,13 @@ export interface WebRTCEvents {
   onPeerJoined?: (peerId: string) => void;
   onPeerLeft?: (peerId: string) => void;
   onStream?: (peerId: string, stream: MediaStream) => void;
-  onData?: (peerId: string, data: any) => void;
+  onData?: (peerId: string, data: unknown) => void;
   onError?: (error: Error) => void;
+}
+
+export interface WebRTCEventDetail {
+  event: string;
+  data: unknown;
 }
 
 class WebRTCManager {
@@ -154,10 +163,12 @@ class WebRTCManager {
   /**
    * Send data to peer
    */
-  sendData(peerId: string, data: any): void {
+  sendData(peerId: string, data: unknown): void {
     const connection = this.peers.get(peerId);
     if (connection && connection.peer) {
-      const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+      const dataString = typeof data === 'string' || data instanceof String
+        ? data.toString()
+        : JSON.stringify(data);
       connection.peer.send(dataString);
     }
   }
@@ -165,7 +176,7 @@ class WebRTCManager {
   /**
    * Broadcast data to all peers
    */
-  broadcast(data: any): void {
+  broadcast(data: unknown): void {
     this.peers.forEach((connection) => {
       this.sendData(connection.id, data);
     });
@@ -246,7 +257,7 @@ class WebRTCManager {
       // Replace video track in all peer connections
       const videoTrack = screenStream.getVideoTracks()[0];
       this.peers.forEach((connection) => {
-        const peer = connection.peer as any;
+        const peer = connection.peer as SimplePeerWithInternal;
         const sender = peer._pc
           ?.getSenders()
           .find((s: RTCRtpSender) => s.track?.kind === 'video');
@@ -274,7 +285,7 @@ class WebRTCManager {
     if (this.localStream) {
       const videoTrack = this.localStream.getVideoTracks()[0];
       this.peers.forEach((connection) => {
-        const peer = connection.peer as any;
+        const peer = connection.peer as SimplePeerWithInternal;
         const sender = peer._pc
           ?.getSenders()
           .find((s: RTCRtpSender) => s.track?.kind === 'video');
@@ -299,11 +310,11 @@ class WebRTCManager {
   /**
    * Event emitter helper
    */
-  private emit(event: string, data: any): void {
+  private emit(event: string, data: unknown): void {
     // This should be connected to a signaling mechanism
     // For now, it's a placeholder for custom event handling
     window.dispatchEvent(
-      new CustomEvent('webrtc-event', { detail: { event, data } })
+      new CustomEvent<WebRTCEventDetail>('webrtc-event', { detail: { event, data } })
     );
   }
 }

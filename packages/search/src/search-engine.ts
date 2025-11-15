@@ -16,7 +16,7 @@ export interface SearchOptions<T> {
 export interface FilterConfig<T> {
   field: keyof T | string;
   operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'between';
-  value: any;
+  value: unknown;
 }
 
 export interface DateRangeFilter {
@@ -98,10 +98,10 @@ export class SearchEngine<T> {
     return [...data].sort((a, b) => {
       const aValue = this.getNestedValue(a, field as string);
       const bValue = this.getNestedValue(b, field as string);
+      const comparison = this.compareValues(aValue, bValue);
 
-      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-      return 0;
+      if (comparison === null) return 0;
+      return direction === 'asc' ? comparison : -comparison;
     });
   }
 
@@ -137,8 +137,8 @@ export class SearchEngine<T> {
     dateField: keyof T | string,
     range: DateRangeFilter
   ): T[] {
-    const start = typeof range.start === 'string' ? parseISO(range.start) : range.start;
-    const end = typeof range.end === 'string' ? parseISO(range.end) : range.end;
+  const startDate: Date = typeof range.start === 'string' ? parseISO(range.start) : range.start;
+  const endDate: Date = typeof range.end === 'string' ? parseISO(range.end) : range.end;
 
     return data.filter(item => {
       const dateValue = this.getNestedValue(item, dateField as string);
@@ -146,10 +146,13 @@ export class SearchEngine<T> {
       if (!dateValue) return false;
 
       const date = typeof dateValue === 'string' ? parseISO(dateValue) : dateValue;
+      if (!(date instanceof Date)) {
+        return false;
+      }
       
       return isWithinInterval(date, {
-        start: startOfDay(start),
-        end: endOfDay(end),
+        start: startOfDay(startDate),
+        end: endOfDay(endDate),
       });
     });
   }
@@ -157,8 +160,8 @@ export class SearchEngine<T> {
   /**
    * Get facets for filtering
    */
-  getFacets(field: keyof T | string): Map<any, number> {
-    const facets = new Map<any, number>();
+  getFacets(field: keyof T | string): Map<unknown, number> {
+    const facets = new Map<unknown, number>();
 
     this.data.forEach(item => {
       const value = this.getNestedValue(item, field as string);
@@ -183,50 +186,141 @@ export class SearchEngine<T> {
   /**
    * Get nested value from object
    */
-  private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  private getNestedValue(source: unknown, path: string): unknown {
+    if (!path) return source;
+
+    return path.split('.').reduce<unknown>((current, key) => {
+      if (current && typeof current === 'object') {
+        return (current as Record<string, unknown>)[key];
+      }
+      return undefined;
+    }, source);
   }
 
   /**
    * Apply filter operator
    */
-  private applyOperator(value: any, operator: string, filterValue: any): boolean {
+  private applyOperator(
+    value: unknown,
+    operator: FilterConfig<T>['operator'],
+    filterValue: unknown
+  ): boolean {
     switch (operator) {
       case 'equals':
         return value === filterValue;
       
       case 'contains':
-        return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
+        return this.matchesStringOperation(value, filterValue, 'includes');
       
       case 'startsWith':
-        return String(value).toLowerCase().startsWith(String(filterValue).toLowerCase());
+        return this.matchesStringOperation(value, filterValue, 'startsWith');
       
       case 'endsWith':
-        return String(value).toLowerCase().endsWith(String(filterValue).toLowerCase());
+        return this.matchesStringOperation(value, filterValue, 'endsWith');
       
       case 'gt':
-        return value > filterValue;
+        return this.compareWithFilter(value, filterValue, comparison => comparison > 0);
       
       case 'lt':
-        return value < filterValue;
+        return this.compareWithFilter(value, filterValue, comparison => comparison < 0);
       
       case 'gte':
-        return value >= filterValue;
+        return this.compareWithFilter(value, filterValue, comparison => comparison >= 0);
       
       case 'lte':
-        return value <= filterValue;
+        return this.compareWithFilter(value, filterValue, comparison => comparison <= 0);
       
       case 'in':
-        return Array.isArray(filterValue) && filterValue.includes(value);
+        return Array.isArray(filterValue) && filterValue.some(item => item === value);
       
-      case 'between':
-        return Array.isArray(filterValue) && 
-               value >= filterValue[0] && 
-               value <= filterValue[1];
+      case 'between': {
+        if (!Array.isArray(filterValue) || filterValue.length !== 2) {
+          return false;
+        }
+
+        const [start, end] = filterValue;
+        return (
+          this.compareWithFilter(value, start, comparison => comparison >= 0) &&
+          this.compareWithFilter(value, end, comparison => comparison <= 0)
+        );
+      }
       
       default:
         return true;
     }
+  }
+
+  private matchesStringOperation(
+    value: unknown,
+    filterValue: unknown,
+    comparator: 'includes' | 'startsWith' | 'endsWith'
+  ): boolean {
+    const target = this.toLowerCaseString(value);
+    const filter = this.toLowerCaseString(filterValue);
+
+    if (target === null || filter === null) {
+      return false;
+    }
+
+    switch (comparator) {
+      case 'includes':
+        return target.includes(filter);
+      case 'startsWith':
+        return target.startsWith(filter);
+      case 'endsWith':
+        return target.endsWith(filter);
+      default:
+        return false;
+    }
+  }
+
+  private toLowerCaseString(value: unknown): string | null {
+    if (value === undefined || value === null) return null;
+    return String(value).toLowerCase();
+  }
+
+  private compareWithFilter(
+    value: unknown,
+    filterValue: unknown,
+    predicate: (comparison: number) => boolean
+  ): boolean {
+    const comparison = this.compareValues(value, filterValue);
+    return comparison !== null && predicate(comparison);
+  }
+
+  private compareValues(a: unknown, b: unknown): number | null {
+    const normalizedA = this.normalizeComparable(a);
+    const normalizedB = this.normalizeComparable(b);
+
+    if (normalizedA === null || normalizedB === null) {
+      return null;
+    }
+
+    if (typeof normalizedA === 'string' && typeof normalizedB === 'string') {
+      return normalizedA.localeCompare(normalizedB);
+    }
+
+    const numericA = normalizedA instanceof Date ? normalizedA.getTime() : normalizedA;
+    const numericB = normalizedB instanceof Date ? normalizedB.getTime() : normalizedB;
+
+    if (typeof numericA === 'number' && typeof numericB === 'number') {
+      if (numericA === numericB) return 0;
+      return numericA > numericB ? 1 : -1;
+    }
+
+    return null;
+  }
+
+  private normalizeComparable(value: unknown): string | number | Date | null {
+    if (typeof value === 'number' || typeof value === 'string') {
+      return value;
+    }
+
+    if (value instanceof Date) {
+      return value;
+    }
+
+    return null;
   }
 }
 
@@ -277,8 +371,8 @@ export function getSearchSuggestions<T>(
   return results
     .slice(0, limit)
     .map(item => {
-      const value = String((item as any)[field]);
-      return value;
+      const value = (item as Record<string, unknown>)[field as string];
+      return String(value ?? '');
     })
-    .filter((value, index, self) => self.indexOf(value) === index);
+    .filter((value, index, self) => value.trim().length > 0 && self.indexOf(value) === index);
 }

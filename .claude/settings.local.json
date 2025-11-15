@@ -13,7 +13,9 @@
       "Bash(curl:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(python fix_python_issues.py:*)"
     ],
     "deny": [],
     "ask": []

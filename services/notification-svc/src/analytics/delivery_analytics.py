@@ -26,11 +26,11 @@ class DeliveryAnalytics:
     Track and analyze notification delivery and engagement
     Open rates, click-through rates, bounces, A/B testing
     """
-    
+
     def __init__(self, db, redis_client):
         self.db = db
         self.redis = redis_client
-    
+
     async def track_sent(
         self,
         notification_id: str,
@@ -41,7 +41,7 @@ class DeliveryAnalytics:
         metadata: Dict = None
     ):
         """Track notification sent"""
-        
+
         query = """
             INSERT INTO notification_analytics (
                 notification_id,
@@ -54,7 +54,7 @@ class DeliveryAnalytics:
                 sent_at
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """
-        
+
         await self.db.execute(
             query,
             notification_id,
@@ -66,17 +66,17 @@ class DeliveryAnalytics:
             metadata or {},
             datetime.utcnow()
         )
-        
+
         # Update metrics
         await self._increment_metric(f"sent:{channel}:{category}")
-    
+
     async def track_delivered(
         self,
         notification_id: str,
         delivery_time_ms: int
     ):
         """Track successful delivery"""
-        
+
         query = """
             UPDATE notification_analytics
             SET status = 'delivered',
@@ -84,48 +84,48 @@ class DeliveryAnalytics:
                 delivery_time_ms = $2
             WHERE notification_id = $3
         """
-        
+
         await self.db.execute(
             query,
             datetime.utcnow(),
             delivery_time_ms,
             notification_id
         )
-        
+
         # Get notification details for metrics
         notif = await self._get_notification(notification_id)
         if notif:
             await self._increment_metric(
                 f"delivered:{notif['channel']}:{notif['category']}"
             )
-    
+
     async def track_opened(
         self,
         notification_id: str,
         tracking_pixel_id: str = None
     ):
         """Track notification opened (email open tracking)"""
-        
+
         query = """
             UPDATE notification_analytics
             SET opened_at = $1,
                 open_count = open_count + 1
             WHERE notification_id = $2
         """
-        
+
         await self.db.execute(
             query,
             datetime.utcnow(),
             notification_id
         )
-        
+
         # Track in Redis for real-time metrics
         notif = await self._get_notification(notification_id)
         if notif:
             await self._increment_metric(
                 f"opened:{notif['channel']}:{notif['category']}"
             )
-    
+
     async def track_clicked(
         self,
         notification_id: str,
@@ -133,7 +133,7 @@ class DeliveryAnalytics:
         click_id: str = None
     ):
         """Track link click"""
-        
+
         # Update notification record
         query = """
             UPDATE notification_analytics
@@ -141,13 +141,13 @@ class DeliveryAnalytics:
                 click_count = click_count + 1
             WHERE notification_id = $2
         """
-        
+
         await self.db.execute(
             query,
             datetime.utcnow(),
             notification_id
         )
-        
+
         # Track individual click
         click_query = """
             INSERT INTO notification_clicks (
@@ -157,7 +157,7 @@ class DeliveryAnalytics:
                 clicked_at
             ) VALUES ($1, $2, $3, $4)
         """
-        
+
         await self.db.execute(
             click_query,
             notification_id,
@@ -165,14 +165,14 @@ class DeliveryAnalytics:
             click_id or secrets.token_urlsafe(16),
             datetime.utcnow()
         )
-        
+
         # Update metrics
         notif = await self._get_notification(notification_id)
         if notif:
             await self._increment_metric(
                 f"clicked:{notif['channel']}:{notif['category']}"
             )
-    
+
     async def track_bounced(
         self,
         notification_id: str,
@@ -180,7 +180,7 @@ class DeliveryAnalytics:
         reason: str
     ):
         """Track bounce"""
-        
+
         query = """
             UPDATE notification_analytics
             SET status = 'bounced',
@@ -189,7 +189,7 @@ class DeliveryAnalytics:
                 bounced_at = $3
             WHERE notification_id = $4
         """
-        
+
         await self.db.execute(
             query,
             bounce_type,
@@ -197,7 +197,7 @@ class DeliveryAnalytics:
             datetime.utcnow(),
             notification_id
         )
-        
+
         # Update metrics
         notif = await self._get_notification(notification_id)
         if notif:
@@ -207,70 +207,70 @@ class DeliveryAnalytics:
             await self._increment_metric(
                 f"bounced_{bounce_type}:{notif['channel']}"
             )
-    
+
     async def track_unsubscribed(
         self,
         notification_id: str,
         unsubscribe_reason: str = None
     ):
         """Track unsubscribe from notification"""
-        
+
         query = """
             UPDATE notification_analytics
             SET unsubscribed_at = $1,
                 unsubscribe_reason = $2
             WHERE notification_id = $3
         """
-        
+
         await self.db.execute(
             query,
             datetime.utcnow(),
             unsubscribe_reason,
             notification_id
         )
-        
+
         # Update metrics
         notif = await self._get_notification(notification_id)
         if notif:
             await self._increment_metric(
                 f"unsubscribed:{notif['channel']}:{notif['category']}"
             )
-    
+
     async def generate_tracking_pixel(
         self,
         notification_id: str
     ) -> str:
         """Generate tracking pixel for email opens"""
-        
+
         pixel_id = secrets.token_urlsafe(16)
-        
+
         # Store mapping
         await self.redis.setex(
             f"tracking_pixel:{pixel_id}",
             2592000,  # 30 days
             notification_id
         )
-        
+
         return pixel_id
-    
+
     async def generate_click_tracking_url(
         self,
         notification_id: str,
         target_url: str
     ) -> str:
         """Generate click tracking URL"""
-        
+
         click_id = secrets.token_urlsafe(16)
-        
+
         # Store mapping
         await self.redis.setex(
             f"click_tracking:{click_id}",
             2592000,  # 30 days
             f"{notification_id}|{target_url}"
         )
-        
+
         return f"https://aivo.com/track/click/{click_id}"
-    
+
     async def calculate_rates(
         self,
         channel: str,
@@ -279,9 +279,9 @@ class DeliveryAnalytics:
         end_date: datetime
     ) -> Dict:
         """Calculate delivery, open, and click-through rates"""
-        
+
         query = """
-            SELECT 
+            SELECT
                 COUNT(*) as total_sent,
                 COUNT(*) FILTER (WHERE status = 'delivered') as delivered,
                 COUNT(*) FILTER (WHERE opened_at IS NOT NULL) as opened,
@@ -297,7 +297,7 @@ class DeliveryAnalytics:
             AND sent_at >= $3
             AND sent_at <= $4
         """
-        
+
         result = await self.db.fetchrow(
             query,
             channel,
@@ -305,13 +305,13 @@ class DeliveryAnalytics:
             start_date,
             end_date
         )
-        
+
         total_sent = result['total_sent'] or 0
         delivered = result['delivered'] or 0
         opened = result['opened'] or 0
         clicked = result['clicked'] or 0
         bounced = result['bounced'] or 0
-        
+
         # Calculate rates
         delivery_rate = (delivered / total_sent * 100) if total_sent > 0 else 0
         open_rate = (opened / delivered * 100) if delivered > 0 else 0
@@ -321,7 +321,7 @@ class DeliveryAnalytics:
             (result['unsubscribed'] / delivered * 100)
             if delivered > 0 else 0
         )
-        
+
         return {
             "channel": channel,
             "category": category,
@@ -352,16 +352,16 @@ class DeliveryAnalytics:
                 )
             }
         }
-    
+
     async def get_ab_test_results(
         self,
         test_id: str
     ) -> Dict:
         """Get A/B test results"""
-        
+
         # Get test config
         test_query = """
-            SELECT 
+            SELECT
                 test_name,
                 template_name,
                 variant_a_version,
@@ -370,15 +370,15 @@ class DeliveryAnalytics:
             FROM template_ab_tests
             WHERE test_id = $1
         """
-        
+
         test = await self.db.fetchrow(test_query, test_id)
-        
+
         if not test:
             return None
-        
+
         # Get metrics for each variant
         metrics_query = """
-            SELECT 
+            SELECT
                 template_version,
                 COUNT(*) as sent,
                 COUNT(*) FILTER (WHERE opened_at IS NOT NULL) as opened,
@@ -390,7 +390,7 @@ class DeliveryAnalytics:
             AND sent_at >= $4
             GROUP BY template_version
         """
-        
+
         results = await self.db.fetch(
             metrics_query,
             test['template_name'],
@@ -398,16 +398,16 @@ class DeliveryAnalytics:
             test['variant_b_version'],
             test['created_at']
         )
-        
+
         # Calculate rates for each variant
         variants = {}
-        
+
         for result in results:
             version = result['template_version']
             sent = result['sent'] or 0
             opened = result['opened'] or 0
             clicked = result['clicked'] or 0
-            
+
             variants[version] = {
                 "sent": sent,
                 "opened": opened,
@@ -416,11 +416,11 @@ class DeliveryAnalytics:
                 "click_rate": (clicked / sent * 100) if sent > 0 else 0,
                 "avg_delivery_time_ms": result['avg_delivery_time']
             }
-        
+
         # Determine winner
         variant_a = variants.get(test['variant_a_version'], {})
         variant_b = variants.get(test['variant_b_version'], {})
-        
+
         winner = None
         if variant_a.get('click_rate', 0) > variant_b.get('click_rate', 0):
             winner = "variant_a"
@@ -438,7 +438,7 @@ class DeliveryAnalytics:
             )
         else:
             lift = 0
-        
+
         return {
             "test_id": test_id,
             "test_name": test['test_name'],
@@ -453,7 +453,7 @@ class DeliveryAnalytics:
                 winner
             )
         }
-    
+
     def _generate_ab_recommendation(
         self,
         variant_a: Dict,
@@ -461,32 +461,32 @@ class DeliveryAnalytics:
         winner: Optional[str]
     ) -> str:
         """Generate recommendation for A/B test"""
-        
+
         min_sample = 100
-        
+
         a_sent = variant_a.get('sent', 0)
         b_sent = variant_b.get('sent', 0)
-        
+
         if a_sent < min_sample or b_sent < min_sample:
             return "Continue test - need more data for significance"
-        
+
         if not winner:
             return "No significant difference - keep current version"
-        
+
         if winner == "variant_a":
             return f"Use Variant A - {variant_a['click_rate']:.2f}% CTR"
         else:
             return f"Use Variant B - {variant_b['click_rate']:.2f}% CTR"
-    
+
     async def get_channel_performance(
         self,
         start_date: datetime,
         end_date: datetime
     ) -> List[Dict]:
         """Compare performance across channels"""
-        
+
         query = """
-            SELECT 
+            SELECT
                 channel,
                 COUNT(*) as sent,
                 COUNT(*) FILTER (WHERE status = 'delivered') as delivered,
@@ -499,15 +499,15 @@ class DeliveryAnalytics:
             GROUP BY channel
             ORDER BY sent DESC
         """
-        
+
         results = await self.db.fetch(query, start_date, end_date)
-        
+
         performance = []
-        
+
         for result in results:
             sent = result['sent'] or 0
             delivered = result['delivered'] or 0
-            
+
             performance.append({
                 "channel": result['channel'],
                 "sent": sent,
@@ -527,46 +527,46 @@ class DeliveryAnalytics:
                 ),
                 "avg_delivery_time_ms": result['avg_delivery_time']
             })
-        
+
         return performance
-    
+
     async def _get_notification(
         self,
         notification_id: str
     ) -> Optional[Dict]:
         """Get notification details"""
-        
+
         query = """
             SELECT channel, category, template_name
             FROM notification_analytics
             WHERE notification_id = $1
         """
-        
+
         result = await self.db.fetchrow(query, notification_id)
-        
+
         return dict(result) if result else None
-    
+
     async def _increment_metric(self, metric_key: str):
         """Increment metric counter in Redis"""
-        
+
         key = f"metrics:{metric_key}"
         await self.redis.incr(key)
-        
+
         # Set TTL of 30 days
         await self.redis.expire(key, 2592000)
-    
+
     async def get_real_time_metrics(self) -> Dict:
         """Get real-time metrics from Redis"""
-        
+
         # Get all metric keys
         pattern = "metrics:*"
         keys = await self.redis.keys(pattern)
-        
+
         metrics = {}
-        
+
         for key in keys:
             value = await self.redis.get(key)
             metric_name = key.replace("metrics:", "")
             metrics[metric_name] = int(value) if value else 0
-        
+
         return metrics

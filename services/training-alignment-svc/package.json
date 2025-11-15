@@ -1,5 +1,6 @@
 {
   "name": "@aivo/training-alignment-svc",
+  "type": "module",
   "version": "1.0.0",
   "description": "Training & Alignment Agent - Responsible AI governance and continuous model improvement",
   "main": "src/main.py",

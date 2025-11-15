@@ -1,5 +1,6 @@
 {
   "name": "@aivo/export",
+  "type": "module",
   "version": "1.0.0",
   "description": "Data export to PDF, CSV, and Excel",
   "main": "./dist/index.js",

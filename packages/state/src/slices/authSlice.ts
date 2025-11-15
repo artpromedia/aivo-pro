@@ -13,7 +13,7 @@ export const createAuthSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   AuthSlice
-> = (set, get) => ({
+> = (set, _get, _store) => ({
   setUser: (user) =>
     set((state) => {
       state.auth.currentUser = user;

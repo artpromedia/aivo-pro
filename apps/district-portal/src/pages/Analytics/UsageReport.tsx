@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { fetchUsageReport } from '../../services/districtApi';
 import {
   ArrowLeft,
   TrendingUp,
@@ -10,7 +12,9 @@ import {
   Download,
   Filter,
   BarChart3,
-  MousePointer
+  MousePointer,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import {
   AreaChart,
@@ -30,60 +34,50 @@ import {
   Cell
 } from 'recharts';
 
-// Mock usage data
-const mockUsageData = {
-  summary: {
-    totalLogins: 12450,
-    activeUsers: 1847,
-    avgSessionDuration: '24 min',
-    featureAdoption: 78
-  },
-  loginTrend: [
-    { date: 'Nov 1', logins: 1650, uniqueUsers: 342 },
-    { date: 'Nov 2', logins: 1720, uniqueUsers: 358 },
-    { date: 'Nov 3', logins: 1580, uniqueUsers: 328 },
-    { date: 'Nov 4', logins: 1890, uniqueUsers: 395 },
-    { date: 'Nov 5', logins: 1950, uniqueUsers: 410 },
-    { date: 'Nov 6', logins: 1660, uniqueUsers: 414 }
-  ],
-  featureUsage: [
-    { feature: 'Dashboard', sessions: 2450, avgTime: '8 min' },
-    { feature: 'Student Profiles', sessions: 1890, avgTime: '12 min' },
-    { feature: 'AI Model', sessions: 1650, avgTime: '18 min' },
-    { feature: 'IEP Management', sessions: 1420, avgTime: '22 min' },
-    { feature: 'Reports', sessions: 980, avgTime: '15 min' },
-    { feature: 'Settings', sessions: 560, avgTime: '5 min' }
-  ],
-  userActivity: [
-    { role: 'Teachers', count: 892, percentage: 48 },
-    { role: 'Students', count: 756, percentage: 41 },
-    { role: 'Admins', count: 145, percentage: 8 },
-    { role: 'Parents', count: 54, percentage: 3 }
-  ],
-  sessionDuration: [
-    { range: '0-5 min', count: 850 },
-    { range: '5-15 min', count: 2340 },
-    { range: '15-30 min', count: 3120 },
-    { range: '30-60 min', count: 1890 },
-    { range: '60+ min', count: 980 }
-  ],
-  peakHours: [
-    { hour: '6 AM', activity: 120 },
-    { hour: '8 AM', activity: 890 },
-    { hour: '10 AM', activity: 1450 },
-    { hour: '12 PM', activity: 980 },
-    { hour: '2 PM', activity: 1320 },
-    { hour: '4 PM', activity: 780 },
-    { hour: '6 PM', activity: 420 },
-    { hour: '8 PM', activity: 280 }
-  ]
-};
-
 const COLORS = ['#a855f7', '#ec4899', '#8b5cf6', '#d946ef', '#c084fc'];
 
 export const UsageReport: React.FC = () => {
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState('7days');
+  const districtId = 'SD-12345'; // In production, get from auth context
+
+  // Fetch usage data from API
+  const { data: usageData, isLoading, error, refetch } = useQuery({
+    queryKey: ['usage-report', districtId, dateRange],
+    queryFn: () => fetchUsageReport(districtId, dateRange),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-coral-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading usage data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !usageData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-900 font-semibold mb-2">Failed to load usage data</p>
+          <p className="text-gray-600 mb-4">Using demo data</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-coral-600 text-white rounded-lg hover:bg-coral-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const mockUsageData = usageData; // Keep variable name for backwards compatibility
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-white">
@@ -250,7 +244,7 @@ export const UsageReport: React.FC = () => {
                 </BarChart>
               </ResponsiveContainer>
               <div className="mt-4 grid grid-cols-3 gap-4">
-                {mockUsageData.featureUsage.slice(0, 3).map((feature, index) => (
+                {mockUsageData.featureUsage.slice(0, 3).map((feature: { feature: string; avgTime: string }, index: number) => (
                   <div key={index} className="p-3 bg-purple-50 rounded-xl">
                     <p className="text-xs text-gray-600 mb-1">{feature.feature}</p>
                     <p className="text-lg font-bold text-gray-900">{feature.avgTime}</p>
@@ -301,7 +295,7 @@ export const UsageReport: React.FC = () => {
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {mockUsageData.userActivity.map((_entry, index) => (
+                    {mockUsageData.userActivity.map((_entry: unknown, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -309,7 +303,7 @@ export const UsageReport: React.FC = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-4 space-y-2">
-                {mockUsageData.userActivity.map((role, index) => (
+                {mockUsageData.userActivity.map((role: { role: string; count: number }, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }}></div>
@@ -325,7 +319,7 @@ export const UsageReport: React.FC = () => {
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Session Duration</h2>
               <div className="space-y-3">
-                {mockUsageData.sessionDuration.map((session, index) => (
+                {mockUsageData.sessionDuration.map((session: { range: string; count: number; percentage: number }, index: number) => (
                   <div key={index}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">{session.range}</span>

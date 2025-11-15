@@ -65,12 +65,12 @@ redis_client = None
 async def startup():
     """Initialize on startup"""
     global goal_engine, redis_client
-    
+
     goal_engine = SMARTGoalEngine(
         api_key=settings.OPENAI_API_KEY,
         model=settings.OPENAI_MODEL
     )
-    
+
     redis_client = await redis.from_url(settings.REDIS_URL)
 
 
@@ -135,7 +135,7 @@ async def health_check():
 @app.post("/v1/iep/generate", response_model=GoalResponse)
 async def generate_goal(request: GenerateGoalRequest):
     """Generate SMART IEP goal"""
-    
+
     try:
         # Generate goal
         goal_data = await goal_engine.generate_smart_goal(
@@ -145,7 +145,7 @@ async def generate_goal(request: GenerateGoalRequest):
             baseline_data=request.baseline_data,
             grade_level=request.grade_level
         )
-        
+
         # Generate objectives
         objectives = goal_engine.generate_objectives(
             goal_text=goal_data["goal_text"],
@@ -153,7 +153,7 @@ async def generate_goal(request: GenerateGoalRequest):
             target=goal_data["target"]
         )
         goal_data["objectives"] = objectives
-        
+
         # Store in Redis (simplified)
         goal_id = str(uuid.uuid4())
         await redis_client.setex(
@@ -161,16 +161,16 @@ async def generate_goal(request: GenerateGoalRequest):
             86400,  # 24 hours
             str(goal_data)
         )
-        
+
         # Metrics
         goal_generations.inc()
         smart_validation_score.observe(goal_data["confidence_score"])
-        
+
         return {
             "goal_id": goal_id,
             **goal_data
         }
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -178,7 +178,7 @@ async def generate_goal(request: GenerateGoalRequest):
 @app.get("/v1/iep/{student_id}/goals")
 async def get_student_goals(student_id: str):
     """Get all goals for student"""
-    
+
     # In production, would query database
     return {
         "student_id": student_id,
@@ -190,21 +190,21 @@ async def get_student_goals(student_id: str):
 @app.post("/v1/iep/goals/{goal_id}/data")
 async def record_data_point(goal_id: str, data: DataPointRequest):
     """Record progress data point"""
-    
+
     try:
         # Store data point
         data_key = f"goal:{goal_id}:data"
         await redis_client.rpush(data_key, str(data.dict()))
-        
+
         # Metrics
         data_points_recorded.inc()
-        
+
         return {
             "goal_id": goal_id,
             "data_point": data.dict(),
             "recorded_at": datetime.utcnow().isoformat()
         }
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -212,46 +212,46 @@ async def record_data_point(goal_id: str, data: DataPointRequest):
 @app.get("/v1/iep/goals/{goal_id}/progress", response_model=ProgressResponse)
 async def get_progress_analysis(goal_id: str):
     """Get progress analysis for goal"""
-    
+
     try:
         # Get data points
         data_key = f"goal:{goal_id}:data"
         raw_data = await redis_client.lrange(data_key, 0, -1)
-        
+
         if not raw_data:
             raise HTTPException(
                 status_code=404,
                 detail="No data points found"
             )
-        
+
         # Parse data points
         import ast
         data_points = [ast.literal_eval(dp.decode()) for dp in raw_data]
-        
+
         # Analyze progress
         analysis = progress_analyzer.analyze_progress(data_points)
-        
+
         # Calculate mastery
         target = 100.0  # Would get from goal
         mastery = progress_analyzer.calculate_mastery(data_points, target)
-        
+
         # Generate alerts
         alerts = progress_analyzer.generate_alerts(
             analysis,
             settings.ALERT_THRESHOLD_REGRESSION,
             settings.ALERT_THRESHOLD_AT_RISK
         )
-        
+
         # Metrics
         progress_analyses.inc()
-        
+
         return {
             "goal_id": goal_id,
             "mastery_level": mastery,
             "alerts": alerts,
             **analysis
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -261,7 +261,7 @@ async def get_progress_analysis(goal_id: str):
 @app.post("/v1/iep/goals/{goal_id}/amend")
 async def amend_goal(goal_id: str, amendment: Dict):
     """Amend IEP goal"""
-    
+
     return {
         "goal_id": goal_id,
         "amendment": amendment,
@@ -272,7 +272,7 @@ async def amend_goal(goal_id: str, amendment: Dict):
 @app.get("/v1/iep/{student_id}/progress-report")
 async def generate_progress_report(student_id: str):
     """Generate comprehensive progress report"""
-    
+
     return {
         "student_id": student_id,
         "report": {},
@@ -283,7 +283,7 @@ async def generate_progress_report(student_id: str):
 @app.post("/v1/iep/document/generate")
 async def generate_iep_document(document_data: Dict):
     """Generate IEP document"""
-    
+
     return {
         "document_id": str(uuid.uuid4()),
         "status": "Document generation pending"
@@ -293,7 +293,7 @@ async def generate_iep_document(document_data: Dict):
 @app.get("/v1/iep/compliance/check")
 async def check_compliance(student_id: Optional[str] = None):
     """Run FERPA/IDEA compliance check"""
-    
+
     return {
         "compliant": True,
         "checks": {

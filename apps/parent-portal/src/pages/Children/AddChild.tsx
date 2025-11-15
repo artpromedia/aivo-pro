@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@aivo/ui';
+import { useAddChild } from '../../hooks/useChildren';
 
 interface ChildFormData {
   // Basic Information for Model Setup
@@ -31,6 +32,7 @@ interface ChildFormData {
 export const AddChild: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const { mutateAsync: addChild, isPending } = useAddChild();
   const [formData, setFormData] = useState<ChildFormData>({
     firstName: '',
     lastName: '',
@@ -53,38 +55,69 @@ export const AddChild: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // Create child profile with basic info
-    const childId = await createChildProfile(formData);
-    console.log('Child profile created:', { childId, ...formData });
-    
-    // Generate a simple session token for the assessment
-    const token = window.btoa(`${childId}_${Date.now()}`);
-    
-    // Redirect to baseline assessment for this child with proper query parameters
-    const assessmentUrl = `http://localhost:5179?childId=${childId}&token=${token}&source=parent&childName=${encodeURIComponent(formData.firstName + ' ' + formData.lastName)}&grade=${formData.grade}`;
-    window.open(assessmentUrl, '_blank');
-    
-    // Navigate back to dashboard
-    navigate('/dashboard');
-  };
-
-  const createChildProfile = async (data: ChildFormData): Promise<string> => {
-    // This would typically make an API call to create the child profile
-    // For now, we'll generate a temporary ID
-    const childId = `child_${Date.now()}`;
-    
-    // Store child data temporarily (in real app, this would be in backend)
-    const childData = {
-      id: childId,
-      ...data,
-      createdAt: new Date().toISOString(),
-      assessmentStatus: 'pending',
-      modelStatus: 'pending'
-    };
-    
-    localStorage.setItem(`aivo_child_${childId}`, JSON.stringify(childData));
-    
-    return childId;
+    try {
+      console.log('📝 Adding child profile:', formData);
+      
+      // Calculate age from date of birth
+      const birthDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear() - 
+        (today.getMonth() < birthDate.getMonth() || 
+         (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate()) ? 1 : 0);
+      
+      // Create child profile using the hook
+      const newChild = await addChild({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        birthDate: formData.dateOfBirth,
+        grade: parseInt(formData.grade === 'K' ? '0' : formData.grade),
+        zipCode: formData.zipCode,
+        disabilities: [],
+        hasIEP: false,
+        avatar: age < 10 ? (Math.random() > 0.5 ? '👧' : '👦') : (Math.random() > 0.5 ? '👩' : '👨'),
+        progress: {
+          overall: 0,
+          subjects: {
+            math: 0,
+            reading: 0,
+            science: 0,
+            socialStudies: 0,
+          },
+        },
+        weeklyStats: {
+          hoursLearned: 0,
+          skillsMastered: 0,
+          avgScore: 0,
+        },
+      });
+      
+      console.log('✅ Child profile created:', newChild);
+      
+      // Generate a simple session token for the assessment
+      const token = window.btoa(`${newChild.id}_${Date.now()}`);
+      
+      // Store child data in localStorage for baseline assessment
+      const childData = {
+        id: newChild.id,
+        ...formData,
+        createdAt: new Date().toISOString(),
+        assessmentStatus: 'pending',
+        modelStatus: 'pending'
+      };
+      localStorage.setItem(`aivo_child_${newChild.id}`, JSON.stringify(childData));
+      
+      // Redirect to baseline assessment for this child with proper query parameters
+      const assessmentUrl = `http://localhost:5179?childId=${newChild.id}&token=${token}&source=parent&childName=${encodeURIComponent(formData.firstName + ' ' + formData.lastName)}&grade=${formData.grade}`;
+      console.log('🧠 Redirecting to baseline assessment:', assessmentUrl);
+      window.open(assessmentUrl, '_blank');
+      
+      // Navigate back to children list to show the new child
+      navigate('/children');
+    } catch (error) {
+      console.error('❌ Error creating child profile:', error);
+      // Show error to user (you might want to add a toast notification here)
+      alert('Failed to create child profile. Please try again.');
+    }
   };
 
   const isStepValid = () => {

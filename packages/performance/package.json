@@ -1,5 +1,6 @@
 {
   "name": "@aivo/performance",
+  "type": "module",
   "version": "1.0.0",
   "description": "Performance monitoring and optimization utilities for AIVO Learning Platform",
   "main": "./dist/index.js",

@@ -19,11 +19,11 @@ from src.config import settings
 
 class DatabaseManager:
     """Manage database connections and sessions"""
-    
+
     def __init__(self):
         self.engine: AsyncEngine = None
         self.session_factory: async_sessionmaker = None
-    
+
     def initialize(self):
         """Initialize database engine"""
         self.engine = create_async_engine(
@@ -34,7 +34,7 @@ class DatabaseManager:
             echo=settings.log_level == "DEBUG",
             poolclass=NullPool if settings.environment == "test" else None
         )
-        
+
         self.session_factory = async_sessionmaker(
             self.engine,
             class_=AsyncSession,
@@ -42,12 +42,12 @@ class DatabaseManager:
             autocommit=False,
             autoflush=False
         )
-    
+
     async def close(self):
         """Close database connections"""
         if self.engine:
             await self.engine.dispose()
-    
+
     @asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
         """Get database session context manager"""

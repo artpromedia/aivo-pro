@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@aivo/auth';
 import { useChildren } from '../hooks/useChildren';
 import { useSuggestions } from '../hooks/useSuggestions';
-import { useMockWebSocket } from '../hooks/useWebSocket';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { ChildCard } from '../components/ChildCard';
 import { ActivityFeed } from '../components/ActivityFeed';
 import { format } from 'date-fns';
@@ -36,24 +36,30 @@ export const Dashboard: React.FC = () => {
   const { children, isLoading: childrenLoading } = useChildren();
   const { pendingSuggestions } = useSuggestions();
   
-  // Mock WebSocket for real-time updates
-  useMockWebSocket();
+  // Real WebSocket for live updates (falls back gracefully if service unavailable)
+  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8003/ws';
+  const { isConnected: wsConnected } = useWebSocket(wsUrl);
 
-  // Fetch dashboard stats
+  // Fetch dashboard stats from actual student data
   const { data: stats } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', children],
     queryFn: async (): Promise<DashboardStats> => {
-      // Mock stats calculation
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            avgProgress: children?.reduce((sum, child) => sum + child.progress.overall, 0) / (children?.length || 1) || 0,
-            totalHours: children?.reduce((sum, child) => sum + child.weeklyStats.hoursLearned, 0) || 0,
-            skillsMastered: children?.reduce((sum, child) => sum + child.weeklyStats.skillsMastered, 0) || 0,
-            activeChildren: children?.length || 0,
-          });
-        }, 300);
-      });
+      // Calculate stats from real student data
+      if (!children || children.length === 0) {
+        return {
+          avgProgress: 0,
+          totalHours: 0,
+          skillsMastered: 0,
+          activeChildren: 0,
+        };
+      }
+      
+      return {
+        avgProgress: Math.round(children.reduce((sum, child) => sum + child.progress.overall, 0) / children.length),
+        totalHours: children.reduce((sum, child) => sum + child.weeklyStats.hoursLearned, 0),
+        skillsMastered: children.reduce((sum, child) => sum + child.weeklyStats.skillsMastered, 0),
+        activeChildren: children.length,
+      };
     },
     enabled: !!children,
   });

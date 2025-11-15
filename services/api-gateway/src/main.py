@@ -52,19 +52,19 @@ http_request_duration_seconds = Histogram(
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     logger.info("Starting API Gateway...")
-    
+
     # Initialize database
     await init_db()
-    
+
     # Create tables in development
     if settings.is_development:
         logger.info("Development mode: Creating database tables")
         await create_tables()
-    
+
     logger.info(f"API Gateway started on {settings.host}:{settings.port}")
-    
+
     yield
-    
+
     # Cleanup
     logger.info("Shutting down API Gateway...")
     await close_db()
@@ -107,28 +107,28 @@ if settings.is_production:
 async def add_security_headers(request: Request, call_next):
     """Add security headers to all responses"""
     response = await call_next(request)
-    
+
     # HSTS
     if settings.is_production:
         response.headers["Strict-Transport-Security"] = \
             f"max-age={settings.hsts_max_age}; includeSubDomains"
-    
+
     # Content Security Policy
     response.headers["Content-Security-Policy"] = \
         f"default-src '{settings.csp_default_src}'"
-    
+
     # XSS Protection
     response.headers["X-Content-Type-Options"] = settings.x_content_type_options
     response.headers["X-Frame-Options"] = settings.x_frame_options
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    
+
     # Referrer Policy
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    
+
     # Permissions Policy
     response.headers["Permissions-Policy"] = \
         "geolocation=(), microphone=(), camera=()"
-    
+
     return response
 
 
@@ -136,32 +136,32 @@ async def add_security_headers(request: Request, call_next):
 async def log_requests(request: Request, call_next):
     """Log all requests and track metrics"""
     start_time = time.time()
-    
+
     # Process request
     response = await call_next(request)
-    
+
     # Calculate duration
     duration = time.time() - start_time
-    
+
     # Log request
     logger.info(
         f"{request.method} {request.url.path} - "
         f"Status: {response.status_code} - "
         f"Duration: {duration:.3f}s"
     )
-    
+
     # Update Prometheus metrics
     http_requests_total.labels(
         method=request.method,
         endpoint=request.url.path,
         status=response.status_code
     ).inc()
-    
+
     http_request_duration_seconds.labels(
         method=request.method,
         endpoint=request.url.path
     ).observe(duration)
-    
+
     return response
 
 
@@ -173,13 +173,13 @@ async def log_requests(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions"""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    
+
     # Don't expose internal errors in production
     if settings.is_production:
         detail = "An internal error occurred. Please try again later."
     else:
         detail = str(exc)
-    
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
@@ -216,7 +216,7 @@ async def metrics():
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": "Metrics endpoint disabled"}
         )
-    
+
     return Response(
         content=generate_latest(),
         media_type=CONTENT_TYPE_LATEST
@@ -237,7 +237,7 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "src.main:app",
         host=settings.host,

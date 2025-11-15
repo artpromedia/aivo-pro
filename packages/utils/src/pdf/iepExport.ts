@@ -176,7 +176,7 @@ function generateIepHtml(data: IEPData): string {
       ${data.activeGoals && data.activeGoals.length > 0 ? `
       <div style="margin-bottom: 30px;">
         <h2 style="margin: 0 0 16px 0; color: #1f2937; font-size: 20px; font-weight: 600;">Active Goals</h2>
-        ${data.activeGoals.map((goal, index) => `
+  ${data.activeGoals.map((goal) => `
           <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
               <div style="flex: 1;">

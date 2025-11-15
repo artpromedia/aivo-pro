@@ -46,18 +46,18 @@ class PersonalizedPlan:
     child_id: str
     plan_date: str
     review_date: str
-    
+
     plan_name: str
     focus_areas: List[str]
-    
+
     weekly_schedule: WeeklySchedule
     goals: List[Goal]
     accommodations: List[Accommodation]
-    
+
     parent_involvement: List[str]
     home_activities: List[Dict[str, str]]
     progress_monitoring: Dict[str, str]
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary"""
         return {
@@ -102,14 +102,14 @@ class PersonalizedPlan:
 class PlanGenerator:
     """
     Personalized AIVO Learning Plan Generator
-    
+
     Creates comprehensive, individualized learning plans based on:
     - Academic assessment results
     - Speech/language evaluation
     - Social-emotional assessment
     - Cross-domain analysis
     """
-    
+
     def generate_personalized_plan(
         self,
         child_id: str,
@@ -121,7 +121,7 @@ class PlanGenerator:
     ) -> PersonalizedPlan:
         """
         Generate personalized AIVO learning plan
-        
+
         Args:
             child_id: Child's unique identifier
             age: Child's age in years
@@ -129,52 +129,52 @@ class PlanGenerator:
             academic_results: Academic assessment results
             speech_results: Speech/language assessment results
             sel_results: SEL assessment results
-        
+
         Returns:
             PersonalizedPlan with complete intervention plan
         """
         logger.info(f"Generating personalized plan for child {child_id}")
-        
+
         plan_date = datetime.now()
         review_date = plan_date + timedelta(weeks=6)
-        
+
         # Determine focus areas
         focus_areas = self._identify_focus_areas(
             academic_results, speech_results, sel_results
         )
-        
+
         # Create weekly schedule
         weekly_schedule = self._create_weekly_schedule(
             academic_results, speech_results, sel_results
         )
-        
+
         # Generate goals
         goals = self._generate_goals(
             age, grade, academic_results, speech_results, sel_results
         )
-        
+
         # Determine accommodations
         accommodations = self._determine_accommodations(
             academic_results, speech_results, sel_results
         )
-        
+
         # Parent involvement strategies
         parent_involvement = self._create_parent_involvement(
             speech_results, sel_results
         )
-        
+
         # Home activities
         home_activities = self._create_home_activities(
             age, speech_results, sel_results
         )
-        
+
         # Progress monitoring plan
         progress_monitoring = self._create_progress_monitoring(
             focus_areas
         )
-        
+
         plan_name = f"Personalized AIVO Learning Plan - Grade {grade}"
-        
+
         return PersonalizedPlan(
             child_id=child_id,
             plan_date=plan_date.isoformat(),
@@ -188,7 +188,7 @@ class PlanGenerator:
             home_activities=home_activities,
             progress_monitoring=progress_monitoring
         )
-    
+
     def _identify_focus_areas(
         self,
         academic_results: Dict,
@@ -196,14 +196,14 @@ class PlanGenerator:
         sel_results: Optional[Dict]
     ) -> List[str]:
         """Identify primary focus areas for intervention"""
-        
+
         focus_areas = []
-        
+
         # Academic areas
         if academic_results:
             for subject in academic_results.keys():
                 focus_areas.append(f"academic_{subject}")
-        
+
         # Speech/language areas
         if speech_results and "error" not in speech_results:
             priority_areas = speech_results.get("summary", {}).get(
@@ -211,7 +211,7 @@ class PlanGenerator:
             )
             for area in priority_areas:
                 focus_areas.append(f"speech_{area}")
-        
+
         # SEL areas
         if sel_results and "error" not in sel_results:
             priority_areas = sel_results.get("summary", {}).get(
@@ -219,9 +219,9 @@ class PlanGenerator:
             )
             for area in priority_areas[:3]:  # Top 3
                 focus_areas.append(f"sel_{area}")
-        
+
         return focus_areas
-    
+
     def _create_weekly_schedule(
         self,
         academic_results: Dict,
@@ -229,12 +229,12 @@ class PlanGenerator:
         sel_results: Optional[Dict]
     ) -> WeeklySchedule:
         """Create weekly intervention schedule"""
-        
+
         academic_sessions = {}
         if academic_results:
             for subject in academic_results.keys():
                 academic_sessions[subject] = "Daily adaptive lessons (20-30 min)"
-        
+
         # Speech therapy schedule
         speech_therapy = None
         if speech_results and "error" not in speech_results:
@@ -246,7 +246,7 @@ class PlanGenerator:
                     speech_therapy = "1-2 sessions per week (30-45 min)"
                 else:
                     speech_therapy = "1 session per week (30 min)"
-        
+
         # SEL activities schedule
         sel_activities = None
         counseling = None
@@ -256,15 +256,15 @@ class PlanGenerator:
                 counseling = "Weekly individual or group counseling (30 min)"
             else:
                 sel_activities = "Daily SEL moments (5-10 min)"
-        
+
         other_services = {}
-        
+
         # Executive function coaching
         if sel_results and "error" not in sel_results:
             if not sel_results.get("executive_function", {}).get("age_appropriate"):
                 other_services["executive_function_coaching"] = \
                     "2x per week (20 min)"
-        
+
         return WeeklySchedule(
             academic_sessions=academic_sessions,
             speech_therapy=speech_therapy,
@@ -272,7 +272,7 @@ class PlanGenerator:
             counseling=counseling,
             other_services=other_services
         )
-    
+
     def _generate_goals(
         self,
         age: float,
@@ -282,10 +282,10 @@ class PlanGenerator:
         sel_results: Optional[Dict]
     ) -> List[Goal]:
         """Generate SMART goals"""
-        
+
         goals = []
         target_date = (datetime.now() + timedelta(weeks=12)).strftime("%Y-%m-%d")
-        
+
         # Academic goals
         if academic_results:
             for subject in academic_results.keys():
@@ -297,13 +297,13 @@ class PlanGenerator:
                     success_criteria=f"IRT theta score ≥ 0.0 (grade level)",
                     progress_monitoring="Weekly adaptive assessments"
                 ))
-        
+
         # Speech/language goals
         if speech_results and "error" not in speech_results:
             priority_areas = speech_results.get("summary", {}).get(
                 "priority_areas", []
             )
-            
+
             if "articulation" in priority_areas:
                 error_sounds = speech_results.get("articulation", {}).get(
                     "error_sounds", []
@@ -318,7 +318,7 @@ class PlanGenerator:
                         success_criteria="80% accuracy in spontaneous speech",
                         progress_monitoring="Weekly speech samples"
                     ))
-            
+
             if "language" in priority_areas:
                 goals.append(Goal(
                     domain="speech",
@@ -328,13 +328,13 @@ class PlanGenerator:
                     success_criteria="MLU within 6 months of chronological age",
                     progress_monitoring="Monthly language samples"
                 ))
-        
+
         # SEL goals
         if sel_results and "error" not in sel_results:
             priority_areas = sel_results.get("summary", {}).get(
                 "priority_areas", []
             )
-            
+
             if "self_management" in priority_areas:
                 goals.append(Goal(
                     domain="sel",
@@ -344,7 +344,7 @@ class PlanGenerator:
                     success_criteria="Uses 3+ coping strategies without prompting",
                     progress_monitoring="Daily emotion check-ins and teacher reports"
                 ))
-            
+
             if "relationship_skills" in priority_areas:
                 goals.append(Goal(
                     domain="sel",
@@ -354,9 +354,9 @@ class PlanGenerator:
                     success_criteria="80% positive interactions observed",
                     progress_monitoring="Weekly social skills observations"
                 ))
-        
+
         return goals
-    
+
     def _determine_accommodations(
         self,
         academic_results: Dict,
@@ -364,9 +364,9 @@ class PlanGenerator:
         sel_results: Optional[Dict]
     ) -> List[Accommodation]:
         """Determine necessary accommodations"""
-        
+
         accommodations = []
-        
+
         # Speech accommodations
         if speech_results and "error" not in speech_results:
             if not speech_results.get("articulation", {}).get("age_appropriate"):
@@ -376,7 +376,7 @@ class PlanGenerator:
                     implementation="Allow 50% additional time for oral presentations",
                     responsible_party="All teachers"
                 ))
-            
+
             if not speech_results.get("language", {}).get("age_appropriate"):
                 accommodations.append(Accommodation(
                     category="speech",
@@ -385,7 +385,7 @@ class PlanGenerator:
                                   "and break instructions into steps",
                     responsible_party="All teachers"
                 ))
-        
+
         # Executive function accommodations
         if sel_results and "error" not in sel_results:
             if not sel_results.get("executive_function", {}).get("age_appropriate"):
@@ -410,7 +410,7 @@ class PlanGenerator:
                         responsible_party="All teachers"
                     )
                 ])
-        
+
         # SEL accommodations
         if sel_results and "error" not in sel_results:
             if sel_results.get("summary", {}).get("intervention_recommended"):
@@ -420,25 +420,25 @@ class PlanGenerator:
                     implementation="Allow breaks as needed for emotion regulation",
                     responsible_party="All teachers"
                 ))
-                
+
                 accommodations.append(Accommodation(
                     category="sel",
                     description="Quiet space access",
                     implementation="Provide access to calm-down space when needed",
                     responsible_party="School counselor"
                 ))
-        
+
         return accommodations
-    
+
     def _create_parent_involvement(
         self,
         speech_results: Optional[Dict],
         sel_results: Optional[Dict]
     ) -> List[str]:
         """Create parent involvement strategies"""
-        
+
         strategies = []
-        
+
         # General involvement
         strategies.append(
             "Review AIVO progress reports weekly with your child"
@@ -446,7 +446,7 @@ class PlanGenerator:
         strategies.append(
             "Celebrate effort and progress, not just outcomes"
         )
-        
+
         # Speech involvement
         if speech_results and "error" not in speech_results:
             if speech_results.get("summary", {}).get("therapy_recommended"):
@@ -456,7 +456,7 @@ class PlanGenerator:
                 strategies.append(
                     "Attend parent training sessions with speech therapist"
                 )
-        
+
         # SEL involvement
         if sel_results and "error" not in sel_results:
             strategies.append(
@@ -465,14 +465,14 @@ class PlanGenerator:
             strategies.append(
                 "Practice mindfulness or breathing exercises together"
             )
-            
+
             if sel_results.get("summary", {}).get("intervention_recommended"):
                 strategies.append(
                     "Reinforce coping strategies learned in counseling"
                 )
-        
+
         return strategies
-    
+
     def _create_home_activities(
         self,
         age: float,
@@ -480,15 +480,15 @@ class PlanGenerator:
         sel_results: Optional[Dict]
     ) -> List[Dict[str, str]]:
         """Create suggested home activities"""
-        
+
         activities = []
-        
+
         # Speech activities
         if speech_results and "error" not in speech_results:
             priority_areas = speech_results.get("summary", {}).get(
                 "priority_areas", []
             )
-            
+
             if "articulation" in priority_areas:
                 activities.append({
                     "domain": "speech",
@@ -498,7 +498,7 @@ class PlanGenerator:
                     "frequency": "10 minutes daily",
                     "materials": "Target word list from speech therapist"
                 })
-            
+
             if "language" in priority_areas:
                 activities.append({
                     "domain": "speech",
@@ -508,7 +508,7 @@ class PlanGenerator:
                     "frequency": "15 minutes daily",
                     "materials": "Age-appropriate books"
                 })
-        
+
         # SEL activities
         if sel_results and "error" not in sel_results:
             activities.append({
@@ -518,7 +518,7 @@ class PlanGenerator:
                 "frequency": "Twice daily (morning and bedtime)",
                 "materials": "Feelings chart or emotion cards"
             })
-            
+
             activities.append({
                 "domain": "sel",
                 "activity": "Mindful Breathing",
@@ -526,11 +526,11 @@ class PlanGenerator:
                 "frequency": "5 minutes daily",
                 "materials": "Breathing apps or guided videos"
             })
-            
+
             priority_areas = sel_results.get("summary", {}).get(
                 "priority_areas", []
             )
-            
+
             if "self_management" in priority_areas:
                 activities.append({
                     "domain": "sel",
@@ -540,33 +540,33 @@ class PlanGenerator:
                     "frequency": "As needed, review daily",
                     "materials": "Coping skills toolkit"
                 })
-        
+
         return activities
-    
+
     def _create_progress_monitoring(
         self,
         focus_areas: List[str]
     ) -> Dict[str, str]:
         """Create progress monitoring plan"""
-        
+
         monitoring = {}
-        
+
         # Academic monitoring
         if any("academic" in area for area in focus_areas):
             monitoring["academic"] = "Weekly IRT adaptive assessments and skill mastery tracking"
-        
+
         # Speech monitoring
         if any("speech" in area for area in focus_areas):
             monitoring["speech"] = "Weekly speech samples and therapist progress notes"
-        
+
         # SEL monitoring
         if any("sel" in area for area in focus_areas):
             monitoring["sel"] = "Daily emotion check-ins and weekly counselor observations"
-        
+
         # Overall
         monitoring["comprehensive_review"] = "6-week interdisciplinary team review"
         monitoring["parent_conferences"] = "Monthly progress updates with family"
-        
+
         return monitoring
 
 

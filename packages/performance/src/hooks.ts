@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import type { DependencyList } from 'react';
 import { webVitals, WebVitalsMetrics, WebVitalsConfig } from './web-vitals';
 import {
   performanceMonitor,
@@ -17,14 +18,21 @@ import { bundleAnalyzer, BundleStats } from './bundle-analyzer';
 export function useWebVitals(config?: WebVitalsConfig) {
   const [metrics, setMetrics] = useState<WebVitalsMetrics>(webVitals.getMetrics());
   const [score, setScore] = useState<number>(0);
+  const configRef = useRef<WebVitalsConfig | undefined>(config);
 
   useEffect(() => {
+    configRef.current = config;
+  }, [config]);
+
+  useEffect(() => {
+    const mergedConfig = configRef.current;
     // Initialize tracking with callback
     webVitals.init({
-      ...config,
+      ...mergedConfig,
       onReport: (updatedMetrics) => {
         setMetrics((prev: WebVitalsMetrics) => ({ ...prev, ...updatedMetrics }));
         setScore(webVitals.getScore());
+        mergedConfig?.onReport?.(updatedMetrics);
       },
     });
 
@@ -155,9 +163,9 @@ export function useLongTaskDetector(threshold = 50) {
 
     try {
       observer.observe({ entryTypes: ['longtask'] });
-    } catch (e) {
+    } catch (error) {
       // longtask not supported
-      console.warn('Long task monitoring not supported');
+      console.warn('Long task monitoring not supported', error);
     }
 
     return () => {
@@ -205,7 +213,7 @@ export function useLazyImage(src: string, placeholder?: string) {
  */
 export function useFetchPerformance<T>(
   fetcher: () => Promise<T>,
-  dependencies: any[] = []
+  dependencies: DependencyList = []
 ) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
@@ -245,7 +253,7 @@ export function useFetchPerformance<T>(
     return () => {
       cancelled = true;
     };
-  }, dependencies);
+  }, [fetcher, dependencies]);
 
   return { data, loading, error, duration };
 }

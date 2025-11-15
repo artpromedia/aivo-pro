@@ -12,11 +12,11 @@ from openai import AsyncOpenAI
 
 class SMARTGoalEngine:
     """Generate SMART IEP goals using AI"""
-    
+
     def __init__(self, api_key: str, model: str = "gpt-4"):
         self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
-        
+
         # Goal templates
         self.templates = {
             "academic": (
@@ -32,7 +32,7 @@ class SMARTGoalEngine:
                 "{accuracy}% accuracy as measured by {measurement}."
             ),
         }
-    
+
     async def generate_smart_goal(
         self,
         student_name: str,
@@ -42,18 +42,18 @@ class SMARTGoalEngine:
         grade_level: int
     ) -> Dict:
         """Generate a SMART goal"""
-        
+
         # Build context
         context = self._build_context(
             student_name, goal_type, area, baseline_data, grade_level
         )
-        
+
         # Generate with AI
         goal_data = await self._generate_with_ai(context)
-        
+
         # Validate SMART criteria
         validation = self._validate_smart(goal_data)
-        
+
         return {
             "goal_text": goal_data["goal_text"],
             "goal_type": goal_type,
@@ -66,7 +66,7 @@ class SMARTGoalEngine:
             "confidence_score": validation["overall_score"],
             "objectives": goal_data.get("objectives", [])
         }
-    
+
     def _build_context(
         self,
         student_name: str,
@@ -98,10 +98,10 @@ Format response as JSON with:
 - timeline_end: date (1 year from now)
 - objectives: [quarterly benchmarks]
 """
-    
+
     async def _generate_with_ai(self, context: str) -> Dict:
         """Generate goal using AI"""
-        
+
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -116,13 +116,13 @@ Format response as JSON with:
             ],
             response_format={"type": "json_object"}
         )
-        
+
         import json
         return json.loads(response.choices[0].message.content)
-    
+
     def _validate_smart(self, goal_data: Dict) -> Dict:
         """Validate SMART criteria"""
-        
+
         scores = {
             "specific": self._check_specific(goal_data),
             "measurable": self._check_measurable(goal_data),
@@ -130,9 +130,9 @@ Format response as JSON with:
             "relevant": self._check_relevant(goal_data),
             "time_bound": self._check_time_bound(goal_data)
         }
-        
+
         overall = sum(scores.values()) / len(scores)
-        
+
         return {
             "scores": scores,
             "overall_score": overall,
@@ -141,70 +141,70 @@ Format response as JSON with:
                 k for k, v in scores.items() if v < 0.7
             ]
         }
-    
+
     def _check_specific(self, goal: Dict) -> float:
         """Check if goal is specific"""
         text = goal.get("goal_text", "")
-        
+
         # Check for concrete behavior
         has_behavior = any(
             w in text.lower()
             for w in ["will", "demonstrate", "complete", "identify"]
         )
-        
+
         # Check for conditions
         has_conditions = "when given" in text.lower() or "given" in text.lower()
-        
+
         score = 0.0
         if has_behavior:
             score += 0.5
         if has_conditions:
             score += 0.5
-        
+
         return score
-    
+
     def _check_measurable(self, goal: Dict) -> float:
         """Check if goal is measurable"""
         text = goal.get("goal_text", "")
         measurement = goal.get("measurement", "")
-        
+
         # Check for numeric criteria
         has_number = any(c.isdigit() for c in text)
-        
+
         # Check for measurement method
         has_method = len(measurement) > 0
-        
+
         score = 0.0
         if has_number:
             score += 0.5
         if has_method:
             score += 0.5
-        
+
         return score
-    
+
     def _check_achievable(self, goal: Dict) -> float:
         """Check if goal is achievable"""
         # Simplified - would compare baseline to target
         return 0.8
-    
+
     def _check_relevant(self, goal: Dict) -> float:
         """Check if goal is relevant"""
         # Simplified - would check standards alignment
         return 0.8
-    
+
     def _check_time_bound(self, goal: Dict) -> float:
         """Check if goal is time-bound"""
         has_timeline = "timeline_end" in goal
         has_objectives = len(goal.get("objectives", [])) > 0
-        
+
         score = 0.0
         if has_timeline:
             score += 0.5
         if has_objectives:
             score += 0.5
-        
+
         return score
-    
+
     def generate_objectives(
         self,
         goal_text: str,
@@ -213,11 +213,11 @@ Format response as JSON with:
         quarters: int = 4
     ) -> List[Dict]:
         """Generate quarterly objectives"""
-        
+
         baseline_val = baseline.get("value", 0)
         target_val = target.get("value", 100)
         increment = (target_val - baseline_val) / quarters
-        
+
         objectives = []
         for q in range(1, quarters + 1):
             objectives.append({
@@ -227,5 +227,5 @@ Format response as JSON with:
                 "criteria": f"Achieve {baseline_val + (increment * q)}% accuracy",
                 "status": "pending"
             })
-        
+
         return objectives

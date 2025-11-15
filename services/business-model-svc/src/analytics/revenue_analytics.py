@@ -17,12 +17,12 @@ class RevenueAnalytics:
     Comprehensive SaaS revenue analytics
     MRR components, LTV, churn, cohort analysis
     """
-    
+
     def __init__(self, db):
         self.db = db
         self.ltv_model = None
         self.scaler = StandardScaler()
-    
+
     async def calculate_mrr_components(
         self,
         start_date: datetime,
@@ -36,10 +36,10 @@ class RevenueAnalytics:
         - Churn MRR: From cancellations
         - Reactivation MRR: From reactivated subscriptions
         """
-        
+
         # Get all subscription events in period
         query = """
-            SELECT 
+            SELECT
                 id,
                 customer_id,
                 stripe_subscription_id,
@@ -55,29 +55,29 @@ class RevenueAnalytics:
             WHERE created_at >= $1 OR updated_at >= $1
             ORDER BY created_at
         """
-        
+
         subscriptions = await self.db.fetch(query, start_date)
-        
+
         # Initialize MRR components
         new_mrr = 0
         expansion_mrr = 0
         contraction_mrr = 0
         churn_mrr = 0
         reactivation_mrr = 0
-        
+
         # Track previous state per customer
         customer_states = {}
-        
+
         for sub in subscriptions:
             customer_id = sub['customer_id']
             monthly_value = self._normalize_to_monthly(
                 sub['price_cents'],
                 sub['billing_period_months']
             )
-            
+
             # Get previous state
             prev_state = customer_states.get(customer_id)
-            
+
             if sub['status'] == 'active':
                 if not prev_state:
                     # New subscription
@@ -91,17 +91,17 @@ class RevenueAnalytics:
                 elif prev_state['monthly_value'] > monthly_value:
                     # Contraction (downgrade)
                     contraction_mrr += (prev_state['monthly_value'] - monthly_value)
-            
+
             elif sub['status'] == 'canceled' and prev_state:
                 # Churn
                 churn_mrr += prev_state.get('monthly_value', 0)
-            
+
             # Update state
             customer_states[customer_id] = {
                 'status': sub['status'],
                 'monthly_value': monthly_value
             }
-        
+
         # Calculate net new MRR
         net_new_mrr = (
             new_mrr +
@@ -110,10 +110,10 @@ class RevenueAnalytics:
             contraction_mrr -
             churn_mrr
         )
-        
+
         # Get current total MRR
         total_mrr = await self._calculate_total_mrr()
-        
+
         return {
             "period_start": start_date.isoformat(),
             "period_end": end_date.isoformat(),
@@ -126,22 +126,22 @@ class RevenueAnalytics:
             "total_mrr": total_mrr / 100,
             "growth_rate": (net_new_mrr / total_mrr) if total_mrr > 0 else 0
         }
-    
+
     def _normalize_to_monthly(self, price_cents: int, billing_months: int) -> int:
         """Convert any billing period to monthly value"""
         return price_cents // billing_months
-    
+
     async def _calculate_total_mrr(self) -> int:
         """Calculate current total MRR"""
         query = """
-            SELECT 
+            SELECT
                 SUM(price_cents / billing_period_months) as total_mrr
             FROM subscriptions
             WHERE status = 'active'
         """
         result = await self.db.fetchrow(query)
         return result['total_mrr'] or 0
-    
+
     async def predict_ltv(
         self,
         customer_id: str,
@@ -151,20 +151,20 @@ class RevenueAnalytics:
         Predict Customer Lifetime Value using ML
         Features: tenure, engagement, payment history, etc.
         """
-        
+
         # Prepare features
         feature_vector = self._prepare_ltv_features(features)
-        
+
         # If model not trained, use rule-based estimation
         if not self.ltv_model:
             return self._estimate_ltv_rule_based(features)
-        
+
         # Use ML model
         scaled_features = self.scaler.transform([feature_vector])
         predicted_ltv = self.ltv_model.predict(scaled_features)[0]
-        
+
         return max(predicted_ltv, 0)  # LTV can't be negative
-    
+
     def _prepare_ltv_features(self, features: Dict) -> List[float]:
         """Prepare feature vector for LTV prediction"""
         return [
@@ -177,26 +177,26 @@ class RevenueAnalytics:
             features.get('feature_adoption_score', 0),
             1 if features.get('has_family_plan') else 0,
         ]
-    
+
     def _estimate_ltv_rule_based(self, features: Dict) -> float:
         """
         Rule-based LTV estimation
         LTV = Monthly Revenue × Avg Lifetime (months)
         """
         monthly_revenue = features.get('monthly_revenue', 0)
-        
+
         # Estimate lifetime based on engagement
         engagement_score = features.get('engagement_score', 0.5)
-        
+
         # Base lifetime: 12 months
         # Adjust by engagement: 6-24 months range
         estimated_lifetime_months = 12 + (engagement_score - 0.5) * 24
         estimated_lifetime_months = max(6, min(24, estimated_lifetime_months))
-        
+
         ltv = monthly_revenue * estimated_lifetime_months
-        
+
         return ltv
-    
+
     async def train_ltv_model(self, historical_data: pd.DataFrame):
         """
         Train LTV prediction model
@@ -205,7 +205,7 @@ class RevenueAnalytics:
         if len(historical_data) < 100:
             # Not enough data for training
             return
-        
+
         # Prepare features and target
         X = historical_data[[
             'account_age_months',
@@ -217,12 +217,12 @@ class RevenueAnalytics:
             'feature_adoption_score',
             'has_family_plan'
         ]].values
-        
+
         y = historical_data['actual_ltv'].values
-        
+
         # Scale features
         X_scaled = self.scaler.fit_transform(X)
-        
+
         # Train model
         self.ltv_model = GradientBoostingRegressor(
             n_estimators=100,
@@ -230,9 +230,9 @@ class RevenueAnalytics:
             learning_rate=0.1,
             random_state=42
         )
-        
+
         self.ltv_model.fit(X_scaled, y)
-    
+
     async def calculate_churn_risk(
         self,
         customer_id: str,
@@ -242,10 +242,10 @@ class RevenueAnalytics:
         Calculate churn risk score (0-1)
         Returns score and contributing factors
         """
-        
+
         risk_score = 0.0
         risk_factors = []
-        
+
         # Low engagement
         engagement = features.get('engagement_score', 0.5)
         if engagement < 0.3:
@@ -255,7 +255,7 @@ class RevenueAnalytics:
                 "weight": 0.3,
                 "detail": f"Engagement score {engagement:.2f} is below threshold"
             })
-        
+
         # Failed payments
         failed_payments = features.get('failed_payment_count', 0)
         if failed_payments > 0:
@@ -266,7 +266,7 @@ class RevenueAnalytics:
                 "weight": payment_risk,
                 "detail": f"{failed_payments} failed payment(s)"
             })
-        
+
         # Low feature usage
         feature_adoption = features.get('feature_adoption_score', 0.5)
         if feature_adoption < 0.4:
@@ -276,7 +276,7 @@ class RevenueAnalytics:
                 "weight": 0.2,
                 "detail": f"Using {feature_adoption*100:.0f}% of features"
             })
-        
+
         # Support issues
         support_tickets = features.get('support_tickets', 0)
         if support_tickets > 3:
@@ -286,7 +286,7 @@ class RevenueAnalytics:
                 "weight": 0.15,
                 "detail": f"{support_tickets} support tickets"
             })
-        
+
         # Trial ending soon
         days_until_trial_end = features.get('days_until_trial_end')
         if days_until_trial_end is not None and days_until_trial_end < 3:
@@ -296,10 +296,10 @@ class RevenueAnalytics:
                 "weight": 0.25,
                 "detail": f"Trial ends in {days_until_trial_end} days"
             })
-        
+
         # Cap at 1.0
         risk_score = min(risk_score, 1.0)
-        
+
         # Determine risk level
         if risk_score > 0.7:
             risk_level = "critical"
@@ -313,7 +313,7 @@ class RevenueAnalytics:
         else:
             risk_level = "low"
             recommended_action = "continue_monitoring"
-        
+
         return {
             "customer_id": customer_id,
             "risk_score": risk_score,
@@ -321,7 +321,7 @@ class RevenueAnalytics:
             "risk_factors": risk_factors,
             "recommended_action": recommended_action
         }
-    
+
     async def cohort_analysis(
         self,
         start_date: datetime,
@@ -331,13 +331,13 @@ class RevenueAnalytics:
         Cohort analysis by signup month
         Track revenue retention over time
         """
-        
+
         cohorts = {}
-        
+
         for month_offset in range(months):
             cohort_start = start_date + timedelta(days=30 * month_offset)
             cohort_end = cohort_start + timedelta(days=30)
-            
+
             # Get customers who signed up in this cohort
             query = """
                 SELECT id, customer_id, price_cents, billing_period_months
@@ -345,12 +345,12 @@ class RevenueAnalytics:
                 WHERE created_at >= $1 AND created_at < $2
                 AND status = 'active'
             """
-            
+
             cohort_subs = await self.db.fetch(query, cohort_start, cohort_end)
-            
+
             if not cohort_subs:
                 continue
-            
+
             # Calculate initial MRR
             initial_mrr = sum(
                 self._normalize_to_monthly(
@@ -359,13 +359,13 @@ class RevenueAnalytics:
                 )
                 for sub in cohort_subs
             )
-            
+
             # Track retention for each month
             retention_data = []
-            
+
             for retention_month in range(months - month_offset):
                 check_date = cohort_start + timedelta(days=30 * retention_month)
-                
+
                 # Count still-active subscriptions
                 active_query = """
                     SELECT COUNT(*), SUM(price_cents / billing_period_months)
@@ -374,13 +374,13 @@ class RevenueAnalytics:
                     AND status = 'active'
                     AND created_at <= $2
                 """
-                
+
                 customer_ids = [sub['customer_id'] for sub in cohort_subs]
                 result = await self.db.fetchrow(active_query, customer_ids, check_date)
-                
+
                 active_count = result[0] or 0
                 retained_mrr = result[1] or 0
-                
+
                 retention_data.append({
                     "month": retention_month,
                     "active_customers": active_count,
@@ -388,35 +388,35 @@ class RevenueAnalytics:
                     "retention_rate": active_count / len(cohort_subs),
                     "mrr_retention": retained_mrr / initial_mrr if initial_mrr > 0 else 0
                 })
-            
+
             cohorts[cohort_start.strftime('%Y-%m')] = {
                 "cohort_size": len(cohort_subs),
                 "initial_mrr": initial_mrr / 100,
                 "retention": retention_data
             }
-        
+
         return cohorts
-    
+
     async def calculate_arpu(self, segment: str = None) -> float:
         """
         Calculate Average Revenue Per User
         Optionally filtered by segment
         """
-        
+
         query = """
             SELECT AVG(price_cents / billing_period_months) as arpu
             FROM subscriptions
             WHERE status = 'active'
         """
-        
+
         if segment:
             query += f" AND tier = '{segment}'"
-        
+
         result = await self.db.fetchrow(query)
         arpu_cents = result['arpu'] or 0
-        
+
         return arpu_cents / 100  # Convert to dollars
-    
+
     async def calculate_quick_ratio(
         self,
         start_date: datetime,
@@ -425,27 +425,27 @@ class RevenueAnalytics:
         """
         Calculate SaaS Quick Ratio
         (New MRR + Expansion MRR) / (Contraction MRR + Churn MRR)
-        
+
         > 4.0 is excellent growth
         1.0-4.0 is healthy
         < 1.0 is concerning
         """
-        
+
         components = await self.calculate_mrr_components(start_date, end_date)
-        
+
         new_and_expansion = (
             components['new_mrr'] +
             components['expansion_mrr']
         )
-        
+
         contraction_and_churn = (
             components['contraction_mrr'] +
             components['churn_mrr']
         )
-        
+
         if contraction_and_churn == 0:
             return float('inf')  # Infinite growth
-        
+
         quick_ratio = new_and_expansion / contraction_and_churn
-        
+
         return quick_ratio

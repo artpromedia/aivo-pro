@@ -91,16 +91,16 @@ redis_client: Optional[redis.Redis] = None
 async def startup():
     """Initialize service"""
     global redis_client
-    
+
     # Initialize database
     db_manager.initialize()
-    
+
     # Initialize Redis
     redis_client = await redis.from_url(
         settings.redis_url,
         max_connections=settings.redis_max_connections
     )
-    
+
     print(f"✅ Learning Session Service started")
     print(f"   Environment: {settings.environment}")
     print(f"   BKT p_init={settings.bkt_default_p_init}, "
@@ -141,11 +141,11 @@ async def start_session(
 ):
     """
     Start new adaptive learning session
-    
+
     Creates session, loads skill states, generates initial tasks
     """
     session_id = str(uuid.uuid4())
-    
+
     # Load student's current skill levels
     skill_states_query = select(SkillState).where(
         SkillState.child_id == request.child_id,
@@ -153,15 +153,15 @@ async def start_session(
     )
     result = await db.execute(skill_states_query)
     skill_states = result.scalars().all()
-    
+
     initial_skill_levels = {
         state.skill: state.mastery_probability
         for state in skill_states
     }
-    
+
     # Select target skills (zone of proximal development)
     target_skills = _select_target_skills(initial_skill_levels)
-    
+
     # Generate initial tasks
     tasks = _generate_initial_tasks(
         subject=request.subject,
@@ -169,7 +169,7 @@ async def start_session(
         target_skills=target_skills,
         duration_minutes=request.duration_minutes
     )
-    
+
     # Create session
     session = LearningSession(
         id=session_id,
@@ -182,9 +182,9 @@ async def start_session(
         initial_skill_levels=initial_skill_levels,
         target_skills=target_skills
     )
-    
+
     db.add(session)
-    
+
     # Create task records
     for idx, task_data in enumerate(tasks):
         task = LearningTask(
@@ -198,9 +198,9 @@ async def start_session(
             estimated_time=task_data["estimated_time"]
         )
         db.add(task)
-    
+
     await db.commit()
-    
+
     # Store session state in Redis
     session_state = {
         "session_id": session_id,
@@ -212,15 +212,15 @@ async def start_session(
         "skill_updates": {},
         "start_time": datetime.utcnow().isoformat()
     }
-    
+
     await redis_client.setex(
         f"learning_session:{session_id}",
         settings.session_timeout_minutes * 60,
         json.dumps(session_state, default=str)
     )
-    
+
     learning_sessions_active.inc()
-    
+
     return {
         "session_id": session_id,
         "status": "created",
@@ -238,29 +238,29 @@ async def submit_response(
 ):
     """
     Submit task response and get next task
-    
+
     Uses BKT to update knowledge state and adapts difficulty
     """
     # Get session state
     session_json = await redis_client.get(f"learning_session:{session_id}")
     if not session_json:
         raise HTTPException(404, "Session not found or expired")
-    
+
     session_state = json.loads(session_json)
     current_idx = session_state["current_task"]
-    
+
     if current_idx >= len(session_state["tasks"]):
         raise HTTPException(400, "No more tasks in session")
-    
+
     current_task = session_state["tasks"][current_idx]
-    
+
     # Evaluate response
     evaluation = _evaluate_response(
         task=current_task,
         response=request.response,
         time_spent=request.time_spent
     )
-    
+
     # Update knowledge using BKT
     bkt_response = Response(
         correct=evaluation["correct"],
@@ -270,13 +270,13 @@ async def submit_response(
         hint_used=request.hint_used,
         confidence=request.confidence
     )
-    
+
     prior_mastery, posterior_mastery = knowledge_tracer.update_knowledge(
         student_id=session_state["child_id"],
         skill=current_task["skill"],
         response=bkt_response
     )
-    
+
     # Record response
     response_data = {
         "task_id": request.task_id,
@@ -288,17 +288,17 @@ async def submit_response(
         "posterior_mastery": posterior_mastery,
         "timestamp": datetime.utcnow().isoformat()
     }
-    
+
     session_state["responses"].append(response_data)
     session_state["skill_updates"][current_task["skill"]] = posterior_mastery
-    
+
     # Update database
     task_query = select(LearningTask).where(
         LearningTask.id == request.task_id
     )
     result = await db.execute(task_query)
     task_db = result.scalar_one_or_none()
-    
+
     if task_db:
         task_db.response = request.response
         task_db.correct = evaluation["correct"]
@@ -308,17 +308,17 @@ async def submit_response(
         task_db.posterior_mastery = posterior_mastery
         task_db.submitted_at = datetime.utcnow()
         task_db.status = TaskStatus.COMPLETED
-    
+
     # Determine next action
     next_action = _determine_next_action(
         session_state, posterior_mastery, evaluation
     )
-    
+
     result = {}
-    
+
     if next_action["type"] == "continue":
         session_state["current_task"] += 1
-        
+
         if session_state["current_task"] < len(session_state["tasks"]):
             next_task = session_state["tasks"][session_state["current_task"]]
             result = {
@@ -332,7 +332,7 @@ async def submit_response(
             }
         else:
             result = await _complete_session(session_state, db)
-    
+
     elif next_action["type"] == "scaffold":
         scaffold_task = _generate_scaffold_task(
             current_task["skill"],
@@ -340,13 +340,13 @@ async def submit_response(
         )
         session_state["tasks"].insert(current_idx + 1, scaffold_task)
         session_state["current_task"] += 1
-        
+
         result = {
             "status": "scaffold",
             "message": "Let's try an easier problem",
             "next_task": _format_task(scaffold_task)
         }
-    
+
     elif next_action["type"] == "challenge":
         challenge_task = _generate_challenge_task(
             current_task["skill"],
@@ -354,13 +354,13 @@ async def submit_response(
         )
         session_state["tasks"].insert(current_idx + 1, challenge_task)
         session_state["current_task"] += 1
-        
+
         result = {
             "status": "challenge",
             "message": "Great job! Here's a challenge",
             "next_task": _format_task(challenge_task)
         }
-    
+
     # Check for advancement
     if posterior_mastery >= settings.advancement_threshold:
         suggestion = await _generate_advancement_suggestion(
@@ -372,19 +372,19 @@ async def submit_response(
         if suggestion:
             result["suggestion"] = suggestion
             suggestions_generated.inc()
-    
+
     # Update Redis
     await redis_client.setex(
         f"learning_session:{session_id}",
         settings.session_timeout_minutes * 60,
         json.dumps(session_state, default=str)
     )
-    
+
     await db.commit()
-    
+
     mastery_updates.inc()
     task_completion_rate.observe(evaluation["score"])
-    
+
     return result
 
 
@@ -399,10 +399,10 @@ async def get_session(
     )
     result = await db.execute(session_query)
     session = result.scalar_one_or_none()
-    
+
     if not session:
         raise HTTPException(404, "Session not found")
-    
+
     return session
 
 
@@ -416,10 +416,10 @@ async def get_suggestions(
         ModelSuggestion.child_id == child_id,
         ModelSuggestion.status == SuggestionStatus.PENDING
     ).order_by(ModelSuggestion.created_at.desc()).limit(10)
-    
+
     result = await db.execute(suggestions_query)
     suggestions = result.scalars().all()
-    
+
     return suggestions
 
 
@@ -435,19 +435,19 @@ async def review_suggestion(
     )
     result = await db.execute(suggestion_query)
     suggestion = result.scalar_one_or_none()
-    
+
     if not suggestion:
         raise HTTPException(404, "Suggestion not found")
-    
+
     suggestion.status = (
         SuggestionStatus.ACCEPTED if request.decision == "accepted"
         else SuggestionStatus.REJECTED
     )
     suggestion.reviewed_at = datetime.utcnow()
     suggestion.reviewer_notes = request.notes
-    
+
     await db.commit()
-    
+
     return {"status": "reviewed", "decision": request.decision}
 
 
@@ -455,11 +455,11 @@ async def review_suggestion(
 def _select_target_skills(skill_levels: Dict[str, float]) -> List[str]:
     """Select skills in zone of proximal development"""
     zpd_skills = []
-    
+
     for skill, mastery in skill_levels.items():
         if 0.3 <= mastery <= 0.8:  # ZPD range
             zpd_skills.append(skill)
-    
+
     return zpd_skills[:5] if zpd_skills else list(skill_levels.keys())[:5]
 
 
@@ -472,10 +472,10 @@ def _generate_initial_tasks(
     """Generate initial task sequence"""
     tasks = []
     num_tasks = min(duration_minutes // 2, 20)  # ~2 min per task
-    
+
     for i in range(num_tasks):
         skill = target_skills[i % len(target_skills)] if target_skills else "general"
-        
+
         tasks.append({
             "skill": skill,
             "difficulty": 0.5,
@@ -483,7 +483,7 @@ def _generate_initial_tasks(
             "estimated_time": 120,
             "content": _generate_task_content(subject, skill, 0.5)
         })
-    
+
     return tasks
 
 
@@ -502,7 +502,7 @@ def _generate_task_content(
             "answer": a + b,
             "type": "numeric"
         }
-    
+
     return {
         "question": f"Sample {skill} question",
         "answer": "42",
@@ -518,7 +518,7 @@ def _evaluate_response(
     """Evaluate student response"""
     correct_answer = task["content"].get("answer")
     correct = str(response).strip().lower() == str(correct_answer).lower()
-    
+
     return {
         "correct": correct,
         "score": 1.0 if correct else 0.0
@@ -547,7 +547,7 @@ def _determine_next_action(
     elif current_mastery >= settings.mastery_threshold:
         if session_state["responses"][-3:].count({"correct": True}) >= 2:
             return {"type": "challenge", "reason": "mastery"}
-    
+
     return {"type": "continue", "reason": "progressing"}
 
 
@@ -584,11 +584,11 @@ async def _generate_advancement_suggestion(
         "addition": "multiplication",
         "multiplication": "division"
     }
-    
+
     next_skill = skill_progression.get(skill)
     if not next_skill:
         return None
-    
+
     suggestion = ModelSuggestion(
         id=str(uuid.uuid4()),
         child_id=child_id,
@@ -601,9 +601,9 @@ async def _generate_advancement_suggestion(
         created_at=datetime.utcnow(),
         status=SuggestionStatus.PENDING
     )
-    
+
     db.add(suggestion)
-    
+
     return {
         "type": "advancement",
         "message": f"Ready to advance from {skill} to {next_skill}!",
@@ -614,28 +614,28 @@ async def _generate_advancement_suggestion(
 async def _complete_session(session_state: Dict, db: AsyncSession) -> Dict:
     """Complete learning session"""
     session_id = session_state["session_id"]
-    
+
     total_correct = sum(1 for r in session_state["responses"] if r["correct"])
     total_attempted = len(session_state["responses"])
     accuracy = total_correct / total_attempted if total_attempted > 0 else 0
-    
+
     # Update session
     session_query = select(LearningSession).where(
         LearningSession.id == session_id
     )
     result = await db.execute(session_query)
     session = result.scalar_one()
-    
+
     session.completed_at = datetime.utcnow()
     session.status = SessionStatus.COMPLETED
     session.total_tasks = total_attempted
     session.correct_tasks = total_correct
     session.accuracy = accuracy
     session.final_skill_levels = session_state["skill_updates"]
-    
+
     await redis_client.delete(f"learning_session:{session_id}")
     learning_sessions_active.dec()
-    
+
     return {
         "status": "completed",
         "session_id": session_id,

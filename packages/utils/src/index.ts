@@ -74,7 +74,7 @@ export function isValidPassword(password: string): boolean {
 }
 
 // Array utilities
-export function groupBy<T, K extends keyof any>(array: T[], key: (item: T) => K): Record<K, T[]> {
+export function groupBy<T, K extends PropertyKey>(array: T[], key: (item: T) => K): Record<K, T[]> {
   return array.reduce((groups, item) => {
     const group = key(item);
     groups[group] = groups[group] || [];
@@ -136,14 +136,16 @@ export const storage = {
 };
 
 // Debounce utility
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: any;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   
   return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
     timeout = setTimeout(() => func(...args), wait);
   };
 }

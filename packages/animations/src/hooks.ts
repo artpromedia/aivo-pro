@@ -6,6 +6,32 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAnimation, useInView as useFramerInView } from 'framer-motion';
 
+type FrameCallback = (timestamp: number) => void;
+type FrameHandle = number | ReturnType<typeof setTimeout>;
+
+const supportsWindow = typeof window !== 'undefined';
+
+const requestFrame = (callback: FrameCallback): FrameHandle => {
+  if (supportsWindow && typeof window.requestAnimationFrame === 'function') {
+    return window.requestAnimationFrame(callback);
+  }
+
+  return setTimeout(() => callback(Date.now()), 16);
+};
+
+const cancelFrame = (handle: FrameHandle | null): void => {
+  if (handle == null) {
+    return;
+  }
+
+  if (supportsWindow && typeof window.cancelAnimationFrame === 'function' && typeof handle === 'number') {
+    window.cancelAnimationFrame(handle);
+    return;
+  }
+
+  clearTimeout(handle as ReturnType<typeof setTimeout>);
+};
+
 /**
  * Hook for animating elements when they enter the viewport
  */
@@ -95,23 +121,25 @@ export function useCounterAnimation(end: number, duration = 2000) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
+    let startTime: number | null = null;
+    let animationFrame: FrameHandle | null = null;
 
     const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
+      if (startTime === null) {
+        startTime = timestamp;
+      }
       const progress = Math.min((timestamp - startTime) / duration, 1);
 
       setCount(Math.floor(progress * end));
 
       if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
+        animationFrame = requestFrame(animate);
       }
     };
 
-    animationFrame = requestAnimationFrame(animate);
+    animationFrame = requestFrame(animate);
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => cancelFrame(animationFrame);
   }, [end, duration]);
 
   return count;
@@ -143,7 +171,7 @@ export function useLoadingAnimation() {
 /**
  * Hook for stagger animation with dynamic children
  */
-export function useStaggerAnimation(childCount: number) {
+export function useStaggerAnimation(_childCount: number) {
   const controls = useAnimation();
 
   const playStagger = () => {
@@ -181,6 +209,10 @@ export function useParallax(speed = 0.5) {
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
+    if (!supportsWindow) {
+      return undefined;
+    }
+
     const handleScroll = () => {
       setOffset(window.pageYOffset * speed);
     };

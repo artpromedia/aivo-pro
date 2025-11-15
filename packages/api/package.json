@@ -1,5 +1,6 @@
 {
   "name": "@aivo/api",
+  "type": "module",
   "version": "1.0.0",
   "description": "Centralized API client for AIVO platform",
   "main": "./src/index.ts",

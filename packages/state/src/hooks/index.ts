@@ -5,8 +5,8 @@ import { type GlobalState } from '../types';
 type Selector<T> = (state: GlobalState & StoreActions) => T;
 
 // Generic hook to use store with selectors
-export function useStore<T>(selector?: Selector<T>): T {
-  return useGlobalStore(selector as any);
+export function useStore<T>(selector: Selector<T>): T {
+  return useGlobalStore(selector);
 }
 
 // Auth hooks

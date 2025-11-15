@@ -1,5 +1,6 @@
 {
   "name": "@aivo/search",
+  "type": "module",
   "version": "1.0.0",
   "description": "Advanced search and filtering with fuzzy matching",
   "main": "./dist/index.js",

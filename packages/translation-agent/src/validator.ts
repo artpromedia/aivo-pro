@@ -5,6 +5,10 @@ import type {
   TranslationMetrics,
 } from './types';
 
+type TranslationTree = Record<string, unknown>;
+const isTranslationRecord = (value: unknown): value is TranslationTree =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export class TranslationValidator {
   /**
    * Validate a locale's translations against reference locale
@@ -216,24 +220,20 @@ export class TranslationValidator {
 
   // Helper methods
   private flattenObject(
-    obj: Record<string, any>,
+    obj: TranslationTree,
     prefix = ''
   ): Record<string, string> {
-    return Object.keys(obj).reduce(
-      (acc, key) => {
+    return Object.entries(obj).reduce<Record<string, string>>(
+      (acc, [key, value]) => {
         const newKey = prefix ? `${prefix}.${key}` : key;
-        if (
-          typeof obj[key] === 'object' &&
-          obj[key] !== null &&
-          !Array.isArray(obj[key])
-        ) {
-          Object.assign(acc, this.flattenObject(obj[key], newKey));
+        if (isTranslationRecord(value)) {
+          Object.assign(acc, this.flattenObject(value, newKey));
         } else {
-          acc[newKey] = String(obj[key]);
+          acc[newKey] = String(value);
         }
         return acc;
       },
-      {} as Record<string, string>
+      {}
     );
   }
 

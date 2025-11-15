@@ -113,7 +113,7 @@ SUPPORTED_LANGUAGES = {
         "rtl": False,
         "family": "Slavic"
     },
-    
+
     # Asian Languages
     "zh": {
         "name": "Chinese (Simplified)",
@@ -223,7 +223,7 @@ SUPPORTED_LANGUAGES = {
         "rtl": False,
         "family": "Austronesian"
     },
-    
+
     # Middle Eastern & RTL Languages
     "ar": {
         "name": "Arabic",
@@ -255,7 +255,7 @@ SUPPORTED_LANGUAGES = {
         "rtl": False,
         "family": "Turkic"
     },
-    
+
     # African Languages
     "sw": {
         "name": "Swahili",
@@ -287,7 +287,7 @@ SUPPORTED_LANGUAGES = {
         "rtl": False,
         "family": "Germanic"
     },
-    
+
     # Other Languages
     "hr": {
         "name": "Croatian",

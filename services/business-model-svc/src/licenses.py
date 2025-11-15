@@ -6,25 +6,26 @@ from typing import Dict, List, Optional
 import uuid
 import logging
 
+from .db import Database, database
+
 logger = logging.getLogger(__name__)
 
 
 class LicenseManager:
     """
     Manage district licenses
-    
+
     Features:
     - Seat-based licensing
     - Usage tracking
     - Expiry monitoring
     - Automatic renewal
     """
-    
-    def __init__(self):
+
+    def __init__(self, db: Database | None = None):
         """Initialize license manager"""
-        # In production, this would use a database
-        self.licenses: Dict[str, Dict] = {}
-    
+        self._db = db or database
+
     async def create_license(
         self,
         district_id: str,
@@ -34,150 +35,218 @@ class LicenseManager:
     ) -> Dict:
         """
         Create new district license
-        
+
         Args:
             district_id: Unique district identifier
             district_name: District name
             student_count: Number of student seats
             duration_months: License duration in months
-        
+
         Returns:
             License data
         """
         license_id = str(uuid.uuid4())
         start_date = datetime.utcnow()
         end_date = start_date + timedelta(days=duration_months * 30)
-        
-        license_data = {
-            "id": license_id,
-            "district_id": district_id,
-            "district_name": district_name,
-            "student_count": student_count,
-            "seats_used": 0,
-            "start_date": start_date,
-            "end_date": end_date,
-            "status": "active"
-        }
-        
-        self.licenses[license_id] = license_data
-        
+
+        record = await self._db.fetchrow(
+            """
+            INSERT INTO district_licenses (
+                id,
+                district_id,
+                district_name,
+                student_count,
+                seats_used,
+                start_date,
+                end_date,
+                status,
+                created_at
+            ) VALUES ($1, $2, $3, $4, 0, $5, $6, 'active', NOW())
+            RETURNING id, district_id, district_name, student_count,
+                      seats_used, start_date, end_date, status
+            """,
+            license_id,
+            district_id,
+            district_name,
+            student_count,
+            start_date,
+            end_date,
+        )
+
         logger.info(
             "Created license %s for district %s (%d students)",
             license_id,
             district_id,
             student_count
         )
-        
-        return license_data
-    
+
+        return self._row_to_dict(record)
+
     async def get_license(self, license_id: str) -> Optional[Dict]:
         """Get license details"""
-        license_data = self.licenses.get(license_id)
-        
-        if license_data:
-            # Update status based on expiry
-            if license_data["end_date"] < datetime.utcnow():
-                license_data["status"] = "expired"
-        
-        return license_data
-    
+        record = await self._db.fetchrow(
+            """
+            SELECT * FROM district_licenses
+            WHERE id = $1
+            """,
+            license_id,
+        )
+
+        if not record:
+            return None
+
+        if (
+            record["end_date"] < datetime.utcnow() and
+            record["status"] == "active"
+        ):
+            await self._db.execute(
+                "UPDATE district_licenses SET status = 'expired' "
+                "WHERE id = $1",
+                license_id,
+            )
+            record = dict(record)
+            record["status"] = "expired"
+
+        return self._row_to_dict(record)
+
     async def get_district_licenses(
         self, district_id: str
     ) -> List[Dict]:
         """Get all licenses for a district"""
-        district_licenses = [
-            lic for lic in self.licenses.values()
-            if lic["district_id"] == district_id
-        ]
-        
-        return district_licenses
-    
+        rows = await self._db.fetch(
+            """
+            SELECT * FROM district_licenses
+            WHERE district_id = $1
+            ORDER BY start_date DESC
+            """,
+            district_id,
+        )
+
+        return [self._row_to_dict(row) for row in rows]
+
     async def check_seat_availability(
         self, license_id: str
     ) -> bool:
         """Check if seats are available"""
-        license_data = self.licenses.get(license_id)
-        
-        if not license_data:
+        record = await self._db.fetchrow(
+            """
+            SELECT student_count, seats_used
+            FROM district_licenses
+            WHERE id = $1
+            """,
+            license_id,
+        )
+
+        if not record:
             return False
-        
-        return license_data["seats_used"] < license_data["student_count"]
-    
+
+        return record["seats_used"] < record["student_count"]
+
     async def allocate_seat(
         self, license_id: str, user_id: str
     ) -> bool:
         """
         Allocate a seat to a user
-        
+
         Args:
             license_id: License ID
             user_id: User ID to allocate seat to
-        
+
         Returns:
             True if allocation successful
         """
-        if not await self.check_seat_availability(license_id):
+        result = await self._db.fetchrow(
+            """
+            UPDATE district_licenses
+            SET seats_used = seats_used + 1,
+                updated_at = NOW()
+            WHERE id = $1
+              AND seats_used < student_count
+            RETURNING seats_used, student_count
+            """,
+            license_id,
+        )
+
+        if not result:
             return False
-        
-        license_data = self.licenses[license_id]
-        license_data["seats_used"] += 1
-        
+
         logger.info(
             "Allocated seat for license %s (used: %d/%d)",
             license_id,
-            license_data["seats_used"],
-            license_data["student_count"]
+            result["seats_used"],
+            result["student_count"],
         )
-        
         return True
-    
+
     async def release_seat(
         self, license_id: str, user_id: str
     ) -> bool:
         """
         Release a seat
-        
+
         Args:
             license_id: License ID
             user_id: User ID releasing seat
-        
+
         Returns:
             True if release successful
         """
-        license_data = self.licenses.get(license_id)
-        
-        if not license_data or license_data["seats_used"] <= 0:
+        result = await self._db.fetchrow(
+            """
+            UPDATE district_licenses
+            SET seats_used = GREATEST(seats_used - 1, 0),
+                updated_at = NOW()
+            WHERE id = $1
+            RETURNING seats_used, student_count
+            """,
+            license_id,
+        )
+
+        if not result:
             return False
-        
-        license_data["seats_used"] -= 1
-        
+
         logger.info(
             "Released seat for license %s (used: %d/%d)",
             license_id,
-            license_data["seats_used"],
-            license_data["student_count"]
+            result["seats_used"],
+            result["student_count"],
         )
-        
         return True
-    
+
     async def get_expiring_licenses(
         self, days: int = 30
     ) -> List[Dict]:
         """
         Get licenses expiring within specified days
-        
+
         Args:
             days: Number of days to look ahead
-        
+
         Returns:
             List of expiring licenses
         """
         cutoff_date = datetime.utcnow() + timedelta(days=days)
-        
-        expiring = [
-            lic for lic in self.licenses.values()
-            if lic["end_date"] <= cutoff_date and
-            lic["status"] == "active"
-        ]
-        
-        return expiring
+
+        rows = await self._db.fetch(
+            """
+            SELECT * FROM district_licenses
+            WHERE status = 'active'
+              AND end_date <= $1
+            ORDER BY end_date
+            """,
+            cutoff_date,
+        )
+
+        return [self._row_to_dict(row) for row in rows]
+
+    def _row_to_dict(self, row) -> Dict:
+        return {
+            "id": row["id"],
+            "district_id": row["district_id"],
+            "district_name": row["district_name"],
+            "student_count": row["student_count"],
+            "seats_used": row["seats_used"],
+            "start_date": row["start_date"],
+            "end_date": row["end_date"],
+            "status": row["status"],
+        }

@@ -1,5 +1,6 @@
 {
   "name": "aivo-brain-svc",
+  "type": "module",
   "version": "1.0.0",
   "description": "AIVO Main Brain Service - Production ML inference service",
   "main": "src/main.py",
@@ -8,7 +9,7 @@
     "start:prod": "uvicorn src.main:app --host 0.0.0.0 --port 8001 --workers 4",
     "dev": "uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug",
     "test": "pytest tests/ -v",
-    "lint": "pylint src/",
+  "lint": "python -m pylint --rcfile=../../.pylintrc src/",
     "format": "black src/ tests/",
     "type-check": "mypy src/"
   },

@@ -131,7 +131,7 @@ async def health_check():
 async def translate_content(request: TranslationRequest):
     """
     Translate content with education-specific context
-    
+
     Supports 50+ languages with special handling for:
     - IEP and education terminology
     - Mathematical expressions
@@ -144,13 +144,13 @@ async def translate_content(request: TranslationRequest):
                 status_code=400,
                 detail=f"Source language '{request.source_lang}' not supported"
             )
-        
+
         if request.target_lang not in SUPPORTED_LANGUAGES:
             raise HTTPException(
                 status_code=400,
                 detail=f"Target language '{request.target_lang}' not supported"
             )
-        
+
         # Translate
         translator = EducationTranslator()
         result = await translator.translate_content(
@@ -159,9 +159,9 @@ async def translate_content(request: TranslationRequest):
             target_lang=request.target_lang,
             context=request.context or "general"
         )
-        
+
         return TranslationResponse(**result)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -179,13 +179,13 @@ async def translate_content(request: TranslationRequest):
 async def translate_batch(request: BatchTranslationRequest):
     """
     Translate multiple pieces of content in batch
-    
+
     Efficiently handles multiple translations in a single request.
     """
     try:
         translator = EducationTranslator()
         translations = []
-        
+
         for item in request.items:
             result = await translator.translate_content(
                 text=item.text,
@@ -194,9 +194,9 @@ async def translate_batch(request: BatchTranslationRequest):
                 context=item.context
             )
             translations.append(TranslationResponse(**result))
-        
+
         return BatchTranslationResponse(translations=translations)
-    
+
     except Exception as e:
         logger.error("Batch translation failed: %s", str(e))
         raise HTTPException(
@@ -212,7 +212,7 @@ async def translate_batch(request: BatchTranslationRequest):
 async def get_supported_languages():
     """
     Get list of all supported languages
-    
+
     Returns 50+ languages with metadata including:
     - Language codes and names
     - Native names
@@ -220,7 +220,7 @@ async def get_supported_languages():
     - Language families
     """
     languages = {}
-    
+
     for code, info in SUPPORTED_LANGUAGES.items():
         languages[code] = LanguageInfo(
             code=code,
@@ -229,7 +229,7 @@ async def get_supported_languages():
             rtl=info["rtl"],
             family=info["family"]
         )
-    
+
     return SupportedLanguagesResponse(
         languages=languages,
         total=len(SUPPORTED_LANGUAGES),
@@ -241,7 +241,7 @@ async def get_supported_languages():
 async def get_iep_terminology():
     """
     Get IEP and education-specific terminology mappings
-    
+
     Returns specialized education terms with translations
     for proper handling of IEP documents and reports.
     """
@@ -258,14 +258,14 @@ async def get_iep_terminology():
 async def detect_language(text: str = Body(..., min_length=1, embed=True)):
     """
     Detect the language of input text
-    
+
     Uses language detection to automatically identify
     the source language.
     """
     try:
         translator = EducationTranslator()
         detected = await translator.detect_language(text)
-        
+
         return {
             "text": text[:100],
             "detected_language": detected["language"],
@@ -274,7 +274,7 @@ async def detect_language(text: str = Body(..., min_length=1, embed=True)):
                 detected["language"], {}
             ).get("name", "Unknown")
         }
-    
+
     except Exception as e:
         logger.error("Language detection failed: %s", str(e))
         raise HTTPException(

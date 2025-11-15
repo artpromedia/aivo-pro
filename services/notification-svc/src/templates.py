@@ -11,21 +11,21 @@ logger = logging.getLogger(__name__)
 class TemplateManager:
     """
     Manage notification templates
-    
+
     Supports Jinja2 templating for:
     - Email (HTML and text)
     - SMS
     - Push notifications
     """
-    
+
     def __init__(self):
         """Initialize template manager"""
         self.templates = self._load_templates()
-    
+
     def _load_templates(self) -> Dict[str, Dict]:
         """
         Load notification templates
-        
+
         In production, load from database
         """
         return {
@@ -106,7 +106,7 @@ class TemplateManager:
                 "push_body": "{{ student_name }}'s IEP has been updated"
             }
         }
-    
+
     async def render_email_template(
         self,
         template_id: str,
@@ -114,23 +114,23 @@ class TemplateManager:
     ) -> Tuple[str, str]:
         """
         Render email template
-        
+
         Args:
             template_id: Template identifier
             data: Template data
-        
+
         Returns:
             (html_content, text_content)
         """
         template = self.templates.get(template_id)
-        
+
         if not template or "email" not in template["channels"]:
             raise ValueError(f"Email template not found: {template_id}")
-        
+
         # Render HTML
         html_template = Template(template["email_html"])
         html_content = html_template.render(**data)
-        
+
         # Render text (or use plain version)
         if "email_text" in template:
             text_template = Template(template["email_text"])
@@ -142,9 +142,9 @@ class TemplateManager:
             # Remove all other tags
             import re
             text_content = re.sub(r'<[^>]+>', '', text_content)
-        
+
         return html_content, text_content
-    
+
     async def render_sms_template(
         self,
         template_id: str,
@@ -152,28 +152,28 @@ class TemplateManager:
     ) -> str:
         """
         Render SMS template
-        
+
         Args:
             template_id: Template identifier
             data: Template data
-        
+
         Returns:
             SMS message text
         """
         template = self.templates.get(template_id)
-        
+
         if not template or "sms" not in template["channels"]:
             raise ValueError(f"SMS template not found: {template_id}")
-        
+
         sms_template = Template(template["sms_text"])
         message = sms_template.render(**data)
-        
+
         # Ensure 160 char limit
         if len(message) > 160:
             message = message[:157] + "..."
-        
+
         return message
-    
+
     async def list_templates(self) -> List[Dict]:
         """List all available templates"""
         return [
@@ -184,7 +184,7 @@ class TemplateManager:
             }
             for t in self.templates.values()
         ]
-    
+
     async def get_template(self, template_id: str) -> Optional[Dict]:
         """Get template details"""
         return self.templates.get(template_id)

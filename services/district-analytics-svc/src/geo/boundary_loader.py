@@ -6,15 +6,15 @@ import json
 
 class BoundaryLoader:
     """Load and manage district boundary data"""
-    
+
     def __init__(self):
         self.boundaries = []
-    
+
     async def load_all_boundaries(self) -> List[Dict]:
         """Load all district boundaries from source"""
         # In production, load from NCES Cartographic API
         # or stored GeoJSON files
-        
+
         # Sample data structure
         sample_boundaries = [
             {
@@ -35,10 +35,10 @@ class BoundaryLoader:
                 }
             }
         ]
-        
+
         self.boundaries = sample_boundaries
         return sample_boundaries
-    
+
     async def load_state_boundaries(self, state: str) -> List[Dict]:
         """Load boundaries for specific state"""
         return [

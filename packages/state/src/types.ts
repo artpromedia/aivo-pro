@@ -151,7 +151,7 @@ export interface ConflictResolution {
 export interface OfflineAction {
   id: string;
   type: string;
-  payload: any;
+  payload: unknown;
   timestamp: string;
   retryCount: number;
   maxRetries: number;
@@ -170,7 +170,7 @@ export interface SyncStatus {
 export interface CrossPortalMessage {
   id: string;
   type: string;
-  payload: any;
+  payload: unknown;
   sourcePortal: PortalType;
   targetPortal?: PortalType;
   timestamp: string;
@@ -197,26 +197,26 @@ export interface GlobalState {
   // Learning data
   learning: {
     currentSession: LearningSession | null;
-    recentActivities: any[];
-    focusMetrics: any[];
-    gamificationData: any;
+  recentActivities: unknown[];
+  focusMetrics: unknown[];
+    gamificationData: Record<string, unknown> | null;
   };
 
   // Portal-specific data
-  portals: Record<PortalType, any>;
+  portals: Record<PortalType, Record<string, unknown>>;
 
   // Sync and offline support
   sync: {
     status: SyncStatus;
     offlineActions: OfflineAction[];
-    conflicts: any[];
+  conflicts: unknown[];
   };
 
   // UI state
   ui: {
     theme: string;
     sidebarOpen: boolean;
-    notifications: any[];
-    modals: Record<string, any>;
+  notifications: unknown[];
+    modals: Record<string, unknown>;
   };
 }

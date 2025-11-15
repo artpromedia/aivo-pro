@@ -17,8 +17,8 @@ import {
 /**
  * Hook for managing focus trap
  */
-export function useFocusTrap(active = true) {
-  const ref = useRef<HTMLElement>(null);
+export function useFocusTrap<T extends HTMLElement = HTMLElement>(active = true) {
+  const ref = useRef<T | null>(null);
 
   useEffect(() => {
     if (!active || !ref.current) return;
@@ -184,8 +184,8 @@ export function useRovingTabIndex(items: HTMLElement[], activeIndex: number) {
 /**
  * Hook for accessible dialog/modal
  */
-export function useDialog(isOpen: boolean) {
-  const dialogRef = useRef<HTMLElement>(null);
+export function useDialog<T extends HTMLElement = HTMLElement>(isOpen: boolean) {
+  const dialogRef = useRef<T | null>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {

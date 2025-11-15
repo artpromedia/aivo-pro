@@ -14,19 +14,19 @@ export const createStudentsSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   StudentsSlice
-> = (set, get) => ({
+> = (set, _get, _store) => ({
   setStudents: (students: Record<string, StudentProfile>) =>
-    set((state: any) => {
+    set((state) => {
       state.students.profiles = students;
     }),
 
   addStudent: (student: StudentProfile) =>
-    set((state: any) => {
+    set((state) => {
       state.students.profiles[student.id] = student;
     }),
 
   updateStudent: (id: string, updates: Partial<StudentProfile>) =>
-    set((state: any) => {
+    set((state) => {
       if (state.students.profiles[id]) {
         state.students.profiles[id] = {
           ...state.students.profiles[id],
@@ -36,12 +36,12 @@ export const createStudentsSlice: StateCreator<
     }),
 
   setActiveStudent: (id: string | null) =>
-    set((state: any) => {
+    set((state) => {
       state.students.activeStudentId = id;
     }),
 
   removeStudent: (id: string) =>
-    set((state: any) => {
+    set((state) => {
       delete state.students.profiles[id];
       if (state.students.activeStudentId === id) {
         state.students.activeStudentId = null;

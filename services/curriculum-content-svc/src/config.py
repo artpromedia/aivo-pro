@@ -3,7 +3,6 @@ Configuration for Curriculum Content Service
 Comprehensive K-12 content generation across all subjects and systems
 """
 
-import os
 from typing import List
 from pydantic_settings import BaseSettings
 
@@ -42,11 +41,11 @@ class Settings(BaseSettings):
     # OpenAI
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
-    
+
     # Anthropic (Alternative)
     ANTHROPIC_API_KEY: str = ""
     ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
-    
+
     # Google (Alternative)
     GOOGLE_API_KEY: str = ""
     GOOGLE_MODEL: str = "gemini-1.5-pro"

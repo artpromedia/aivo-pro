@@ -32,7 +32,7 @@ class ViolationType(str, enum.Enum):
 class ModerationLog(Base):
     """Log of content moderation actions"""
     __tablename__ = "moderation_logs"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     moderation_id = Column(String(100), unique=True, index=True)
     content_type = Column(String(50))
@@ -48,7 +48,7 @@ class ModerationLog(Base):
 class SafetyIncident(Base):
     """Critical safety incidents"""
     __tablename__ = "safety_incidents"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     threat_level = Column(Enum(ThreatLevel))
     threat_type = Column(String(100))
@@ -64,7 +64,7 @@ class SafetyIncident(Base):
 class ThreatAssessment(Base):
     """Threat assessments from behavior analysis"""
     __tablename__ = "threat_assessments"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     interaction_id = Column(String(100))
     user_id = Column(String(100), index=True)
@@ -79,7 +79,7 @@ class ThreatAssessment(Base):
 class ParentalConsent(Base):
     """COPPA parental consent records"""
     __tablename__ = "parental_consents"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     child_id = Column(String(100), index=True)
     parent_id = Column(String(100), index=True)
@@ -97,7 +97,7 @@ class ParentalConsent(Base):
 class BlockedContent(Base):
     """Blocked content for audit trail"""
     __tablename__ = "blocked_content"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     content_hash = Column(String(64), unique=True)
     content_type = Column(String(50))
@@ -111,7 +111,7 @@ class BlockedContent(Base):
 class UserFlag(Base):
     """User behavior flags"""
     __tablename__ = "user_flags"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(String(100), index=True)
     flag_type = Column(String(100))
@@ -128,7 +128,7 @@ class UserFlag(Base):
 class ComplianceAudit(Base):
     """Compliance audit trail"""
     __tablename__ = "compliance_audits"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     audit_type = Column(String(50))  # coppa, ferpa, data_retention
     entity_type = Column(String(50))
@@ -143,7 +143,7 @@ class ComplianceAudit(Base):
 class DataRetention(Base):
     """Data retention enforcement log"""
     __tablename__ = "data_retention_logs"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     data_type = Column(String(100))
     retention_policy_days = Column(Integer)
@@ -156,7 +156,7 @@ class DataRetention(Base):
 class Child(Base):
     """Child user records for COPPA compliance"""
     __tablename__ = "children"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(String(100), unique=True, index=True)
     date_of_birth = Column(DateTime)
@@ -168,7 +168,7 @@ class Child(Base):
 class ChatMessage(Base):
     """Chat messages for retention enforcement"""
     __tablename__ = "chat_messages"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(String(100), index=True)
     content = Column(Text)

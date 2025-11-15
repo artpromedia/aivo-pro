@@ -38,10 +38,10 @@ aivo_brain: AIVOMainBrain = None
 async def lifespan(app: FastAPI):
     """Initialize and cleanup resources"""
     global aivo_brain
-    
+
     logger.info("🚀 Starting AIVO Main Brain Service...")
     logger.info(f"🔧 Configuration: {settings.model_dump()}")
-    
+
     try:
         # Initialize the ACTUAL AI model
         aivo_brain = AIVOMainBrain()
@@ -49,9 +49,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.critical(f"❌ Failed to initialize AIVO Brain: {e}")
         raise
-    
+
     yield
-    
+
     logger.info("🛑 Shutting down AIVO Main Brain Service...")
     # Cleanup resources if needed
 
@@ -95,7 +95,7 @@ async def root():
 async def health_check():
     """
     Health check endpoint for monitoring.
-    
+
     Returns model status and system information.
     """
     if aivo_brain is None:
@@ -106,9 +106,9 @@ async def health_check():
             model_name="none",
             gpu_available=False
         )
-    
+
     model_info = aivo_brain.get_model_info()
-    
+
     return HealthResponse(
         status="healthy" if model_info['model_loaded'] else "degraded",
         model_loaded=model_info['model_loaded'],
@@ -126,9 +126,9 @@ async def health_check():
 async def generate_response(request: GenerateRequest):
     """
     Generate AI response for student learning.
-    
+
     This uses ACTUAL transformer inference - not hard-coded responses!
-    
+
     **Example:**
     ```json
     {
@@ -145,12 +145,12 @@ async def generate_response(request: GenerateRequest):
     """
     if aivo_brain is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    
+
     try:
         # Generate ACTUAL AI response
         response_text = ""
         token_count = 0
-        
+
         async for chunk in aivo_brain.generate_response(
             request.prompt,
             request.context,
@@ -160,14 +160,14 @@ async def generate_response(request: GenerateRequest):
         ):
             response_text += chunk
             token_count += len(chunk.split())
-        
+
         return GenerateResponse(
             response=response_text,
             model=aivo_brain.model_name,
             tokens_used=token_count,
             context_applied=request.context.model_dump()
         )
-        
+
     except Exception as e:
         logger.error(f"Error generating response: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -177,13 +177,13 @@ async def generate_response(request: GenerateRequest):
 async def generate_stream(request: GenerateRequest):
     """
     Stream AI response for real-time interaction.
-    
+
     Returns Server-Sent Events (SSE) stream of tokens.
     Perfect for chat interfaces that want to show responses as they're generated.
     """
     if aivo_brain is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    
+
     async def stream_generator():
         try:
             async for chunk in aivo_brain.generate_response(
@@ -195,14 +195,14 @@ async def generate_stream(request: GenerateRequest):
             ):
                 # Send as Server-Sent Event
                 yield f"data: {chunk}\n\n"
-            
+
             # Send completion signal
             yield "data: [DONE]\n\n"
-            
+
         except Exception as e:
             logger.error(f"Error in streaming: {e}")
             yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
-    
+
     return StreamingResponse(
         stream_generator(),
         media_type="text/event-stream",
@@ -218,10 +218,10 @@ async def generate_stream(request: GenerateRequest):
 async def assess_response(request: AssessRequest):
     """
     Assess student response using AI.
-    
+
     Provides intelligent, context-aware assessment of student work.
     NOT rule-based - uses actual AI to evaluate understanding.
-    
+
     **Example:**
     ```json
     {
@@ -237,16 +237,16 @@ async def assess_response(request: AssessRequest):
     """
     if aivo_brain is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    
+
     try:
         assessment = await aivo_brain.assess_response(
             request.student_response,
             request.criteria,
             request.expected_answer
         )
-        
+
         return AssessResponse(**assessment)
-        
+
     except Exception as e:
         logger.error(f"Error assessing response: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -256,13 +256,13 @@ async def assess_response(request: AssessRequest):
 async def query_curriculum(request: CurriculumQuery):
     """
     Query curriculum knowledge base.
-    
+
     Retrieves curriculum standards, learning objectives, and related content
     for specific topics and grade levels.
     """
     if aivo_brain is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    
+
     try:
         # In production, would query actual curriculum database/embeddings
         # For now, return structured response
@@ -280,7 +280,7 @@ async def query_curriculum(request: CurriculumQuery):
             content_summary=f"Core content for {request.topic} at grade {request.grade_level}",
             related_topics=[]
         )
-        
+
     except Exception as e:
         logger.error(f"Error querying curriculum: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -291,7 +291,7 @@ async def get_model_info():
     """Get information about the loaded model"""
     if aivo_brain is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    
+
     return aivo_brain.get_model_info()
 
 
@@ -299,25 +299,25 @@ async def get_model_info():
 async def reload_model(background_tasks: BackgroundTasks):
     """
     Reload the model (admin endpoint).
-    
+
     Useful for applying updates or changing model configuration.
     """
     global aivo_brain
-    
+
     def reload():
         global aivo_brain
         logger.info("🔄 Reloading AIVO Brain...")
         aivo_brain = AIVOMainBrain()
         logger.info("✅ Model reloaded successfully")
-    
+
     background_tasks.add_task(reload)
-    
+
     return {"status": "reload_initiated"}
 
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         app,
         host="0.0.0.0",

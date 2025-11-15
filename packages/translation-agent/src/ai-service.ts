@@ -6,6 +6,11 @@ import type {
   LocaleData,
 } from './types';
 
+type NestedTranslations = Record<string, unknown>;
+function isPlainObject(value: unknown): value is NestedTranslations {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 export class AITranslationService {
   private client: OpenAI;
   private model: string;
@@ -142,20 +147,22 @@ Format as JSON:
       const sourceValue = this.getNestedValue(referenceLocale.translations, key);
       const currentValue = this.getNestedValue(localeData.translations, key);
 
-      if (!currentValue) continue;
+      if (typeof sourceValue !== 'string' || typeof currentValue !== 'string') {
+        continue;
+      }
 
       const validation = await this.validateTranslation(
         key,
-        currentValue as string,
+        currentValue,
         localeData.locale,
-        sourceValue as string
+        sourceValue
       );
 
       if (validation.score < 80 && validation.suggestions.length > 0) {
         suggestions.push({
           key,
           locale: localeData.locale,
-          currentValue: currentValue as string,
+          currentValue,
           suggestedValue: validation.suggestions[0],
           reason: validation.issues.join('; '),
           confidence: validation.score / 100,
@@ -180,10 +187,10 @@ Format as JSON:
 
     for (const key of missingKeys) {
       const sourceValue = this.getNestedValue(sourceLocale.translations, key);
-      if (sourceValue) {
+      if (typeof sourceValue === 'string') {
         const translated = await this.translateKey(
           key,
-          sourceValue as string,
+          sourceValue,
           sourceLocale.locale,
           targetLocale,
           context
@@ -294,24 +301,26 @@ actionable suggestions for improvement.`;
   }
 
   private flattenObject(
-    obj: Record<string, any>,
+    obj: NestedTranslations,
     prefix = ''
-  ): Record<string, any> {
-    return Object.keys(obj).reduce(
-      (acc, key) => {
-        const newKey = prefix ? `${prefix}.${key}` : key;
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          Object.assign(acc, this.flattenObject(obj[key], newKey));
-        } else {
-          acc[newKey] = obj[key];
-        }
-        return acc;
-      },
-      {} as Record<string, any>
-    );
+  ): NestedTranslations {
+    return Object.entries(obj).reduce<NestedTranslations>((acc, [key, value]) => {
+      const newKey = prefix ? `${prefix}.${key}` : key;
+      if (isPlainObject(value)) {
+        Object.assign(acc, this.flattenObject(value, newKey));
+      } else {
+        acc[newKey] = value;
+      }
+      return acc;
+    }, {});
   }
 
-  private getNestedValue(obj: Record<string, any>, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  private getNestedValue(obj: NestedTranslations, path: string): unknown {
+    return path.split('.').reduce<unknown>((current, key) => {
+      if (isPlainObject(current)) {
+        return current[key];
+      }
+      return undefined;
+    }, obj);
   }
 }

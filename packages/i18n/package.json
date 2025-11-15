@@ -1,5 +1,6 @@
 {
   "name": "@aivo/i18n",
+  "type": "module",
   "version": "1.0.0",
   "description": "Internationalization with react-intl",
   "main": "./dist/index.js",

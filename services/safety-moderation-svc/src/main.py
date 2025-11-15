@@ -88,7 +88,7 @@ class ReportConcernRequest(BaseModel):
 
 class ContentModerationEngine:
     """Advanced content moderation using ML"""
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
         self.content_classifier = ContentClassifier()
@@ -96,26 +96,26 @@ class ContentModerationEngine:
         self.image_scanner = ImageScanner()
         self.profanity_filter = ProfanityFilter()
         self.pii_detector = PIIDetector()
-        
+
         self.thresholds = {
             "toxicity": settings.TOXICITY_THRESHOLD,
             "severe_toxicity": settings.SEVERE_TOXICITY_THRESHOLD,
             "profanity": settings.PROFANITY_THRESHOLD,
             "threat": settings.THREAT_THRESHOLD
         }
-    
+
     async def initialize(self):
         """Initialize moderation engine"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
-        
+
         await self.content_classifier.load_models()
         await self.toxicity_detector.load_model()
         await self.image_scanner.load_model()
         await self.profanity_filter.load_wordlists()
         await self.pii_detector.load_patterns()
-        
+
         print("✅ Content Moderation Engine initialized")
-    
+
     async def moderate_content(
         self,
         content: str,
@@ -127,7 +127,7 @@ class ContentModerationEngine:
         """Moderate content with multi-layer filtering"""
         start_time = datetime.utcnow()
         moderation_id = str(uuid.uuid4())
-        
+
         # Layer 1: Profanity check
         profanity_result = await self.profanity_filter.check(content)
         if profanity_result["contains_profanity"]:
@@ -135,7 +135,7 @@ class ContentModerationEngine:
                 moderation_id, content, ViolationType.PROFANITY,
                 "high", user_id, db
             )
-        
+
         # Layer 2: PII Detection
         pii_result = await self.pii_detector.scan(content)
         if pii_result["contains_pii"]:
@@ -143,10 +143,10 @@ class ContentModerationEngine:
             await self._log_compliance_concern(
                 user_id, "pii_exposure", pii_result, db
             )
-        
+
         # Layer 3: Toxicity analysis
         toxicity_scores = await self._analyze_toxicity(content)
-        
+
         for category, score in toxicity_scores.items():
             if score > self.thresholds.get(category, 0.7):
                 return await self._handle_violation(
@@ -154,31 +154,31 @@ class ContentModerationEngine:
                     self._map_toxicity_to_violation(category),
                     self._calculate_severity(score), user_id, db
                 )
-        
+
         # Content passed
         moderation_time = (datetime.utcnow() - start_time).total_seconds() * 1000
         moderation_latency.observe(moderation_time)
-        
+
         await self._log_moderation(
             moderation_id, content_type, user_id,
             "approved", moderation_time, db
         )
-        
+
         content_moderated.labels(type=content_type.value, action="approved").inc()
-        
+
         return {
             "moderation_id": moderation_id,
             "action": "approve",
             "content": content,
             "safety_scores": toxicity_scores
         }
-    
+
     async def _analyze_toxicity(self, content: str) -> Dict[str, float]:
         """Analyze content toxicity"""
         scores = await self.toxicity_detector.predict(content)
         scores["grooming"] = await self._detect_grooming_patterns(content)
         return scores
-    
+
     async def _detect_grooming_patterns(self, content: str) -> float:
         """Detect potential grooming patterns"""
         grooming_indicators = [
@@ -188,16 +188,16 @@ class ContentModerationEngine:
             r"meet.{0,10}(privately|alone|secret)",
             r"send.{0,10}(picture|photo|pic)"
         ]
-        
+
         score = 0.0
         content_lower = content.lower()
-        
+
         for pattern in grooming_indicators:
             if re.search(pattern, content_lower):
                 score += 0.3
-        
+
         return min(score, 1.0)
-    
+
     async def _handle_violation(
         self, moderation_id: str, content: str,
         violation_type: ViolationType, severity: str,
@@ -206,7 +206,7 @@ class ContentModerationEngine:
         """Handle content violation"""
         # Log blocked content
         content_hash = hashlib.sha256(content.encode()).hexdigest()
-        
+
         blocked = BlockedContent(
             id=uuid.uuid4(),
             content_hash=content_hash,
@@ -218,9 +218,9 @@ class ContentModerationEngine:
         )
         db.add(blocked)
         await db.commit()
-        
+
         content_moderated.labels(type="text", action="blocked").inc()
-        
+
         return {
             "moderation_id": moderation_id,
             "action": "block",
@@ -228,7 +228,7 @@ class ContentModerationEngine:
             "severity": severity,
             "reason": f"Content violates {violation_type.value} policy"
         }
-    
+
     async def _log_moderation(
         self, moderation_id: str, content_type: ContentType,
         user_id: str, result: str, latency_ms: float, db: AsyncSession
@@ -244,13 +244,13 @@ class ContentModerationEngine:
         )
         db.add(log)
         await db.commit()
-    
+
     async def _log_compliance_concern(
         self, user_id: str, concern_type: str, details: Dict, db: AsyncSession
     ):
         """Log compliance concern"""
         pass  # Implement logging
-    
+
     def _map_toxicity_to_violation(self, category: str) -> ViolationType:
         """Map toxicity category to violation type"""
         mapping = {
@@ -259,7 +259,7 @@ class ContentModerationEngine:
             "severe_toxicity": ViolationType.INAPPROPRIATE
         }
         return mapping.get(category, ViolationType.INAPPROPRIATE)
-    
+
     def _calculate_severity(self, score: float) -> str:
         """Calculate severity from score"""
         if score > 0.9:
@@ -273,28 +273,28 @@ class ContentModerationEngine:
 
 class ChildSafetyGuard:
     """Child safety monitoring - COPPA/FERPA compliant"""
-    
+
     def __init__(self):
         self.coppa_enforcer = COPPAEnforcer()
         self.ferpa_guardian = FERPAGuardian()
         self.behavior_analyzer = BehaviorAnalyzer()
         self.redis_client: Optional[redis.Redis] = None
-    
+
     async def verify_parental_consent(
         self, child_id: str, parent_id: str,
         consent_type: str, db: AsyncSession
     ) -> Dict:
         """Verify and record parental consent"""
         from src.db.models import Child
-        
+
         result = await db.execute(
             Child.__table__.select().where(Child.id == child_id)
         )
         child = result.first()
-        
+
         if not child:
             raise HTTPException(404, "Child not found")
-        
+
         # Record consent
         consent = ParentalConsent(
             id=uuid.uuid4(),
@@ -309,16 +309,16 @@ class ChildSafetyGuard:
                 days=settings.PARENTAL_CONSENT_DURATION_DAYS
             )
         )
-        
+
         db.add(consent)
         await db.commit()
-        
+
         return {
             "consent_recorded": True,
             "consent_id": str(consent.id),
             "expires_at": consent.expires_at.isoformat()
         }
-    
+
     async def monitor_interaction(
         self, interaction_data: Dict, db: AsyncSession
     ) -> Dict:
@@ -328,19 +328,19 @@ class ChildSafetyGuard:
             "concerns": [],
             "actions_required": []
         }
-        
+
         # Analyze interaction
         pattern_analysis = await self.behavior_analyzer.analyze_interaction(
             interaction_data
         )
-        
+
         if pattern_analysis["risk_score"] > 0.7:
             threat_assessment["threat_level"] = ThreatLevel.HIGH
             threat_assessment["concerns"].append({
                 "type": "suspicious_pattern",
                 "details": pattern_analysis["flags"]
             })
-        
+
         # Log if threats detected
         if threat_assessment["threat_level"] != ThreatLevel.NONE:
             await self._log_threat_assessment(
@@ -349,9 +349,9 @@ class ChildSafetyGuard:
             threats_detected.labels(
                 threat_type=threat_assessment["concerns"][0]["type"]
             ).inc()
-        
+
         return threat_assessment
-    
+
     async def _log_threat_assessment(
         self, threat_assessment: Dict, interaction_data: Dict, db: AsyncSession
     ):
@@ -371,15 +371,15 @@ class ChildSafetyGuard:
 
 class PlatformSafetyMonitor:
     """Overall platform safety monitoring"""
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
-    
+
     async def calculate_safety_score(self, db: AsyncSession) -> float:
         """Calculate platform safety score"""
         now = datetime.utcnow()
         day_ago = now - timedelta(days=1)
-        
+
         # Count violations
         violations_result = await db.execute(
             ModerationLog.__table__.select().where(
@@ -388,11 +388,11 @@ class PlatformSafetyMonitor:
             )
         )
         violations = len(violations_result.all())
-        
+
         # Calculate score
         violation_score = max(0, 1 - (violations / 100))
         overall_score = violation_score
-        
+
         safety_score.set(overall_score)
         return overall_score
 
@@ -400,7 +400,7 @@ class PlatformSafetyMonitor:
 # Main Service
 class SafetyModerationService:
     """Main Safety & Moderation Service"""
-    
+
     def __init__(self):
         self.content_moderator = ContentModerationEngine()
         self.child_safety = ChildSafetyGuard()
@@ -408,22 +408,22 @@ class SafetyModerationService:
         self.redis_client: Optional[redis.Redis] = None
         self.db_engine = None
         self.async_session = None
-    
+
     async def initialize(self):
         self.redis_client = await redis.from_url(settings.REDIS_URL)
-        
+
         # Setup database
         self.db_engine = create_async_engine(settings.DATABASE_URL)
         self.async_session = sessionmaker(
             self.db_engine, class_=AsyncSession, expire_on_commit=False
         )
-        
+
         # Create tables
         async with self.db_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
+
         await self.content_moderator.initialize()
-        
+
         print("✅ Safety & Moderation Service initialized")
 
 
@@ -490,13 +490,13 @@ async def moderate_image(
 ):
     """Moderate uploaded image"""
     image_bytes = await file.read()
-    
+
     result = await safety_service.content_moderator.image_scanner.scan(
         image_bytes,
         user_id=user_id,
         context=json.loads(context)
     )
-    
+
     return result
 
 
@@ -520,7 +520,7 @@ async def record_parental_consent(
     """Record parental consent for COPPA compliance"""
     # In production, verify current_user
     parent_id = "parent_user_id"  # Get from auth
-    
+
     return await safety_service.child_safety.verify_parental_consent(
         child_id=request.child_id,
         parent_id=parent_id,
@@ -546,7 +546,7 @@ async def report_safety_concern(
 async def get_safety_score(db: AsyncSession = Depends(get_db)):
     """Get current platform safety score"""
     score = await safety_service.platform_monitor.calculate_safety_score(db)
-    
+
     return {
         "safety_score": round(score, 3),
         "status": "safe" if score > 0.8 else "monitoring",

@@ -32,7 +32,7 @@ class LanguageCode(str, Enum):
     GERMAN = "de"
     PORTUGUESE = "pt"
     ITALIAN = "it"
-    
+
     # Asian Languages
     CHINESE_SIMPLIFIED = "zh-cn"
     CHINESE_TRADITIONAL = "zh-tw"
@@ -42,14 +42,14 @@ class LanguageCode(str, Enum):
     THAI = "th"
     INDONESIAN = "id"
     MALAY = "ms"
-    
+
     # Middle Eastern
     ARABIC = "ar"
     HEBREW = "he"
     PERSIAN = "fa"
     TURKISH = "tr"
     URDU = "ur"
-    
+
     # South Asian
     HINDI = "hi"
     BENGALI = "bn"
@@ -57,7 +57,7 @@ class LanguageCode(str, Enum):
     TELUGU = "te"
     MARATHI = "mr"
     GUJARATI = "gu"
-    
+
     # African Languages
     SWAHILI = "sw"
     AMHARIC = "am"
@@ -66,7 +66,7 @@ class LanguageCode(str, Enum):
     ZULU = "zu"
     XHOSA = "xh"
     AFRIKAANS = "af"
-    
+
     # European
     RUSSIAN = "ru"
     POLISH = "pl"
@@ -107,20 +107,20 @@ class LanguageService:
     """
     Comprehensive language support for global education
     """
-    
+
     def __init__(self):
         self.translator = Translator()
         self.redis_client: Optional[redis.Redis] = None
-        
+
         # Educational terminology by subject and language
         self.edu_terminology = self._load_educational_terminology()
-        
+
         # Regional language preferences
         self.regional_languages = {
             "north_america": ["en", "es", "fr"],
             "latin_america": ["es", "pt", "fr"],
             "europe": [
-                "en", "de", "fr", "es", "it", "pt", "nl", "pl", 
+                "en", "de", "fr", "es", "it", "pt", "nl", "pl",
                 "ru", "uk", "ro", "el", "hu", "cs", "sv", "no", "da", "fi"
             ],
             "middle_east": ["ar", "he", "fa", "tr", "ur"],
@@ -133,7 +133,7 @@ class LanguageService:
             ],
             "southeast_asia": ["id", "ms", "th", "vi", "ja", "ko"]
         }
-    
+
     async def initialize(self):
         """Initialize service"""
         self.redis_client = await redis.from_url(
@@ -142,7 +142,7 @@ class LanguageService:
         )
         print("✅ Localization Service initialized")
         print(f"   Languages: {len(LanguageCode)} supported")
-    
+
     def _load_educational_terminology(self) -> Dict[str, Dict[str, Dict[str, str]]]:
         """Load subject-specific terminology in multiple languages"""
         return {
@@ -281,7 +281,7 @@ class LanguageService:
                 }
             }
         }
-    
+
     async def translate_text(
         self,
         text: str,
@@ -295,30 +295,30 @@ class LanguageService:
         # Detect language if needed
         if source_lang == "auto":
             source_lang = detect(text)
-        
+
         # Check cache
         cache_key = f"trans:{source_lang}:{target_lang}:{hash(text)}"
         if self.redis_client:
             cached = await self.redis_client.get(cache_key)
             if cached:
                 return json.loads(cached)
-        
+
         # Translate
         translation = self.translator.translate(
             text,
             src=source_lang,
             dest=target_lang
         )
-        
+
         translated_text = translation.text
-        
+
         # Apply subject-specific terminology
         if subject and subject in self.edu_terminology:
             translated_text = self._apply_terminology(
                 translated_text,
                 self.edu_terminology[subject].get(target_lang, {})
             )
-        
+
         result = {
             "original": text,
             "translated": translated_text,
@@ -327,7 +327,7 @@ class LanguageService:
             "confidence": 0.9,  # Would use real confidence from model
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
         # Cache result
         if self.redis_client:
             await self.redis_client.setex(
@@ -335,11 +335,11 @@ class LanguageService:
                 3600,  # 1 hour
                 json.dumps(result)
             )
-        
+
         translations_total.labels(source=source_lang, target=target_lang).inc()
-        
+
         return result
-    
+
     def _apply_terminology(
         self,
         text: str,
@@ -350,7 +350,7 @@ class LanguageService:
         for english_term, translated_term in terminology.items():
             text = text.replace(english_term, translated_term)
         return text
-    
+
     async def translate_content(
         self,
         content: Dict[str, Any],
@@ -363,7 +363,7 @@ class LanguageService:
         Preserves formatting and special elements
         """
         translated = {}
-        
+
         for key, value in content.items():
             if isinstance(value, str):
                 # Translate text
@@ -408,9 +408,9 @@ class LanguageService:
             else:
                 # Keep non-translatable content
                 translated[key] = value
-        
+
         return translated
-    
+
     def get_supported_languages(self, region: Optional[str] = None) -> List[str]:
         """Get supported languages for a region"""
         if region and region in self.regional_languages:
@@ -422,10 +422,10 @@ class CulturalAdaptationEngine:
     """
     Adapt content for cultural appropriateness
     """
-    
+
     def __init__(self):
         self.cultural_rules = self._load_cultural_rules()
-    
+
     def _load_cultural_rules(self) -> Dict[str, Dict[str, Any]]:
         """Load cultural adaptation rules"""
         return {
@@ -460,7 +460,7 @@ class CulturalAdaptationEngine:
                     "avoid": []
                 }
             },
-            
+
             "china": {
                 "number_symbolism": {
                     "lucky": ["6", "8", "9"],
@@ -489,7 +489,7 @@ class CulturalAdaptationEngine:
                     "festivals": "spring_festival_mid_autumn"
                 }
             },
-            
+
             "india": {
                 "religious_diversity": {
                     "hindu": "majority",
@@ -517,7 +517,7 @@ class CulturalAdaptationEngine:
                     "regional": "respect_all"
                 }
             },
-            
+
             "africa": {
                 "diversity": {
                     "note": "54_countries_diverse_cultures",
@@ -546,7 +546,7 @@ class CulturalAdaptationEngine:
                     "connectivity": "offline_friendly"
                 }
             },
-            
+
             "latin_america": {
                 "cultural_values": {
                     "family": "central_extended_family",
@@ -566,7 +566,7 @@ class CulturalAdaptationEngine:
                     "indigenous": "respect_languages"
                 }
             },
-            
+
             "us": {
                 "diversity": {
                     "multicultural": True,
@@ -584,7 +584,7 @@ class CulturalAdaptationEngine:
                 }
             }
         }
-    
+
     async def adapt_content(
         self,
         content: Dict[str, Any],
@@ -600,11 +600,11 @@ class CulturalAdaptationEngine:
                 "adaptations_made": [],
                 "note": f"No specific rules for {target_culture}, content unchanged"
             }
-        
+
         rules = self.cultural_rules[target_culture]
         adapted_content = content.copy()
         adaptations_made = []
-        
+
         # Apply adaptations based on level
         if adaptation_level in ["moderate", "extensive"]:
             # Replace sensitive content
@@ -618,7 +618,7 @@ class CulturalAdaptationEngine:
                         adaptations_made.append(
                             f"Removed/replaced sensitive topic: {topic}"
                         )
-            
+
             # Adapt examples
             if "adapt_examples" in rules:
                 for original, replacement in rules["adapt_examples"].items():
@@ -631,13 +631,13 @@ class CulturalAdaptationEngine:
                         adaptations_made.append(
                             f"Adapted example: {original} → {replacement}"
                         )
-        
+
         if adaptation_level == "extensive":
             # Add cultural context
             if "cultural_values" in rules:
                 adapted_content["cultural_context"] = rules["cultural_values"]
                 adaptations_made.append("Added cultural context")
-        
+
         return {
             "content": adapted_content,
             "adaptations_made": adaptations_made,
@@ -645,24 +645,24 @@ class CulturalAdaptationEngine:
             "adaptation_level": adaptation_level,
             "cultural_guidelines": rules
         }
-    
+
     def _contains_topic(self, content: Dict, topic: str) -> bool:
         """Check if content contains sensitive topic"""
         content_str = json.dumps(content).lower()
         return topic.lower() in content_str
-    
+
     def _replace_topic(self, content: Dict, topic: str) -> Dict:
         """Replace or remove sensitive topic"""
         # Simplified implementation
         content_str = json.dumps(content)
         content_str = content_str.replace(topic, "[culturally adapted]")
         return json.loads(content_str)
-    
+
     def _contains_example(self, content: Dict, example: str) -> bool:
         """Check if content contains example"""
         content_str = json.dumps(content).lower()
         return example.lower().replace("_", " ") in content_str
-    
+
     def _replace_example(
         self,
         content: Dict,

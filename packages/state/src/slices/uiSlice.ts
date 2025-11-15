@@ -4,9 +4,9 @@ import type { GlobalState } from '../types';
 export interface UISlice {
   setTheme: (theme: string) => void;
   toggleSidebar: () => void;
-  addNotification: (notification: any) => void;
+  addNotification: (notification: Record<string, unknown>) => void;
   removeNotification: (id: string) => void;
-  openModal: (id: string, data?: any) => void;
+  openModal: (id: string, data?: unknown) => void;
   closeModal: (id: string) => void;
 }
 
@@ -15,24 +15,24 @@ export const createUISlice: StateCreator<
   [['zustand/immer', never]],
   [],
   UISlice
-> = (set, get) => ({
+> = (set, _get, _store) => ({
   setTheme: (theme: string) =>
-    set((state: any) => {
+    set((state) => {
       state.ui.theme = theme;
       
       // Update user preferences if logged in
       if (state.auth.currentUser) {
-        state.auth.currentUser.preferences.theme = theme as any;
+        state.auth.currentUser.preferences.theme = theme as typeof state.auth.currentUser.preferences.theme;
       }
     }),
 
   toggleSidebar: () =>
-    set((state: any) => {
+    set((state) => {
       state.ui.sidebarOpen = !state.ui.sidebarOpen;
     }),
 
-  addNotification: (notification: any) =>
-    set((state: any) => {
+  addNotification: (notification: Record<string, unknown>) =>
+    set((state) => {
       const newNotification = {
         id: `notification-${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -48,14 +48,18 @@ export const createUISlice: StateCreator<
     }),
 
   removeNotification: (id: string) =>
-    set((state: any) => {
+    set((state) => {
       state.ui.notifications = state.ui.notifications.filter(
-        (notification: any) => notification.id !== id
+        (notification) =>
+          typeof notification === 'object' &&
+          notification !== null &&
+          'id' in notification &&
+          notification.id !== id
       );
     }),
 
-  openModal: (id: string, data?: any) =>
-    set((state: any) => {
+  openModal: (id: string, data?: unknown) =>
+    set((state) => {
       state.ui.modals[id] = {
         isOpen: true,
         data: data || null,
@@ -64,9 +68,17 @@ export const createUISlice: StateCreator<
     }),
 
   closeModal: (id: string) =>
-    set((state: any) => {
-      if (state.ui.modals[id]) {
-        state.ui.modals[id].isOpen = false;
+    set((state) => {
+      const modalState = state.ui.modals[id];
+      if (
+        typeof modalState === 'object' &&
+        modalState !== null &&
+        'isOpen' in modalState
+      ) {
+        state.ui.modals[id] = {
+          ...modalState,
+          isOpen: false
+        };
       }
     })
 });

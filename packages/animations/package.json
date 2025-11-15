@@ -1,5 +1,6 @@
 {
   "name": "@aivo/animations",
+  "type": "module",
   "version": "1.0.0",
   "description": "Advanced animations and transitions with Framer Motion",
   "main": "./dist/index.js",

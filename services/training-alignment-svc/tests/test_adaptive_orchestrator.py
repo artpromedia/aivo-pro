@@ -14,20 +14,20 @@ from src.adaptive_orchestrator import (
 
 class TestAdaptiveLearningOrchestrator:
     """Test adaptive learning recommendation engine"""
-    
+
     @pytest.fixture
     def orchestrator(self):
         """Create orchestrator instance"""
         return AdaptiveLearningOrchestrator()
-    
+
     # =====================================================
     # SCENARIO 1: Student Mastering Content (Level Up)
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_level_up_for_mastery(self, orchestrator):
         """Test level up recommendation for mastered content"""
-        
+
         # Student performing excellently
         metrics = LearnerMetrics(
             student_id="emma_123",
@@ -48,9 +48,9 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.88, 0.90, 0.92, 0.94, 0.95, 0.94, 0.94],
             last_7_days_time=[30, 28, 26, 25, 24, 25, 25]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend level up
         assert recommendation.recommendation_type == RecommendationType.LEVEL_UP
         assert recommendation.recommended_level == 5
@@ -59,15 +59,15 @@ class TestAdaptiveLearningOrchestrator:
         assert "mastered" in recommendation.reasoning.lower()
         assert len(recommendation.evidence) > 0
         assert len(recommendation.suggested_actions) > 0
-    
+
     # =====================================================
     # SCENARIO 2: Student Struggling (Level Down)
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_level_down_for_struggling(self, orchestrator):
         """Test level down for struggling student"""
-        
+
         # Student struggling with current content
         metrics = LearnerMetrics(
             student_id="alex_456",
@@ -88,9 +88,9 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.50, 0.48, 0.45, 0.42, 0.45, 0.40, 0.45],
             last_7_days_time=[110, 115, 120, 125, 120, 130, 120]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend level down or remediation
         assert recommendation.recommendation_type in [
             RecommendationType.LEVEL_DOWN,
@@ -99,15 +99,15 @@ class TestAdaptiveLearningOrchestrator:
         assert recommendation.recommended_level < metrics.current_level
         assert recommendation.confidence >= 0.7
         assert recommendation.priority in ["high", "urgent"]
-    
+
     # =====================================================
     # SCENARIO 3: Low Focus (Break Needed)
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_break_for_low_focus(self, orchestrator):
         """Test break recommendation when focus drops"""
-        
+
         # Student with critically low focus
         metrics = LearnerMetrics(
             student_id="jordan_789",
@@ -128,25 +128,25 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.70, 0.68, 0.65, 0.62, 0.60, 0.62, 0.65],
             last_7_days_time=[55, 58, 60, 65, 60, 62, 60]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend immediate break
         assert recommendation.recommendation_type == RecommendationType.BREAK
         assert recommendation.priority == "urgent"
         assert recommendation.confidence >= 0.9
         assert "focus" in recommendation.reasoning.lower()
-        assert any("break" in action.lower() 
+        assert any("break" in action.lower()
                   for action in recommendation.suggested_actions)
-    
+
     # =====================================================
     # SCENARIO 4: Plateau Detected (Change Approach)
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_change_approach_for_plateau(self, orchestrator):
         """Test change approach when student plateaus"""
-        
+
         # Student stuck at same level for long time
         metrics = LearnerMetrics(
             student_id="sam_101",
@@ -167,9 +167,9 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.72, 0.71, 0.73, 0.72, 0.72, 0.71, 0.72],
             last_7_days_time=[88, 90, 92, 90, 89, 91, 90]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend changing approach
         assert recommendation.recommendation_type in [
             RecommendationType.CHANGE_APPROACH,
@@ -178,15 +178,15 @@ class TestAdaptiveLearningOrchestrator:
         if recommendation.recommendation_type == RecommendationType.CHANGE_APPROACH:
             assert "approach" in recommendation.reasoning.lower() or \
                    "plateau" in recommendation.reasoning.lower()
-    
+
     # =====================================================
     # SCENARIO 5: Enrichment Needed
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_enrichment_for_good_performance(self, orchestrator):
         """Test enrichment recommendation for proficient student"""
-        
+
         # Student doing well but not quite ready to advance
         metrics = LearnerMetrics(
             student_id="maya_202",
@@ -207,24 +207,24 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.80, 0.82, 0.85, 0.86, 0.85, 0.87, 0.85],
             last_7_days_time=[50, 48, 45, 44, 45, 43, 45]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend maintain or enrichment
         assert recommendation.recommendation_type in [
             RecommendationType.MAINTAIN,
             RecommendationType.ENRICHMENT
         ]
         assert recommendation.recommended_level == metrics.current_level
-    
+
     # =====================================================
     # SCENARIO 6: Session Too Long
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_recommend_break_for_long_session(self, orchestrator):
         """Test break recommendation for overly long session"""
-        
+
         metrics = LearnerMetrics(
             student_id="riley_303",
             subject="history",
@@ -244,21 +244,21 @@ class TestAdaptiveLearningOrchestrator:
             last_7_days_accuracy=[0.78, 0.76, 0.75, 0.74, 0.75, 0.75, 0.75],
             last_7_days_time=[50, 52, 55, 55, 55, 56, 55]
         )
-        
+
         recommendation = await orchestrator.analyze_and_recommend(metrics)
-        
+
         # Should recommend break due to session length
         assert recommendation.recommendation_type == RecommendationType.BREAK
         assert recommendation.priority in ["urgent", "high"]
         assert "session" in recommendation.reasoning.lower()
-    
+
     # =====================================================
     # SCENARIO 7: Performance Classification
     # =====================================================
-    
+
     def test_performance_classification(self, orchestrator):
         """Test performance level classification"""
-        
+
         # Advanced
         advanced_metrics = LearnerMetrics(
             student_id="test", subject="test", skill="test",
@@ -272,7 +272,7 @@ class TestAdaptiveLearningOrchestrator:
         )
         assert orchestrator._classify_performance(advanced_metrics) == \
                PerformanceLevel.ADVANCED
-        
+
         # Struggling
         struggling_metrics = LearnerMetrics(
             student_id="test", subject="test", skill="test",
@@ -286,15 +286,15 @@ class TestAdaptiveLearningOrchestrator:
         )
         assert orchestrator._classify_performance(struggling_metrics) == \
                PerformanceLevel.STRUGGLING
-    
+
     # =====================================================
     # SCENARIO 8: Batch Analysis
     # =====================================================
-    
+
     @pytest.mark.asyncio
     async def test_batch_analyze_students(self, orchestrator):
         """Test analyzing multiple students at once"""
-        
+
         students = [
             # Student 1: Mastering
             LearnerMetrics(
@@ -321,31 +321,31 @@ class TestAdaptiveLearningOrchestrator:
                 last_7_days_time=[95, 100, 105, 100, 98, 102, 100]
             )
         ]
-        
+
         recommendations = await orchestrator.batch_analyze_students(students)
-        
+
         # Should return 2 recommendations
         assert len(recommendations) == 2
-        
+
         # Should be sorted by priority
         priorities = [r.priority for r in recommendations]
-        assert all(priorities[i] <= priorities[i+1] 
+        assert all(priorities[i] <= priorities[i+1]
                   for i in range(len(priorities)-1)
-                  if priorities[i] in ["urgent", "high"] and 
+                  if priorities[i] in ["urgent", "high"] and
                      priorities[i+1] in ["medium", "low"])
 
 
 @pytest.mark.integration
 class TestAdaptiveLearningIntegration:
     """Integration tests with training pipeline"""
-    
+
     @pytest.mark.asyncio
     async def test_full_analysis_to_model_update_flow(self):
         """Test complete flow from analysis to model update"""
         from src.training import ContinuousTrainingPipeline
-        
+
         pipeline = ContinuousTrainingPipeline()
-        
+
         # High-performing student data
         performance_data = {
             "recent_accuracy": 0.95,
@@ -363,7 +363,7 @@ class TestAdaptiveLearningIntegration:
             "last_7_days_accuracy": [0.90, 0.92, 0.94, 0.95, 0.96, 0.95, 0.95],
             "last_7_days_time": [30, 28, 27, 28, 28, 27, 28]
         }
-        
+
         # Analyze performance
         recommendation = await pipeline.analyze_learner_performance(
             student_id="test_student",
@@ -371,10 +371,10 @@ class TestAdaptiveLearningIntegration:
             skill="fractions",
             performance_data=performance_data
         )
-        
+
         # Should get level up recommendation
         assert recommendation.recommendation_type == RecommendationType.LEVEL_UP
         assert recommendation.confidence >= 0.8
-        
+
         # Should trigger model update (logged, not executed in test)
         # In production, this would queue a model fine-tuning job

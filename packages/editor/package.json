@@ -1,5 +1,6 @@
 {
   "name": "@aivo/editor",
+  "type": "module",
   "version": "1.0.0",
   "description": "Rich content editor with multimedia support for AIVO Learning Platform",
   "main": "dist/index.js",

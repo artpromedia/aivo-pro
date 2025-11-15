@@ -11,7 +11,7 @@ export const TranslationKeySchema = z.object({
 
 export const LocaleDataSchema = z.object({
   locale: z.string(),
-  translations: z.record(z.any()),
+  translations: z.record(z.unknown()),
   metadata: z.object({
     totalKeys: z.number(),
     coverage: z.number(),
@@ -189,7 +189,7 @@ export interface BatchTranslationResponse {
  */
 export interface DocumentTranslationRequest {
   document_id: string;
-  document: any; // structured document
+  document: unknown; // structured document
   source_lang: string;
   target_lang: string;
   output_format?: 'json' | 'pdf' | 'docx';

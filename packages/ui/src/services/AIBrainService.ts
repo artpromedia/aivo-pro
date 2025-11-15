@@ -31,7 +31,7 @@ export interface GenerateResponse {
   response: string;
   model: string;
   tokens_used: number;
-  context_applied: Record<string, any>;
+  context_applied: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -39,7 +39,7 @@ export interface AssessmentCriteria {
   subject: string;
   grade: string;
   learning_objective: string;
-  rubric?: Record<string, any>;
+  rubric?: Record<string, unknown>;
 }
 
 export interface AssessResponse {
@@ -53,8 +53,8 @@ export interface AssessResponse {
 
 export interface CloneRequest {
   student_id: string;
-  student_profile: any;
-  baseline_data: any;
+  student_profile: Record<string, unknown>;
+  baseline_data: Record<string, unknown>;
 }
 
 export interface CloneResponse {
@@ -237,6 +237,7 @@ export class AIBrainService {
         cloning: cloningHealth.status === 200,
       };
     } catch (error) {
+      console.error('AIBrainService health check failed', error);
       return {
         brain: false,
         cloning: false,

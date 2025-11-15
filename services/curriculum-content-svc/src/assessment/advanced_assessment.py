@@ -47,12 +47,12 @@ class AdvancedAssessmentEngine:
     """
     Comprehensive assessment generation with cultural appropriateness
     """
-    
+
     def __init__(self):
         self.question_templates = self._load_question_templates()
         self.rubric_templates = self._load_rubric_templates()
         self.bloom_taxonomy = self._load_blooms_taxonomy()
-    
+
     def _load_blooms_taxonomy(self) -> Dict:
         """Load Bloom's Taxonomy levels and verbs"""
         return {
@@ -135,7 +135,7 @@ class AdvancedAssessmentEngine:
                 ]
             }
         }
-    
+
     def _load_question_templates(self) -> Dict:
         """Load question templates by subject"""
         return {
@@ -187,7 +187,7 @@ class AdvancedAssessmentEngine:
                 }
             }
         }
-    
+
     def _load_rubric_templates(self) -> Dict:
         """Load rubric templates"""
         return {
@@ -368,7 +368,7 @@ class AdvancedAssessmentEngine:
                 }
             }
         }
-    
+
     async def generate_assessment(
         self,
         subject: str,
@@ -382,7 +382,7 @@ class AdvancedAssessmentEngine:
         """
         Generate comprehensive assessment with rubrics
         """
-        
+
         # Default difficulty distribution (Bloom's levels)
         if not difficulty_distribution:
             difficulty_distribution = {
@@ -393,7 +393,7 @@ class AdvancedAssessmentEngine:
                 "evaluate": 0.05,
                 "create": 0.0
             }
-        
+
         # Generate questions based on distribution
         questions = []
         for bloom_level, proportion in difficulty_distribution.items():
@@ -407,7 +407,7 @@ class AdvancedAssessmentEngine:
                     cultural_context=cultural_context
                 )
                 questions.append(question)
-        
+
         # Generate rubric if needed
         rubric = None
         if assessment_type in [
@@ -420,7 +420,7 @@ class AdvancedAssessmentEngine:
                 assessment_type=assessment_type,
                 subject=subject
             )
-        
+
         # Create assessment structure
         assessment = {
             "id": f"assess_{random.randint(1000, 9999)}",
@@ -444,16 +444,16 @@ class AdvancedAssessmentEngine:
                 "points_possible": self._calculate_total_points(questions, rubric)
             }
         }
-        
+
         # Apply cultural adaptations if needed
         if cultural_context:
             assessment = await self._culturally_adapt_assessment(
                 assessment,
                 cultural_context
             )
-        
+
         return assessment
-    
+
     async def _generate_question(
         self,
         subject: str,
@@ -463,11 +463,11 @@ class AdvancedAssessmentEngine:
         cultural_context: Optional[Dict]
     ) -> Dict[str, Any]:
         """Generate a single question"""
-        
+
         bloom_data = self.bloom_taxonomy.get(bloom_level, {})
         verb = random.choice(bloom_data.get("verbs", ["explain"]))
         stem = random.choice(bloom_data.get("question_stems", ["Describe"]))
-        
+
         if assessment_type == AssessmentType.MULTIPLE_CHOICE:
             return await self._generate_multiple_choice(
                 subject, topic, bloom_level, verb
@@ -488,7 +488,7 @@ class AdvancedAssessmentEngine:
             return await self._generate_generic_question(
                 subject, topic, bloom_level, assessment_type
             )
-    
+
     async def _generate_multiple_choice(
         self,
         subject: str,
@@ -497,24 +497,24 @@ class AdvancedAssessmentEngine:
         verb: str
     ) -> Dict[str, Any]:
         """Generate multiple choice question"""
-        
+
         # Mathematics example
         if subject == "mathematics" and "fraction" in topic.lower():
             numerator = random.randint(1, 5)
             denominator = random.randint(2, 10)
             correct_answer = numerator / denominator
-            
+
             # Generate distractors
             distractors = [
                 correct_answer + 0.1,
                 correct_answer - 0.1,
                 numerator + denominator  # Common misconception
             ]
-            
+
             options = [correct_answer] + distractors
             random.shuffle(options)
             correct_index = options.index(correct_answer)
-            
+
             return {
                 "type": "multiple_choice",
                 "bloom_level": bloom_level,
@@ -525,7 +525,7 @@ class AdvancedAssessmentEngine:
                 "points": 1,
                 "difficulty": bloom_level
             }
-        
+
         # Generic multiple choice
         return {
             "type": "multiple_choice",
@@ -536,7 +536,7 @@ class AdvancedAssessmentEngine:
             "explanation": "Explanation of correct answer",
             "points": 1
         }
-    
+
     async def _generate_short_answer(
         self,
         subject: str,
@@ -545,7 +545,7 @@ class AdvancedAssessmentEngine:
         stem: str
     ) -> Dict[str, Any]:
         """Generate short answer question"""
-        
+
         return {
             "type": "short_answer",
             "bloom_level": bloom_level,
@@ -564,7 +564,7 @@ class AdvancedAssessmentEngine:
                 "clarity": 1
             }
         }
-    
+
     async def _generate_essay_prompt(
         self,
         subject: str,
@@ -572,16 +572,16 @@ class AdvancedAssessmentEngine:
         bloom_level: str
     ) -> Dict[str, Any]:
         """Generate essay prompt"""
-        
+
         prompts_by_type = {
             "analyze": f"Analyze the key factors that contributed to {topic}",
             "evaluate": f"Evaluate the effectiveness of {topic}",
             "compare": f"Compare and contrast different approaches to {topic}",
             "argue": f"Take a position on {topic} and defend your view"
         }
-        
+
         prompt_type = "analyze" if bloom_level == "analyze" else "evaluate"
-        
+
         return {
             "type": "essay",
             "bloom_level": bloom_level,
@@ -602,7 +602,7 @@ class AdvancedAssessmentEngine:
             "points": 20,
             "grading": "See rubric"
         }
-    
+
     async def _generate_performance_task(
         self,
         subject: str,
@@ -610,7 +610,7 @@ class AdvancedAssessmentEngine:
         bloom_level: str
     ) -> Dict[str, Any]:
         """Generate performance task"""
-        
+
         return {
             "type": "performance_task",
             "bloom_level": bloom_level,
@@ -633,7 +633,7 @@ class AdvancedAssessmentEngine:
             "points": 50,
             "grading": "See project rubric"
         }
-    
+
     async def _generate_generic_question(
         self,
         subject: str,
@@ -642,7 +642,7 @@ class AdvancedAssessmentEngine:
         assessment_type: AssessmentType
     ) -> Dict[str, Any]:
         """Generate generic question"""
-        
+
         return {
             "type": assessment_type.value,
             "bloom_level": bloom_level,
@@ -651,14 +651,14 @@ class AdvancedAssessmentEngine:
             "question": f"Question about {topic} at {bloom_level} level",
             "points": 5
         }
-    
+
     async def _generate_rubric(
         self,
         assessment_type: AssessmentType,
         subject: str
     ) -> Dict[str, Any]:
         """Generate assessment rubric"""
-        
+
         # Map assessment type to rubric template
         template_map = {
             AssessmentType.ESSAY: "written_response",
@@ -667,13 +667,13 @@ class AdvancedAssessmentEngine:
             AssessmentType.PERFORMANCE_TASK: "written_response",
             AssessmentType.PROBLEM_SOLVING: "math_problem_solving"
         }
-        
+
         template_key = template_map.get(
             assessment_type,
             "written_response"
         )
         template = self.rubric_templates.get(template_key, {})
-        
+
         return {
             "title": f"{assessment_type.value.replace('_', ' ').title()} Rubric",
             "criteria": template.get("criteria", {}),
@@ -683,7 +683,7 @@ class AdvancedAssessmentEngine:
             "scoring_guide": "Each criterion scored 1-4 points",
             "notes": "Scores are weighted according to criterion importance"
         }
-    
+
     def _calculate_rubric_points(self, criteria: Dict) -> int:
         """Calculate total points from rubric"""
         total = 0
@@ -692,14 +692,14 @@ class AdvancedAssessmentEngine:
             # Assume max score of 4 per criterion
             total += 4 * weight * 100  # Scale to percentage
         return int(total)
-    
+
     def _estimate_time(
         self,
         questions: List[Dict],
         assessment_type: AssessmentType
     ) -> str:
         """Estimate time to complete assessment"""
-        
+
         time_per_question = {
             AssessmentType.MULTIPLE_CHOICE: 1.5,  # minutes
             AssessmentType.SHORT_ANSWER: 5,
@@ -707,18 +707,18 @@ class AdvancedAssessmentEngine:
             AssessmentType.PERFORMANCE_TASK: 120,
             AssessmentType.LAB_REPORT: 90
         }
-        
+
         minutes = len(questions) * time_per_question.get(
             assessment_type,
             5
         )
-        
+
         if minutes < 60:
             return f"{int(minutes)} minutes"
         else:
             hours = minutes / 60
             return f"{hours:.1f} hours"
-    
+
     def _get_standards_for_topics(
         self,
         subject: str,
@@ -731,7 +731,7 @@ class AdvancedAssessmentEngine:
             f"{subject.upper()}.{grade_level}.{i}"
             for i, topic in enumerate(topics, 1)
         ]
-    
+
     def _generate_accommodations(self) -> List[str]:
         """Generate suggested accommodations"""
         return [
@@ -743,7 +743,7 @@ class AdvancedAssessmentEngine:
             "Scribe for written responses",
             "Large print or digital format"
         ]
-    
+
     def _is_auto_gradable(self, assessment_type: AssessmentType) -> bool:
         """Check if assessment can be auto-graded"""
         auto_gradable_types = [
@@ -752,7 +752,7 @@ class AdvancedAssessmentEngine:
             AssessmentType.CODING_CHALLENGE
         ]
         return assessment_type in auto_gradable_types
-    
+
     def _calculate_total_points(
         self,
         questions: List[Dict],
@@ -763,35 +763,35 @@ class AdvancedAssessmentEngine:
         if rubric:
             total += rubric.get("total_points", 0)
         return total
-    
+
     async def _culturally_adapt_assessment(
         self,
         assessment: Dict,
         cultural_context: Dict
     ) -> Dict:
         """Adapt assessment for cultural appropriateness"""
-        
+
         # Check for sensitive topics
         sensitive_topics = cultural_context.get("sensitive_topics", [])
-        
+
         # Review each question
         for question in assessment["questions"]:
             question_text = str(question.get("question", "")).lower()
-            
+
             # Check for sensitive content
             for sensitive in sensitive_topics:
                 if sensitive.lower() in question_text:
                     question["cultural_note"] = f"Consider alternative framing for {cultural_context.get('region', 'this region')}"
-        
+
         # Add cultural accommodations
         assessment["cultural_accommodations"] = [
             "Examples adapted to local context",
             "Culturally appropriate scenarios",
             "Respectful of regional sensitivities"
         ]
-        
+
         return assessment
-    
+
     async def auto_grade_response(
         self,
         question: Dict,
@@ -801,26 +801,26 @@ class AdvancedAssessmentEngine:
         Automatically grade student response
         """
         question_type = question.get("type")
-        
+
         if question_type == "multiple_choice":
             correct_index = question.get("correct_answer")
             is_correct = student_response == correct_index
-            
+
             return {
                 "is_correct": is_correct,
                 "points_earned": question.get("points", 1) if is_correct else 0,
                 "points_possible": question.get("points", 1),
                 "feedback": question.get("explanation") if is_correct else "Incorrect. " + question.get("explanation", "")
             }
-        
+
         elif question_type == "problem_solving":
             # For numeric answers
             correct_answer = question.get("correct_answer")
             tolerance = question.get("tolerance", 0.01)
-            
+
             try:
                 is_correct = abs(float(student_response) - float(correct_answer)) <= tolerance
-                
+
                 return {
                     "is_correct": is_correct,
                     "points_earned": question.get("points", 1) if is_correct else 0,
@@ -834,7 +834,7 @@ class AdvancedAssessmentEngine:
                     "points_possible": question.get("points", 1),
                     "feedback": "Invalid response format"
                 }
-        
+
         else:
             # Requires manual grading
             return {

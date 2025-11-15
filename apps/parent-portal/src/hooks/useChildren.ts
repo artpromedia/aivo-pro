@@ -5,10 +5,24 @@ import type { Child } from '../stores/parentStore';
 
 // Mock API functions - replace with actual API calls
 const fetchChildren = async (): Promise<Child[]> => {
-  // Mock data for development
+  // Try to load children from localStorage first
+  const storedChildren = localStorage.getItem('aivo_parent_children');
+  
+  if (storedChildren) {
+    try {
+      const children = JSON.parse(storedChildren);
+      console.log('📚 Loaded children from localStorage:', children.length, 'children');
+      return Promise.resolve(children);
+    } catch (error) {
+      console.error('❌ Error parsing stored children:', error);
+    }
+  }
+  
+  // If no stored children, return mock data for demo purposes
+  console.log('📚 No stored children found, using demo data');
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve([
+      const demoChildren: Child[] = [
         {
           id: '1',
           firstName: 'Emma',
@@ -69,7 +83,11 @@ const fetchChildren = async (): Promise<Child[]> => {
             avgScore: 92,
           },
         },
-      ]);
+      ];
+      
+      // Save demo children to localStorage for future loads
+      localStorage.setItem('aivo_parent_children', JSON.stringify(demoChildren));
+      resolve(demoChildren);
     }, 500);
   });
 };
@@ -79,7 +97,7 @@ const addChildAPI = async (childData: Omit<Child, 'id'>): Promise<Child> => {
     setTimeout(() => {
       const newChild: Child = {
         ...childData,
-        id: Date.now().toString(),
+        id: `child_${Date.now()}`,
         progress: {
           overall: 0,
           subjects: {
@@ -95,6 +113,26 @@ const addChildAPI = async (childData: Omit<Child, 'id'>): Promise<Child> => {
           avgScore: 0,
         },
       };
+      
+      // Load existing children from localStorage
+      const storedChildren = localStorage.getItem('aivo_parent_children');
+      let children: Child[] = [];
+      
+      if (storedChildren) {
+        try {
+          children = JSON.parse(storedChildren);
+        } catch (error) {
+          console.error('❌ Error parsing stored children:', error);
+        }
+      }
+      
+      // Add new child to the list
+      children.push(newChild);
+      
+      // Save back to localStorage
+      localStorage.setItem('aivo_parent_children', JSON.stringify(children));
+      console.log('✅ Child saved to localStorage:', newChild);
+      
       resolve(newChild);
     }, 1000);
   });
@@ -103,8 +141,33 @@ const addChildAPI = async (childData: Omit<Child, 'id'>): Promise<Child> => {
 const updateChildAPI = async (childId: string, updates: Partial<Child>): Promise<Child> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Mock updated child - in real app, this would be the API response
-      resolve({ id: childId, ...updates } as Child);
+      // Load existing children from localStorage
+      const storedChildren = localStorage.getItem('aivo_parent_children');
+      let children: Child[] = [];
+      
+      if (storedChildren) {
+        try {
+          children = JSON.parse(storedChildren);
+        } catch (error) {
+          console.error('❌ Error parsing stored children:', error);
+        }
+      }
+      
+      // Find and update the child
+      const childIndex = children.findIndex(child => child.id === childId);
+      if (childIndex !== -1) {
+        children[childIndex] = { ...children[childIndex], ...updates };
+        
+        // Save back to localStorage
+        localStorage.setItem('aivo_parent_children', JSON.stringify(children));
+        console.log('✅ Child updated in localStorage:', children[childIndex]);
+        
+        resolve(children[childIndex]);
+      } else {
+        // Child not found - create a new one with the updates
+        const updatedChild = { id: childId, ...updates } as Child;
+        resolve(updatedChild);
+      }
     }, 500);
   });
 };

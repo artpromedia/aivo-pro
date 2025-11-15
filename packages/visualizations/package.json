@@ -1,5 +1,6 @@
 {
   "name": "@aivo/visualizations",
+  "type": "module",
   "version": "1.0.0",
   "description": "Interactive D3.js data visualizations for AIVO Learning Platform",
   "main": "./dist/index.js",

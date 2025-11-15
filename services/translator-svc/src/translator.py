@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class EducationTranslator:
     """
     Translation service with education-specific context
-    
+
     Features:
     - 50+ language support via Google Translate
     - IEP terminology preservation
@@ -32,7 +32,7 @@ class EducationTranslator:
     - RTL language support
     - Context-aware translation
     """
-    
+
     def __init__(self):
         """Initialize translator with Google Translate"""
         if Translator is None:
@@ -42,7 +42,7 @@ class EducationTranslator:
             )
         self.translator = Translator()
         self.cache: Dict[str, Dict] = {}
-    
+
     async def translate_content(
         self,
         text: str,
@@ -52,14 +52,14 @@ class EducationTranslator:
     ) -> Dict:
         """
         Translate content with context awareness
-        
+
         Args:
             text: Text to translate
             source_lang: Source language code
             target_lang: Target language code
             context: Context type (general, iep, math, programming,
                                    interface)
-        
+
         Returns:
             Translation result with metadata
         """
@@ -67,20 +67,20 @@ class EducationTranslator:
         cache_key = f"{source_lang}:{target_lang}:{context}:{text}"
         if cache_key in self.cache:
             return self.cache[cache_key]
-        
+
         try:
             # Preserve special terms based on context
             protected_text, placeholders = self._protect_terms(
                 text, context
             )
-            
+
             # Translate
             result = self.translator.translate(
                 protected_text,
                 src=source_lang,
                 dest=target_lang
             )
-            
+
             # Restore protected terms
             translated = self._restore_terms(
                 result.text,
@@ -88,10 +88,10 @@ class EducationTranslator:
                 target_lang,
                 context
             )
-            
+
             # Determine if RTL
             is_rtl = target_lang in RTL_LANGUAGES
-            
+
             response = {
                 "original": text,
                 "translated": translated,
@@ -100,12 +100,12 @@ class EducationTranslator:
                 "confidence": 0.95,  # Google Translate doesn't provide
                 "rtl": is_rtl
             }
-            
+
             # Cache result
             self.cache[cache_key] = response
-            
+
             return response
-        
+
         except Exception as e:
             logger.error(
                 "Translation failed for %s->%s: %s",
@@ -122,24 +122,24 @@ class EducationTranslator:
                 "confidence": 0.0,
                 "rtl": target_lang in RTL_LANGUAGES
             }
-    
+
     def _protect_terms(
         self, text: str, context: str
     ) -> tuple[str, Dict[str, str]]:
         """
         Replace special terms with placeholders before translation
-        
+
         Args:
             text: Original text
             context: Context type
-        
+
         Returns:
             (protected_text, placeholders_dict)
         """
         placeholders = {}
         protected = text
         counter = 0
-        
+
         # Protect IEP terms
         if context in ["iep", "general"]:
             for term in IEP_TERMINOLOGY.keys():
@@ -148,7 +148,7 @@ class EducationTranslator:
                     placeholders[placeholder] = term
                     protected = protected.replace(term, placeholder)
                     counter += 1
-        
+
         # Protect math terms
         if context in ["math", "general"]:
             for term in MATH_TERMS:
@@ -161,7 +161,7 @@ class EducationTranslator:
                         match.group(), placeholder, 1
                     )
                     counter += 1
-        
+
         # Protect programming terms
         if context in ["programming", "general"]:
             for term in PROGRAMMING_TERMS:
@@ -174,7 +174,7 @@ class EducationTranslator:
                         match.group(), placeholder, 1
                     )
                     counter += 1
-        
+
         # Protect URLs
         url_pattern = r'https?://[^\s]+'
         urls = re.finditer(url_pattern, protected)
@@ -183,7 +183,7 @@ class EducationTranslator:
             placeholders[placeholder] = url_match.group()
             protected = protected.replace(url_match.group(), placeholder)
             counter += 1
-        
+
         # Protect email addresses
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         emails = re.finditer(email_pattern, protected)
@@ -194,9 +194,9 @@ class EducationTranslator:
                 email_match.group(), placeholder
             )
             counter += 1
-        
+
         return protected, placeholders
-    
+
     def _restore_terms(
         self,
         translated: str,
@@ -206,18 +206,18 @@ class EducationTranslator:
     ) -> str:
         """
         Restore protected terms with appropriate translations
-        
+
         Args:
             translated: Translated text with placeholders
             placeholders: Placeholder mapping
             target_lang: Target language
             context: Context type
-        
+
         Returns:
             Text with terms restored
         """
         restored = translated
-        
+
         for placeholder, original_term in placeholders.items():
             # Get appropriate translation or preserve term
             term_translation = get_term_translation(
@@ -226,34 +226,34 @@ class EducationTranslator:
                 context
             )
             restored = restored.replace(placeholder, term_translation)
-        
+
         return restored
-    
+
     async def detect_language(self, text: str) -> Dict:
         """
         Detect language of input text
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             Detection result with language code and confidence
         """
         try:
             detection = self.translator.detect(text)
-            
+
             return {
                 "language": detection.lang,
                 "confidence": detection.confidence
             }
-        
+
         except Exception as e:
             logger.error("Language detection failed: %s", str(e))
             return {
                 "language": "en",  # Default to English
                 "confidence": 0.0
             }
-    
+
     async def translate_batch(
         self,
         texts: list[str],
@@ -263,18 +263,18 @@ class EducationTranslator:
     ) -> list[Dict]:
         """
         Translate multiple texts efficiently
-        
+
         Args:
             texts: List of texts to translate
             source_lang: Source language code
             target_lang: Target language code
             context: Context type
-        
+
         Returns:
             List of translation results
         """
         results = []
-        
+
         for text in texts:
             result = await self.translate_content(
                 text,
@@ -283,5 +283,5 @@ class EducationTranslator:
                 context
             )
             results.append(result)
-        
+
         return results

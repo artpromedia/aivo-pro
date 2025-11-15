@@ -13,7 +13,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import AsyncGenerator, Dict, Optional
+from typing import Dict, Optional
 
 import sentry_sdk
 import uvicorn
@@ -78,7 +78,7 @@ class AIVOBrainService:
     Production-grade AIVO Brain Service
     Implements Google's microservice patterns and Microsoft's resilience
     """
-    
+
     def __init__(self):
         self.model_manager: Optional[ModelManager] = None
         self.inference_engine: Optional[InferenceEngine] = None
@@ -87,14 +87,14 @@ class AIVOBrainService:
         self.metrics_collector: Optional[MetricsCollector] = None
         self.curriculum_expert: Optional[CurriculumExpertSystem] = None
         self.input_validator: InputValidator = InputValidator()
-        
+
         # Circuit breaker pattern (Netflix Hystrix style)
         self.circuit_breaker_settings = {
             'failure_threshold': 5,
             'recovery_timeout': 60,
             'expected_exception': Exception
         }
-        
+
     async def initialize(self):
         """
         Initialize all components with proper error handling
@@ -102,7 +102,7 @@ class AIVOBrainService:
         """
         try:
             print("🚀 Initializing AIVO Brain Service...")
-            
+
             # Initialize Redis cache (Microsoft Azure Cache pattern)
             self.cache_layer = CacheLayer(
                 redis_url=settings.REDIS_URL,
@@ -111,7 +111,7 @@ class AIVOBrainService:
             )
             await self.cache_layer.initialize()
             print("✅ Cache layer initialized")
-            
+
             # Initialize model manager based on AI provider
             if settings.USE_LOCAL_MODELS:
                 # Local HuggingFace models
@@ -135,7 +135,7 @@ class AIVOBrainService:
                 )
                 await self.model_manager.load_models()
                 print(f"✅ Cloud model manager initialized ({settings.AI_PROVIDER})")
-            
+
             # Initialize inference engine with batching
             self.inference_engine = InferenceEngine(
                 model_manager=self.model_manager,
@@ -143,7 +143,7 @@ class AIVOBrainService:
                 max_batch_delay_ms=settings.MAX_BATCH_DELAY_MS
             )
             print("✅ Inference engine initialized")
-            
+
             # Initialize curriculum expert system
             self.curriculum_expert = CurriculumExpertSystem(
                 knowledge_base_path=settings.KNOWLEDGE_BASE_PATH,
@@ -151,7 +151,7 @@ class AIVOBrainService:
             )
             await self.curriculum_expert.load_knowledge_base()
             print("✅ Curriculum expert initialized")
-            
+
             # Initialize health checker
             self.health_checker = HealthChecker(
                 components={
@@ -161,21 +161,21 @@ class AIVOBrainService:
                 }
             )
             print("✅ Health checker initialized")
-            
+
             # Initialize metrics collector
             self.metrics_collector = MetricsCollector()
             print("✅ Metrics collector initialized")
-            
+
             print("✅ AIVO Brain Service initialized successfully")
-            
+
         except Exception as e:
             print(f"❌ Failed to initialize AIVO Brain Service: {str(e)}")
             await self.initialize_fallback_mode()
-    
+
     async def initialize_fallback_mode(self):
         """Fallback initialization for partial functionality"""
         print("⚠️ Initializing in fallback mode with reduced functionality")
-        
+
         try:
             # In cloud mode, use cloud model manager for fallback
             if not settings.USE_LOCAL_MODELS:
@@ -197,20 +197,20 @@ class AIVOBrainService:
                     device_map="cpu",
                     optimization_level="low"
                 )
-            
+
             await self.model_manager.load_models()
-            
+
             self.inference_engine = InferenceEngine(
                 model_manager=self.model_manager,
                 batch_size=1,
                 max_batch_delay_ms=0
             )
-            
+
             print("✅ Fallback mode initialized")
         except Exception as e:
             print(f"❌ Even fallback mode failed: {str(e)}")
             raise
-    
+
     @circuit
     async def generate_response(
         self,
@@ -222,25 +222,25 @@ class AIVOBrainService:
         Implements Google's defensive programming practices
         """
         start_time = time.time()
-        
+
         try:
             # Input validation (Microsoft Security Development Lifecycle)
             validated_input = self.input_validator.validate(request)
-            
+
             # Check cache first (Google's caching strategy)
             if not streaming:
                 cache_key = self._generate_cache_key(validated_input)
                 cached_response = await self.cache_layer.get(cache_key)
-                
+
                 if cached_response:
                     cache_hit_rate.set(1.0)
                     return cached_response
-                
+
                 cache_hit_rate.set(0.0)
-            
+
             # Build context with curriculum alignment
             context = await self._build_context(validated_input)
-            
+
             # Generate response with timeout protection
             response = await asyncio.wait_for(
                 self.inference_engine.generate(
@@ -252,17 +252,17 @@ class AIVOBrainService:
                 ),
                 timeout=settings.INFERENCE_TIMEOUT_SECONDS
             )
-            
+
             # Cache non-streaming responses
             if not streaming:
                 await self.cache_layer.set(cache_key, response)
-            
+
             # Record metrics
             inference_time = time.time() - start_time
             model_inference_time.observe(inference_time)
-            
+
             return response
-            
+
         except asyncio.TimeoutError:
             raise HTTPException(
                 status_code=status.HTTP_504_GATEWAY_TIMEOUT,
@@ -275,7 +275,7 @@ class AIVOBrainService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Inference failed: {str(e)}"
             )
-    
+
     async def _build_context(
         self,
         request: "InferenceRequest"
@@ -291,7 +291,7 @@ class AIVOBrainService:
             "learning_style": request.learning_style,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
         # Add curriculum expertise
         if request.curriculum_standard and self.curriculum_expert:
             try:
@@ -305,16 +305,16 @@ class AIVOBrainService:
                 context["curriculum_context"] = curriculum_data
             except Exception as e:
                 print(f"Warning: Could not fetch curriculum data: {e}")
-        
+
         # Add disability accommodations if specified
         if request.disability_type:
             accommodations = self._get_accommodations(
                 request.disability_type
             )
             context["accommodations"] = accommodations
-        
+
         return context
-    
+
     def _get_accommodations(self, disability_type: str) -> Dict:
         """Get specific accommodations based on disability type"""
         accommodations_map = {
@@ -344,7 +344,7 @@ class AIVOBrainService:
             }
         }
         return accommodations_map.get(disability_type, {})
-    
+
     def _generate_cache_key(self, request: "InferenceRequest") -> str:
         """Generate cache key using Google's cache key design"""
         key_components = [
@@ -356,11 +356,11 @@ class AIVOBrainService:
             str(request.temperature),
             str(request.max_tokens)
         ]
-        
+
         key_string = "|".join(key_components)
         hash_digest = hashlib.sha256(key_string.encode()).hexdigest()
         return f"aivo:inference:{hash_digest}"
-    
+
     async def cleanup(self):
         """Cleanup resources on shutdown"""
         if self.cache_layer:
@@ -382,7 +382,7 @@ async def lifespan(app: FastAPI):
     # Startup
     print("Starting AIVO Brain Service...")
     await brain_service.initialize()
-    
+
     # Start background tasks
     if brain_service.health_checker:
         asyncio.create_task(
@@ -392,9 +392,9 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(
             brain_service.metrics_collector.start_collection()
         )
-    
+
     yield
-    
+
     # Shutdown
     print("Shutting down AIVO Brain Service...")
     await brain_service.cleanup()
@@ -441,9 +441,9 @@ class InferenceRequest(BaseModel):
         le=settings.MAX_TOKENS_LIMIT
     )
     temperature: float = Field(default=0.7, ge=0.0, le=1.0)
-    
+
     @validator('prompt')
-    def validate_prompt(cls, v):
+    def validate_prompt(cls, v):  # pylint: disable=no-self-argument
         """Validate prompt for safety"""
         if not v or not v.strip():
             raise ValueError("Prompt cannot be empty")
@@ -475,18 +475,18 @@ async def generate(
         "X-Request-ID",
         str(uuid.uuid4())
     )
-    
+
     with active_requests.track_inprogress():
         start_time = time.time()
-        
+
         try:
             result = await brain_service.generate_response(
                 request,
                 streaming=False
             )
-            
+
             duration = (time.time() - start_time) * 1000
-            
+
             # Record metrics
             request_count.labels(
                 method="POST",
@@ -497,7 +497,7 @@ async def generate(
                 method="POST",
                 endpoint="/v1/generate"
             ).observe(duration / 1000)
-            
+
             return InferenceResponse(
                 response=result["response"],
                 model_used=result["model_used"],
@@ -507,8 +507,8 @@ async def generate(
                 request_id=request_id,
                 timestamp=datetime.utcnow().isoformat()
             )
-            
-        except Exception as e:
+
+        except Exception:
             request_count.labels(
                 method="POST",
                 endpoint="/v1/generate",
@@ -530,7 +530,7 @@ async def generate_stream(request: InferenceRequest):
                 request,
                 streaming=True
             )
-            
+
             if isinstance(result, dict) and "chunks" in result:
                 for chunk in result["chunks"]:
                     yield f"data: {json.dumps({'chunk': chunk})}\n\n"
@@ -538,12 +538,12 @@ async def generate_stream(request: InferenceRequest):
             else:
                 # Non-streaming fallback
                 yield f"data: {json.dumps({'chunk': result['response']})}\n\n"
-                
+
             yield f"data: {json.dumps({'done': True})}\n\n"
-            
+
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
-    
+
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream",
@@ -562,9 +562,9 @@ async def health():
     """
     if not brain_service.health_checker:
         return {"healthy": False, "reason": "Health checker not initialized"}
-    
+
     health_status = await brain_service.health_checker.check_health()
-    
+
     if health_status["healthy"]:
         return health_status
     else:
@@ -589,9 +589,9 @@ async def readiness():
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             media_type="application/json"
         )
-    
+
     readiness_status = await brain_service.health_checker.check_readiness()
-    
+
     if readiness_status["ready"]:
         return readiness_status
     else:

@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     DATABASE_URL: str = "postgresql+asyncpg://localhost/aivo_sel"
     API_GATEWAY_URL: str = "http://localhost:8000"
-    
+
     class Config:
         env_file = ".env"
 
@@ -81,10 +81,10 @@ class EmotionalIntelligenceEngine:
     Assess and develop emotional intelligence
     Based on Yale's RULER approach
     """
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
-        
+
         # RULER Framework (Yale)
         self.ruler_framework = {
             "Recognizing": "emotions in self and others",
@@ -93,7 +93,7 @@ class EmotionalIntelligenceEngine:
             "Expressing": "emotions appropriately",
             "Regulating": "emotions effectively"
         }
-        
+
         # Age-appropriate emotional vocabulary
         self.emotion_vocabulary = {
             "K-2": {
@@ -128,12 +128,12 @@ class EmotionalIntelligenceEngine:
                 ]
             }
         }
-    
+
     async def initialize(self):
         """Initialize engine"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         print("✅ Emotional Intelligence Engine initialized")
-    
+
     async def assess_emotional_intelligence(
         self,
         child_id: str,
@@ -147,7 +147,7 @@ class EmotionalIntelligenceEngine:
             "date": datetime.utcnow().isoformat(),
             "scores": {}
         }
-        
+
         # Assess each RULER component
         for component in self.ruler_framework.keys():
             score = await self._assess_component(
@@ -156,18 +156,18 @@ class EmotionalIntelligenceEngine:
                 assessment_type
             )
             assessment["scores"][component] = score
-        
+
         # Calculate overall EI score
         assessment["overall_ei"] = np.mean(
             list(assessment["scores"].values())
         )
-        
+
         # Generate age-appropriate feedback
         assessment["feedback"] = await self._generate_ei_feedback(
             assessment["scores"],
             age
         )
-        
+
         # Recommendations
         assessment["recommendations"] = (
             await self._generate_ei_recommendations(
@@ -175,9 +175,9 @@ class EmotionalIntelligenceEngine:
                 age
             )
         )
-        
+
         return assessment
-    
+
     async def _assess_component(
         self,
         component: str,
@@ -187,7 +187,7 @@ class EmotionalIntelligenceEngine:
         """Assess a RULER component"""
         # Simulated assessment (in production, use actual tests)
         return random.uniform(0.6, 0.95)
-    
+
     async def _generate_ei_feedback(
         self,
         scores: Dict,
@@ -196,13 +196,13 @@ class EmotionalIntelligenceEngine:
         """Generate feedback on EI assessment"""
         strengths = [k for k, v in scores.items() if v > 0.8]
         areas_to_develop = [k for k, v in scores.items() if v < 0.7]
-        
+
         return {
             "strengths": strengths,
             "areas_to_develop": areas_to_develop,
             "overall_message": "Good emotional awareness with room to grow"
         }
-    
+
     async def _generate_ei_recommendations(
         self,
         scores: Dict,
@@ -227,7 +227,7 @@ class EmotionalIntelligenceEngine:
                 "frequency": "Daily"
             }
         ]
-    
+
     async def conduct_emotion_check_in(
         self,
         child_id: str,
@@ -236,9 +236,9 @@ class EmotionalIntelligenceEngine:
     ) -> Dict:
         """Daily emotional check-in"""
         emotional_checkins.inc()
-        
+
         age_group = self._get_age_group(age)
-        
+
         # Age-appropriate check-in
         if age_group == "K-2":
             return await self._visual_emotion_checkin(child_id)
@@ -248,7 +248,7 @@ class EmotionalIntelligenceEngine:
             return await self._mood_meter_checkin(child_id)
         else:  # 9-12
             return await self._detailed_emotion_checkin(child_id)
-    
+
     async def _visual_emotion_checkin(self, child_id: str) -> Dict:
         """Visual check-in for young children"""
         return {
@@ -264,7 +264,7 @@ class EmotionalIntelligenceEngine:
             "follow_up": "Can you tell me why you feel this way?",
             "coping_suggestion": "Let's take 3 deep breaths together!"
         }
-    
+
     async def _emotion_wheel_checkin(self, child_id: str) -> Dict:
         """Emotion wheel for elementary students"""
         return {
@@ -277,7 +277,7 @@ class EmotionalIntelligenceEngine:
             "intensity_scale": [1, 2, 3, 4, 5],
             "follow_up": "What made you feel this way?"
         }
-    
+
     async def _mood_meter_checkin(self, child_id: str) -> Dict:
         """Mood meter for middle school"""
         return {
@@ -307,7 +307,7 @@ class EmotionalIntelligenceEngine:
                 "How can you move toward green/yellow?"
             ]
         }
-    
+
     async def _detailed_emotion_checkin(self, child_id: str) -> Dict:
         """Detailed check-in for high school"""
         return {
@@ -327,7 +327,7 @@ class EmotionalIntelligenceEngine:
                 "Identify helpful coping strategies"
             ]
         }
-    
+
     def _get_age_group(self, age: int) -> str:
         """Get age group string"""
         if age < 8:
@@ -345,7 +345,7 @@ class SELActivityGenerator:
     Generate age-appropriate SEL activities
     Based on CASEL framework
     """
-    
+
     def __init__(self):
         self.activity_database = {
             SELCompetency.SELF_AWARENESS: {
@@ -477,7 +477,7 @@ class SELActivityGenerator:
                 ]
             }
         }
-    
+
     async def generate_daily_activity(
         self,
         child_age: int,
@@ -486,44 +486,44 @@ class SELActivityGenerator:
     ) -> Dict:
         """Generate personalized daily SEL activity"""
         sel_activities_completed.inc()
-        
+
         age_group = self._get_age_group(child_age)
-        
+
         # Select competency to focus on
         if not focus_competency:
             focus_competency = random.choice(list(SELCompetency))
-        
+
         # Get appropriate activities
         available_activities = self.activity_database.get(
             focus_competency, {}
         ).get(age_group, [])
-        
+
         if not available_activities:
             # Fall back to K-2 activities
             available_activities = self.activity_database.get(
                 focus_competency, {}
             ).get("K-2", [])
-        
+
         # Filter out recent activities
         new_activities = [
             a for a in available_activities
             if a["name"] not in previous_activities
         ]
-        
+
         if not new_activities:
             new_activities = available_activities  # Reset if all used
-        
+
         # Select activity
         activity = random.choice(new_activities)
-        
+
         # Enhance with personalization
         enhanced_activity = await self._personalize_activity(
             activity,
             child_age
         )
-        
+
         return enhanced_activity
-    
+
     async def _personalize_activity(
         self,
         activity: Dict,
@@ -537,9 +537,9 @@ class SELActivityGenerator:
             "Model the behavior yourself",
             "Make it fun and engaging"
         ]
-        
+
         return activity
-    
+
     def _get_age_group(self, age: int) -> str:
         """Get age group string"""
         if age < 8:
@@ -557,7 +557,7 @@ class MindfulnessEngine:
     Mindfulness and meditation for children
     Age-appropriate practices
     """
-    
+
     def __init__(self):
         self.mindfulness_practices = {
             "K-2": {
@@ -655,7 +655,7 @@ class MindfulnessEngine:
                 ]
             }
         }
-    
+
     async def guide_mindfulness_session(
         self,
         child_age: int,
@@ -664,10 +664,10 @@ class MindfulnessEngine:
     ) -> Dict:
         """Guide age-appropriate mindfulness session"""
         mindfulness_sessions.inc()
-        
+
         age_group = self._get_age_group(child_age)
         practices = self.mindfulness_practices.get(age_group, {})
-        
+
         # Select appropriate practice
         if session_type in practices:
             available = practices[session_type]
@@ -675,14 +675,14 @@ class MindfulnessEngine:
         else:
             # Default to breathing
             practice = practices.get("breathing", [{}])[0]
-        
+
         # Generate guided script
         script = await self._generate_guided_script(
             practice,
             child_age,
             duration_minutes
         )
-        
+
         return {
             "session_type": session_type,
             "practice": practice,
@@ -699,7 +699,7 @@ class MindfulnessEngine:
                 "journal_prompt": self._generate_journal_prompt(practice)
             }
         }
-    
+
     def _select_practice(
         self,
         available: List[Dict],
@@ -708,7 +708,7 @@ class MindfulnessEngine:
         """Select practice based on duration"""
         suitable = [p for p in available if p["duration"] <= duration]
         return suitable[0] if suitable else available[0]
-    
+
     async def _generate_guided_script(
         self,
         practice: Dict,
@@ -724,7 +724,7 @@ class MindfulnessEngine:
             f"Notice how you feel",
             f"When you're ready, slowly open your eyes"
         ]
-    
+
     def _select_background_music(self, child_age: int) -> str:
         """Select appropriate background music"""
         if child_age < 8:
@@ -733,7 +733,7 @@ class MindfulnessEngine:
             return "gentle_instrumental"
         else:
             return "ambient_meditation"
-    
+
     async def _generate_visual_aids(
         self,
         practice: Dict,
@@ -746,7 +746,7 @@ class MindfulnessEngine:
             "calming_colors": ["blue", "green", "purple"],
             "imagery": "nature_scenes"
         }
-    
+
     def _generate_reflection_prompts(self, child_age: int) -> List[str]:
         """Generate post-session reflection prompts"""
         if child_age < 8:
@@ -760,11 +760,11 @@ class MindfulnessEngine:
                 "How has your mood changed?",
                 "What will you remember about this?"
             ]
-    
+
     def _generate_journal_prompt(self, practice: Dict) -> str:
         """Generate journal prompt"""
         return f"After trying {practice.get('name', 'this practice')}, I feel..."
-    
+
     def _get_age_group(self, age: int) -> str:
         """Get age group string"""
         if age < 8:
@@ -782,7 +782,7 @@ class ResilienceBuilder:
     Build resilience and coping skills
     Evidence-based interventions
     """
-    
+
     def __init__(self):
         self.resilience_factors = {
             "cognitive": ["growth_mindset", "problem_solving", "optimism"],
@@ -794,7 +794,7 @@ class ResilienceBuilder:
             "social": ["social_support", "help_seeking", "communication"],
             "behavioral": ["healthy_habits", "goal_pursuit", "persistence"]
         }
-        
+
         self.coping_strategies = {
             "K-2": {
                 "upset": ["deep breaths", "hug stuffed animal", "draw feelings"],
@@ -841,7 +841,7 @@ class ResilienceBuilder:
                 ]
             }
         }
-    
+
     async def create_resilience_plan(
         self,
         child_id: str,
@@ -862,7 +862,7 @@ class ResilienceBuilder:
             },
             "interventions": []
         }
-        
+
         # Generate interventions for each domain
         for domain, factors in self.resilience_factors.items():
             intervention = await self._generate_domain_intervention(
@@ -872,18 +872,18 @@ class ResilienceBuilder:
                 risk_factors
             )
             plan["interventions"].append(intervention)
-        
+
         # Add coping toolkit
         plan["coping_toolkit"] = await self._create_coping_toolkit(
             age,
             risk_factors
         )
-        
+
         # Add progress milestones
         plan["milestones"] = self._define_resilience_milestones(age)
-        
+
         return plan
-    
+
     def _calculate_resilience_score(
         self,
         risk_factors: List[str],
@@ -892,15 +892,15 @@ class ResilienceBuilder:
         """Calculate overall resilience score"""
         risk_score = len(risk_factors) * 0.1
         protective_score = len(protective_factors) * 0.15
-        
+
         base_score = 0.7
         final_score = max(
             0.0,
             min(1.0, base_score - risk_score + protective_score)
         )
-        
+
         return final_score
-    
+
     async def _generate_domain_intervention(
         self,
         domain: str,
@@ -918,7 +918,7 @@ class ResilienceBuilder:
             "frequency": "3x per week",
             "duration_weeks": 8
         }
-    
+
     async def _create_coping_toolkit(
         self,
         age: int,
@@ -927,7 +927,7 @@ class ResilienceBuilder:
         """Create personalized coping toolkit"""
         age_group = self._get_age_group(age)
         strategies = self.coping_strategies.get(age_group, {})
-        
+
         toolkit = {
             "strategies": strategies,
             "quick_tools": [
@@ -938,9 +938,9 @@ class ResilienceBuilder:
             "when_to_use": "When feeling overwhelmed or stressed",
             "parent_support": "How parents can help"
         }
-        
+
         return toolkit
-    
+
     def _define_resilience_milestones(self, age: int) -> List[Dict]:
         """Define resilience milestones"""
         return [
@@ -960,7 +960,7 @@ class ResilienceBuilder:
                 "indicator": "Recovers from disappointments faster"
             }
         ]
-    
+
     def _get_age_group(self, age: int) -> str:
         """Get age group string"""
         if age < 8:
@@ -975,20 +975,20 @@ class ResilienceBuilder:
 
 class SELService:
     """Main Social-Emotional Learning Service"""
-    
+
     def __init__(self):
         self.ei_engine = EmotionalIntelligenceEngine()
         self.activity_generator = SELActivityGenerator()
         self.mindfulness_engine = MindfulnessEngine()
         self.resilience_builder = ResilienceBuilder()
         self.redis_client: Optional[redis.Redis] = None
-    
+
     async def initialize(self):
         """Initialize service"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         await self.ei_engine.initialize()
         print("✅ SEL Service initialized")
-    
+
     async def create_sel_program(
         self,
         child_id: str,
@@ -1003,7 +1003,7 @@ class SELService:
             age,
             "comprehensive"
         )
-        
+
         # Create resilience plan
         resilience_plan = await self.resilience_builder.create_resilience_plan(
             child_id,
@@ -1011,20 +1011,20 @@ class SELService:
             risk_factors=parent_concerns,
             protective_factors=assessment_data.get("strengths", [])
         )
-        
+
         # Generate 12-week curriculum
         curriculum = await self._generate_sel_curriculum(
             age,
             ei_assessment,
             resilience_plan
         )
-        
+
         # Create parent partnership plan
         parent_plan = await self._create_parent_partnership(
             age,
             parent_concerns
         )
-        
+
         return {
             "program_id": str(uuid.uuid4()),
             "child_id": child_id,
@@ -1034,7 +1034,7 @@ class SELService:
             "parent_partnership": parent_plan,
             "created_at": datetime.utcnow().isoformat()
         }
-    
+
     async def _generate_sel_curriculum(
         self,
         age: int,
@@ -1061,7 +1061,7 @@ class SELService:
             "daily_activities": True,
             "parent_involvement": True
         }
-    
+
     async def _create_parent_partnership(
         self,
         age: int,
@@ -1156,7 +1156,7 @@ async def create_sel_program(request: CreateSELProgramRequest):
         assessment_data=request.assessment_data,
         parent_concerns=request.parent_concerns
     )
-    
+
     return program
 
 
@@ -1168,7 +1168,7 @@ async def emotion_check_in(request: EmotionCheckInRequest):
         age=request.age,
         context=request.context
     )
-    
+
     return check_in
 
 
@@ -1183,7 +1183,7 @@ async def get_daily_activity(request: ActivityRequest):
         ),
         previous_activities=request.previous_activities
     )
-    
+
     return activity
 
 
@@ -1195,7 +1195,7 @@ async def guide_mindfulness(request: MindfulnessRequest):
         session_type=request.session_type,
         duration_minutes=request.duration_minutes
     )
-    
+
     return session
 
 
@@ -1203,12 +1203,12 @@ async def guide_mindfulness(request: MindfulnessRequest):
 async def live_emotional_support(websocket: WebSocket):
     """Real-time emotional support"""
     await websocket.accept()
-    
+
     try:
         while True:
             # Receive emotion data
             data = await websocket.receive_json()
-            
+
             # Provide support
             response = {
                 "acknowledgment": "I hear you",
@@ -1216,9 +1216,9 @@ async def live_emotional_support(websocket: WebSocket):
                 "suggestion": "Let's try a calming technique together",
                 "breathing_exercise": "4-7-8 breathing"
             }
-            
+
             await websocket.send_json(response)
-    
+
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:

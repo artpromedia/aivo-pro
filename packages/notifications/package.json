@@ -1,5 +1,6 @@
 {
   "name": "@aivo/notifications",
+  "type": "module",
   "version": "1.0.0",
   "description": "Toast notifications and notification center",
   "main": "./dist/index.js",

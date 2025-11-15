@@ -1,5 +1,6 @@
 {
   "name": "@aivo/auth",
+  "type": "module",
   "version": "1.0.0",
   "description": "Advanced authentication with biometric, MFA, and SSO support",
   "main": "./dist/index.js",

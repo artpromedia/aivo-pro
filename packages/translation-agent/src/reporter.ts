@@ -87,9 +87,12 @@ export class TranslationReporter {
     lines.push(`   • Info:     ${report.issuesBySeverity.info}\n`);
 
     // Issues by type (only show non-zero)
-    const nonZeroIssues = Object.entries(report.issuesByType)
-      .filter(([, count]) => (count as number) > 0)
-      .sort(([, a], [, b]) => (b as number) - (a as number));
+    const nonZeroIssues = (Object.entries(report.issuesByType) as Array<[
+      IssueType,
+      number
+    ]>)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a);
 
     if (nonZeroIssues.length > 0) {
       lines.push(`📋 Issues by Type:`);
@@ -102,8 +105,8 @@ export class TranslationReporter {
     // AI Suggestions
     if (report.suggestions.length > 0) {
       lines.push(`💡 AI Suggestions (${report.suggestions.length}):\n`);
-      const topSuggestions = report.suggestions
-        .sort((a: any, b: any) => b.confidence - a.confidence)
+      const topSuggestions = [...report.suggestions]
+        .sort((a, b) => b.confidence - a.confidence)
         .slice(0, 5);
 
       for (const suggestion of topSuggestions) {
@@ -206,9 +209,12 @@ export class TranslationReporter {
     lines.push(`| Warning  | ${report.issuesBySeverity.warning} |`);
     lines.push(`| Info     | ${report.issuesBySeverity.info} |\n`);
 
-    const nonZeroIssues = Object.entries(report.issuesByType)
-      .filter(([, count]) => (count as number) > 0)
-      .sort(([, a], [, b]) => (b as number) - (a as number));
+    const nonZeroIssues = (Object.entries(report.issuesByType) as Array<[
+      IssueType,
+      number
+    ]>)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a);
 
     if (nonZeroIssues.length > 0) {
       lines.push(`## Issues by Type\n`);

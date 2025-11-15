@@ -78,14 +78,14 @@ redis_client: Optional[redis.Redis] = None
 
 class MathematicsManager:
     """Mathematics content across all K-12 topics"""
-    
+
     TOPICS = {
         "K-2": ["counting", "addition", "subtraction", "shapes", "measurement"],
         "3-5": ["multiplication", "division", "fractions", "decimals", "geometry"],
         "6-8": ["ratios", "percentages", "algebra_basics", "statistics", "probability"],
         "9-12": ["algebra_advanced", "geometry", "trigonometry", "calculus", "statistics"]
     }
-    
+
     async def generate_content(
         self,
         skill: str,
@@ -105,7 +105,7 @@ class MathematicsManager:
             return self._generate_geometry_problem(difficulty)
         else:
             return self._generate_generic_math_problem(skill, difficulty)
-    
+
     def _generate_addition_problem(self, difficulty: float) -> Dict:
         """Generate addition problem"""
         import random
@@ -117,7 +117,7 @@ class MathematicsManager:
             "type": "numeric",
             "work_shown": f"{a} + {b} = {a + b}"
         }
-    
+
     def _generate_multiplication_problem(self, difficulty: float) -> Dict:
         """Generate multiplication problem"""
         import random
@@ -127,19 +127,19 @@ class MathematicsManager:
             a, b = random.randint(10, 99), random.randint(2, 12)
         else:
             a, b = random.randint(10, 999), random.randint(10, 99)
-        
+
         return {
             "question": f"What is {a} × {b}?",
             "answer": a * b,
             "type": "numeric",
             "hint": "Break down into smaller parts if needed"
         }
-    
+
     def _generate_fraction_problem(self, difficulty: float) -> Dict:
         """Generate fraction problem"""
         import random
         from fractions import Fraction
-        
+
         if difficulty < 0.5:
             # Simple fractions
             num1, den1 = random.randint(1, 5), random.randint(2, 10)
@@ -148,21 +148,21 @@ class MathematicsManager:
             # Complex fractions
             num1, den1 = random.randint(1, 20), random.randint(5, 30)
             num2, den2 = random.randint(1, 20), random.randint(5, 30)
-        
+
         f1, f2 = Fraction(num1, den1), Fraction(num2, den2)
         result = f1 + f2
-        
+
         return {
             "question": f"Add {f1} + {f2}",
             "answer": str(result),
             "type": "fraction",
             "hint": "Find common denominator first"
         }
-    
+
     def _generate_algebra_problem(self, difficulty: float) -> Dict:
         """Generate algebra problem"""
         import random
-        
+
         if difficulty < 0.5:
             # Linear equations
             a = random.randint(2, 10)
@@ -188,11 +188,11 @@ class MathematicsManager:
                 "type": "algebraic",
                 "formula": "x = (-b ± √(b²-4ac)) / 2a"
             }
-    
+
     def _generate_geometry_problem(self, difficulty: float) -> Dict:
         """Generate geometry problem"""
         import random
-        
+
         if difficulty < 0.5:
             # Area/perimeter
             length = random.randint(5, 20)
@@ -212,7 +212,7 @@ class MathematicsManager:
                 "type": "numeric",
                 "formula": "V = (4/3)πr³"
             }
-    
+
     def _generate_generic_math_problem(self, skill: str, difficulty: float) -> Dict:
         """Generic math problem"""
         return {
@@ -225,13 +225,13 @@ class MathematicsManager:
 
 class ScienceManager:
     """Science content - Biology, Chemistry, Physics, Earth Science"""
-    
+
     TOPICS = {
         "elementary": ["plants", "animals", "weather", "matter", "energy"],
         "middle": ["cells", "ecosystems", "forces", "chemical_reactions", "solar_system"],
         "high": ["genetics", "evolution", "thermodynamics", "quantum", "climate"]
     }
-    
+
     async def generate_content(self, skill: str, difficulty: float, content_type: str) -> Dict:
         """Generate science content"""
         if "biology" in skill or "cell" in skill or "genetics" in skill:
@@ -242,7 +242,7 @@ class ScienceManager:
             return self._generate_physics_content(skill, difficulty)
         else:
             return self._generate_general_science(skill, difficulty)
-    
+
     def _generate_biology_content(self, skill: str, difficulty: float) -> Dict:
         """Biology questions"""
         questions = [
@@ -261,11 +261,11 @@ class ScienceManager:
         ]
         import random
         return random.choice(questions)
-    
+
     def _generate_chemistry_content(self, skill: str, difficulty: float) -> Dict:
         """Chemistry questions"""
         import random
-        
+
         if difficulty < 0.5:
             return {
                 "question": "What is H2O commonly known as?",
@@ -280,13 +280,13 @@ class ScienceManager:
                 "type": "chemical_equation",
                 "explanation": "Need 2 water molecules to balance oxygen atoms"
             }
-    
+
     def _generate_physics_content(self, skill: str, difficulty: float) -> Dict:
         """Physics questions"""
         import random
         mass = random.randint(5, 50)
         acceleration = random.randint(2, 10)
-        
+
         return {
             "question": f"Calculate force: mass={mass}kg, acceleration={acceleration}m/s²",
             "answer": mass * acceleration,
@@ -294,7 +294,7 @@ class ScienceManager:
             "formula": "F = ma",
             "unit": "N (Newtons)"
         }
-    
+
     def _generate_general_science(self, skill: str, difficulty: float) -> Dict:
         """General science"""
         return {
@@ -306,13 +306,13 @@ class ScienceManager:
 
 class EnglishLanguageArtsManager:
     """English/Language Arts content"""
-    
+
     TOPICS = {
         "elementary": ["phonics", "reading", "writing", "vocabulary", "grammar_basics"],
         "middle": ["literature", "essay_writing", "grammar", "vocabulary_advanced", "poetry"],
         "high": ["literary_analysis", "rhetoric", "research_writing", "shakespeare", "world_literature"]
     }
-    
+
     async def generate_content(self, skill: str, difficulty: float, content_type: str) -> Dict:
         """Generate ELA content"""
         if "grammar" in skill:
@@ -325,7 +325,7 @@ class EnglishLanguageArtsManager:
             return self._generate_writing_prompt(difficulty)
         else:
             return self._generate_general_ela(skill, difficulty)
-    
+
     def _generate_grammar_question(self, difficulty: float) -> Dict:
         """Grammar questions"""
         questions = [
@@ -344,7 +344,7 @@ class EnglishLanguageArtsManager:
         ]
         import random
         return random.choice(questions)
-    
+
     def _generate_vocabulary_question(self, difficulty: float) -> Dict:
         """Vocabulary questions"""
         vocab = [
@@ -359,7 +359,7 @@ class EnglishLanguageArtsManager:
             "answer": item['definition'],
             "type": "definition"
         }
-    
+
     def _generate_reading_comprehension(self, difficulty: float) -> Dict:
         """Reading comprehension"""
         return {
@@ -369,7 +369,7 @@ class EnglishLanguageArtsManager:
             "options": ["morning", "afternoon", "evening", "night"],
             "type": "comprehension"
         }
-    
+
     def _generate_writing_prompt(self, difficulty: float) -> Dict:
         """Writing prompts"""
         prompts = [
@@ -384,7 +384,7 @@ class EnglishLanguageArtsManager:
             "type": "writing",
             "word_count_min": int(100 + difficulty * 400)
         }
-    
+
     def _generate_general_ela(self, skill: str, difficulty: float) -> Dict:
         """General ELA"""
         return {
@@ -396,13 +396,13 @@ class EnglishLanguageArtsManager:
 
 class SocialStudiesManager:
     """Social Studies - History, Geography, Civics, Economics"""
-    
+
     TOPICS = {
         "elementary": ["community", "maps", "holidays", "family_history", "basic_geography"],
         "middle": ["us_history", "world_geography", "civics", "ancient_civilizations"],
         "high": ["world_history", "government", "economics", "current_events", "ap_history"]
     }
-    
+
     async def generate_content(self, skill: str, difficulty: float, content_type: str) -> Dict:
         """Generate social studies content"""
         if "history" in skill:
@@ -415,7 +415,7 @@ class SocialStudiesManager:
             return self._generate_economics_question(difficulty)
         else:
             return self._generate_general_social_studies(skill, difficulty)
-    
+
     def _generate_history_question(self, difficulty: float) -> Dict:
         """History questions"""
         questions = [
@@ -432,7 +432,7 @@ class SocialStudiesManager:
         ]
         import random
         return random.choice(questions)
-    
+
     def _generate_geography_question(self, difficulty: float) -> Dict:
         """Geography questions"""
         return {
@@ -441,7 +441,7 @@ class SocialStudiesManager:
             "options": ["London", "Berlin", "Paris", "Madrid"],
             "type": "multiple_choice"
         }
-    
+
     def _generate_civics_question(self, difficulty: float) -> Dict:
         """Civics questions"""
         return {
@@ -450,7 +450,7 @@ class SocialStudiesManager:
             "type": "numeric",
             "explanation": "Legislative, Executive, and Judicial"
         }
-    
+
     def _generate_economics_question(self, difficulty: float) -> Dict:
         """Economics questions"""
         return {
@@ -458,7 +458,7 @@ class SocialStudiesManager:
             "answer": "The relationship between availability and desire for goods",
             "type": "text"
         }
-    
+
     def _generate_general_social_studies(self, skill: str, difficulty: float) -> Dict:
         """General social studies"""
         return {
@@ -506,13 +506,13 @@ async def health_check():
 async def generate_content(request: ContentRequest):
     """
     Generate learning content dynamically
-    
+
     Supports all subjects across K-12
     """
     subject_lower = request.subject.lower()
-    
+
     content_generated.labels(subject=request.subject, type=request.content_type).inc()
-    
+
     # Route to appropriate subject manager
     contents = []
     for _ in range(request.count):
@@ -546,7 +546,7 @@ async def generate_content(request: ContentRequest):
                 "answer": "answer",
                 "note": "Additional subject managers coming soon"
             }
-        
+
         contents.append({
             "id": str(uuid.uuid4()),
             "subject": request.subject,
@@ -554,7 +554,7 @@ async def generate_content(request: ContentRequest):
             "difficulty": request.difficulty,
             "content": content
         })
-    
+
     return {"contents": contents, "count": len(contents)}
 
 
@@ -656,7 +656,7 @@ async def get_subject_skills(
 ):
     """Get skill taxonomy for a subject"""
     content_retrieved.labels(subject=subject).inc()
-    
+
     # This would query the database
     return {
         "subject": subject,

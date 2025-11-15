@@ -4,6 +4,7 @@
 
 import { useRef, useEffect } from 'react';
 import { useWebRTC } from '../hooks';
+import type { PeerConnection } from '../webrtc';
 import { Mic, MicOff, Video, VideoOff, Monitor, PhoneOff } from 'lucide-react';
 
 export interface VideoCallProps {
@@ -124,7 +125,7 @@ export function VideoCall({ userName, onEnd }: VideoCallProps) {
 }
 
 interface RemoteVideoProps {
-  peer: any;
+  peer: Pick<PeerConnection, 'id' | 'stream'>;
 }
 
 function RemoteVideo({ peer }: RemoteVideoProps) {

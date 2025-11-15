@@ -10,10 +10,13 @@ from contextlib import asynccontextmanager
 import logging
 import sys
 
-from src.core.irt_engine import ItemParameters, irt_engine
+from src.config import Settings
+from src.db.database import Database
 from src.core.item_selector import item_selector, stopping_criteria
 from src.core.session_manager import session_manager
 from src.core.skill_analyzer import skill_analyzer
+from src.repositories.item_bank_repository import ItemBankRepository
+from src.repositories.session_repository import AssessmentSessionRepository
 
 # Import comprehensive assessment modules
 from src.assessors.speech_assessor import SpeechLanguageAssessor
@@ -26,6 +29,15 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
+
+
+settings = Settings()
+database = Database(settings=settings)
+item_repository = ItemBankRepository(
+    db=database,
+    cache_ttl_seconds=settings.ITEM_CACHE_TTL_SECONDS
+)
+session_repository = AssessmentSessionRepository(db=database)
 
 
 # ============================================
@@ -81,16 +93,16 @@ class ComprehensiveAssessmentRequest(BaseModel):
     child_id: str = Field(description="Child UUID")
     age: float = Field(description="Child's age in years")
     grade: str = Field(description="Grade level (K, 1-12)")
-    
+
     # Academic assessment data (IRT)
     academic_subjects: List[str] = Field(default=["math", "ela"])
-    
+
     # Speech/Language assessment data
     speech_assessment_data: Optional[Dict] = Field(
         default=None,
         description="Speech and language assessment responses"
     )
-    
+
     # SEL assessment data
     sel_assessment_data: Optional[Dict] = Field(
         default=None,
@@ -102,121 +114,51 @@ class ComprehensiveAssessmentResponse(BaseModel):
     """Response for comprehensive assessment"""
     child_id: str
     assessment_date: str
-    
+
     # Academic results
     academic_results: Dict
-    
+
     # Speech/Language results
     speech_results: Optional[Dict]
-    
+
     # SEL results
     sel_results: Optional[Dict]
-    
+
     # Integrated analysis
     comprehensive_summary: Dict
     recommendations: List[str]
     personalized_plan: Dict
 
 
-# ============================================
-# Mock Item Bank (In production, load from database)
-# ============================================
-
-# Sample item bank for demonstration
-MOCK_ITEM_BANK: Dict[str, ItemParameters] = {
-    "math_001": ItemParameters(
-        item_id="math_001",
-        difficulty=-1.5,
-        discrimination=1.2,
-        guessing=0.25
-    ),
-    "math_002": ItemParameters(
-        item_id="math_002",
-        difficulty=-0.5,
-        discrimination=1.5,
-        guessing=0.25
-    ),
-    "math_003": ItemParameters(
-        item_id="math_003",
-        difficulty=0.0,
-        discrimination=1.3,
-        guessing=0.25
-    ),
-    "math_004": ItemParameters(
-        item_id="math_004",
-        difficulty=0.5,
-        discrimination=1.4,
-        guessing=0.25
-    ),
-    "math_005": ItemParameters(
-        item_id="math_005",
-        difficulty=1.5,
-        discrimination=1.1,
-        guessing=0.25
-    ),
-    # Add more items for a complete bank...
-}
-
-# Mock item skills mapping
-MOCK_ITEM_SKILLS: Dict[str, str] = {
-    "math_001": "arithmetic",
-    "math_002": "arithmetic",
-    "math_003": "algebra",
-    "math_004": "algebra",
-    "math_005": "geometry",
-}
-
-# Mock item content (questions)
-MOCK_ITEM_CONTENT: Dict[str, Dict] = {
-    "math_001": {
-        "question": "What is 5 + 3?",
-        "options": ["6", "7", "8", "9"],
-        "correct_answer": 2
-    },
-    "math_002": {
-        "question": "Solve: 2x + 4 = 10",
-        "options": ["x = 2", "x = 3", "x = 4", "x = 6"],
-        "correct_answer": 1
-    },
-    "math_003": {
-        "question": "What is 15% of 200?",
-        "options": ["20", "25", "30", "35"],
-        "correct_answer": 2
-    },
-    "math_004": {
-        "question": "Simplify: (x² + 2x + 1)",
-        "options": ["(x + 1)", "(x + 1)²", "(x - 1)²", "x² + 1"],
-        "correct_answer": 1
-    },
-    "math_005": {
-        "question": "Area of circle with radius 5?",
-        "options": ["25π", "50π", "10π", "5π"],
-        "correct_answer": 0
-    },
-}
-
-# Exposure tracking (in production, use database)
-EXPOSURE_COUNTS: Dict[str, int] = {}
-TOTAL_ASSESSMENTS = 0
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     logger.info("Starting Baseline Assessment Service...")
-    logger.info("Loaded item bank with %d items", len(MOCK_ITEM_BANK))
-    
+    await database.connect()
+
+    # Share dependencies via app state
+    app.state.database = database
+    app.state.item_repository = item_repository
+    app.state.session_repository = session_repository
+
+    item_count = await database.fetchval(
+        "SELECT COUNT(*) FROM item_bank WHERE is_active = TRUE"
+    ) or 0
+    logger.info("Loaded %d calibrated assessment items", item_count)
+
     # Initialize comprehensive assessors
     app.state.speech_assessor = SpeechLanguageAssessor()
     app.state.sel_assessor = SocialEmotionalAssessor()
     logger.info("Initialized Speech and SEL assessors")
-    
-    yield
-    
-    # Cleanup
-    await app.state.speech_assessor.client.aclose()
-    await app.state.sel_assessor.client.aclose()
-    logger.info("Shutting down Baseline Assessment Service...")
+
+    try:
+        yield
+    finally:
+        await app.state.speech_assessor.client.aclose()
+        await app.state.sel_assessor.client.aclose()
+        await database.close()
+        logger.info("Shutting down Baseline Assessment Service...")
 
 
 # Create FastAPI application
@@ -245,50 +187,63 @@ app.add_middleware(
 async def start_assessment(request: StartAssessmentRequest):
     """
     Start new adaptive assessment
-    
+
     Flow:
     1. Create session
     2. Select initial item (medium difficulty)
     3. Return item and session info
     """
-    global TOTAL_ASSESSMENTS
-    
-    # Create session
     session = session_manager.create_session(
         child_id=request.child_id,
         subject=request.subject,
         grade=request.grade
     )
-    
-    TOTAL_ASSESSMENTS += 1
-    
-    # Select first item
-    first_item_params = item_selector.select_initial_item(
-        list(MOCK_ITEM_BANK.values()),
-        EXPOSURE_COUNTS,
-        TOTAL_ASSESSMENTS
+    await session_repository.create_session(
+        session.session_id,
+        request.child_id,
+        request.subject,
+        request.grade,
     )
-    
+
+    try:
+        snapshot = await item_repository.get_snapshot(
+            request.subject,
+            request.grade
+        )
+    except ValueError as exc:  # No calibrated items
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc)
+        ) from exc
+
+    total_assessments = await session_repository.get_total_assessments(
+        subject=request.subject,
+        grade=request.grade,
+    )
+
+    first_item_params = item_selector.select_initial_item(
+        list(snapshot.parameters.values()),
+        snapshot.exposure_counts,
+        total_assessments
+    )
+
     if not first_item_params:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="No items available in item bank"
         )
-    
+
     # Track exposure
-    EXPOSURE_COUNTS[first_item_params.item_id] = \
-        EXPOSURE_COUNTS.get(first_item_params.item_id, 0) + 1
-    
-    # Get item content
-    item_content = MOCK_ITEM_CONTENT.get(first_item_params.item_id, {})
-    
+    await item_repository.increment_exposure(first_item_params.item_id)
+    item_content = snapshot.content.get(first_item_params.item_id)
+
     first_item = {
         "item_id": first_item_params.item_id,
-        "question": item_content.get("question"),
-        "options": item_content.get("options"),
+        "question": item_content.question if item_content else None,
+        "options": item_content.options if item_content else None,
         "difficulty": round(first_item_params.difficulty, 2)
     }
-    
+
     return StartAssessmentResponse(
         session_id=session.session_id,
         first_item=first_item,
@@ -300,7 +255,7 @@ async def start_assessment(request: StartAssessmentRequest):
 async def submit_answer(request: SubmitAnswerRequest):
     """
     Submit answer and get next item
-    
+
     Flow:
     1. Validate answer
     2. Update ability estimate
@@ -308,67 +263,99 @@ async def submit_answer(request: SubmitAnswerRequest):
     4. Select next item or complete
     """
     session = session_manager.get_session(request.session_id)
-    
+
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {request.session_id} not found"
         )
-    
+
+    try:
+        snapshot = await item_repository.get_snapshot(
+            session.subject,
+            session.grade
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc)
+        ) from exc
+
     # Get correct answer
-    item_content = MOCK_ITEM_CONTENT.get(request.item_id)
+    item_content = snapshot.content.get(request.item_id)
     if not item_content:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item {request.item_id} not found"
         )
-    
-    correct = (request.answer == item_content["correct_answer"])
-    
+
+    correct = (request.answer == item_content.correct_answer)
+
     # Submit response and update ability
     stats = session_manager.submit_response(
         request.session_id,
         request.item_id,
         correct,
         request.response_time_ms,
-        MOCK_ITEM_BANK
+        snapshot.parameters
     )
-    
+
+    last_response = session.responses[-1]
+    await session_repository.record_response(
+        session_id=request.session_id,
+        item_id=request.item_id,
+        answer=request.answer,
+        correct=correct,
+        response_time_ms=request.response_time_ms,
+        theta_before=last_response.theta_before,
+        theta_after=last_response.theta_after,
+    )
+    await session_repository.update_progress(
+        request.session_id,
+        stats,
+    )
+
     # Check stopping criteria
     should_stop, reason = session_manager.check_stopping_criteria(
         request.session_id
     )
-    
+
     next_item = None
-    
+
     if not should_stop:
+        total_assessments = await session_repository.get_total_assessments(
+            subject=session.subject,
+            grade=session.grade,
+        )
+
         # Select next item
         next_item_params = item_selector.select_next_item(
             session.theta,
-            list(MOCK_ITEM_BANK.values()),
+            list(snapshot.parameters.values()),
             session.administered_items,
-            EXPOSURE_COUNTS,
-            TOTAL_ASSESSMENTS
+            snapshot.exposure_counts,
+            total_assessments
         )
-        
+
         if next_item_params:
             # Track exposure
-            EXPOSURE_COUNTS[next_item_params.item_id] = \
-                EXPOSURE_COUNTS.get(next_item_params.item_id, 0) + 1
-            
-            # Get item content
-            next_content = MOCK_ITEM_CONTENT.get(next_item_params.item_id, {})
-            
+            await item_repository.increment_exposure(next_item_params.item_id)
+            next_content = snapshot.content.get(next_item_params.item_id)
+
             next_item = {
                 "item_id": next_item_params.item_id,
-                "question": next_content.get("question"),
-                "options": next_content.get("options"),
+                "question": (
+                    next_content.question if next_content else None
+                ),
+                "options": (
+                    next_content.options if next_content else None
+                ),
                 "difficulty": round(next_item_params.difficulty, 2)
             }
         else:
             should_stop = True
             reason = "No more available items"
-    
+
     return SubmitAnswerResponse(
         correct=correct,
         next_item=next_item,
@@ -382,7 +369,7 @@ async def submit_answer(request: SubmitAnswerRequest):
 async def complete_assessment(session_id: str):
     """
     Complete assessment and generate skill vector
-    
+
     Flow:
     1. Mark session complete
     2. Calculate skill vector
@@ -390,33 +377,39 @@ async def complete_assessment(session_id: str):
     4. Generate recommendations
     """
     session = session_manager.get_session(session_id)
-    
+
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found"
         )
-    
+
     # Complete session
     final_stats = session_manager.complete_session(session_id)
-    
+    await session_repository.update_progress(session_id, final_stats)
+
+    snapshot = await item_repository.get_snapshot(
+        session.subject,
+        session.grade,
+    )
+
     # Calculate skill vector
     skill_vector = skill_analyzer.calculate_skill_vector(
         session.responses,
-        MOCK_ITEM_BANK,
-        MOCK_ITEM_SKILLS,
+        snapshot.parameters,
+        snapshot.skills,
         session.theta
     )
-    
+
     # Analyze strengths/weaknesses
     analysis = skill_analyzer.identify_strengths_weaknesses(skill_vector)
-    
+
     # Generate recommendations
     recommendations = skill_analyzer.generate_recommendations(
         skill_vector,
         analysis
     )
-    
+
     # Format skill vector for response
     formatted_skills = {
         skill: {
@@ -426,7 +419,13 @@ async def complete_assessment(session_id: str):
         }
         for skill, mastery in skill_vector.items()
     }
-    
+
+    await session_repository.complete_session(
+        session_id,
+        skill_vector,
+        recommendations,
+    )
+
     return CompleteAssessmentResponse(
         session_id=session_id,
         final_theta=session.theta,
@@ -444,19 +443,19 @@ async def complete_assessment(session_id: str):
 async def get_session_status(session_id: str):
     """Get current session status"""
     session = session_manager.get_session(session_id)
-    
+
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found"
         )
-    
+
     stop_check = stopping_criteria.get_assessment_stats(
         len(session.responses),
         session.standard_error,
         session.theta
     )
-    
+
     return {
         "session": session.get_stats(),
         "stopping_criteria": stop_check
@@ -473,16 +472,16 @@ async def conduct_comprehensive_assessment(
     - Academic assessment (IRT-based adaptive testing)
     - Speech and language evaluation
     - Social-emotional learning assessment
-    
+
     Returns integrated results with cross-domain analysis and
     personalized AIVO learning plan
     """
     from datetime import datetime
-    
+
     logger.info(
         f"Starting comprehensive assessment for child {request.child_id}"
     )
-    
+
     results = {
         "child_id": request.child_id,
         "assessment_date": datetime.now().isoformat(),
@@ -493,7 +492,7 @@ async def conduct_comprehensive_assessment(
         "recommendations": [],
         "personalized_plan": {}
     }
-    
+
     # 1. Conduct Academic Assessments (IRT-based)
     academic_results = {}
     for subject in request.academic_subjects:
@@ -503,7 +502,13 @@ async def conduct_comprehensive_assessment(
             subject=subject,
             grade=request.grade
         )
-        
+        await session_repository.create_session(
+            session.session_id,
+            request.child_id,
+            subject,
+            request.grade,
+        )
+
         # This is simplified - in real implementation, would conduct full
         # adaptive test. For now, we'll store session info
         academic_results[subject] = {
@@ -514,9 +519,9 @@ async def conduct_comprehensive_assessment(
             "message": "Academic assessment session created. "
                       "Use /v1/assessment/start to begin adaptive test."
         }
-    
+
     results["academic_results"] = academic_results
-    
+
     # 2. Conduct Speech & Language Assessment
     if request.speech_assessment_data:
         logger.info("Conducting speech and language assessment...")
@@ -533,7 +538,7 @@ async def conduct_comprehensive_assessment(
         except Exception as e:
             logger.error(f"Speech assessment failed: {e}")
             results["speech_results"] = {"error": str(e)}
-    
+
     # 3. Conduct SEL Assessment
     if request.sel_assessment_data:
         logger.info("Conducting SEL assessment...")
@@ -550,7 +555,7 @@ async def conduct_comprehensive_assessment(
         except Exception as e:
             logger.error(f"SEL assessment failed: {e}")
             results["sel_results"] = {"error": str(e)}
-    
+
     # 4. Generate Comprehensive Summary
     summary = _generate_comprehensive_summary(
         academic_results,
@@ -558,7 +563,7 @@ async def conduct_comprehensive_assessment(
         results.get("sel_results")
     )
     results["comprehensive_summary"] = summary
-    
+
     # 5. Generate Integrated Recommendations
     recommendations = _generate_integrated_recommendations(
         academic_results,
@@ -566,7 +571,7 @@ async def conduct_comprehensive_assessment(
         results.get("sel_results")
     )
     results["recommendations"] = recommendations
-    
+
     # 6. Create Personalized AIVO Learning Plan
     personalized_plan = _create_personalized_plan(
         request.child_id,
@@ -577,11 +582,11 @@ async def conduct_comprehensive_assessment(
         results.get("sel_results")
     )
     results["personalized_plan"] = personalized_plan
-    
+
     logger.info(
         f"Comprehensive assessment completed for child {request.child_id}"
     )
-    
+
     return ComprehensiveAssessmentResponse(**results)
 
 
@@ -591,14 +596,14 @@ def _generate_comprehensive_summary(
     sel_results: Optional[Dict]
 ) -> Dict:
     """Generate comprehensive summary across all domains"""
-    
+
     summary = {
         "domains_assessed": [],
         "overall_profile": "",
         "cross_domain_patterns": [],
         "priority_needs": []
     }
-    
+
     # Identify assessed domains
     if academic_results:
         summary["domains_assessed"].append("academic")
@@ -606,21 +611,21 @@ def _generate_comprehensive_summary(
         summary["domains_assessed"].append("speech_language")
     if sel_results and "error" not in sel_results:
         summary["domains_assessed"].append("social_emotional")
-    
+
     # Analyze cross-domain patterns
     patterns = []
-    
+
     # Check for language-academic connections
     if (speech_results and sel_results and
         "error" not in speech_results and "error" not in sel_results):
-        
+
         # Language delays may impact academic performance
         if speech_results.get("language", {}).get("age_appropriate") is False:
             patterns.append(
                 "Language delays may impact reading comprehension and "
                 "written expression"
             )
-        
+
         # Pragmatic difficulties may relate to social skills
         if (not speech_results.get("pragmatics", {}).get("age_appropriate") and
             sel_results.get("casel_competencies", {})
@@ -630,7 +635,7 @@ def _generate_comprehensive_summary(
                 "Social communication challenges evident across speech "
                 "and SEL domains"
             )
-    
+
     # Check for attention/executive function patterns
     if sel_results and "error" not in sel_results:
         ef_score = (sel_results.get("executive_function", {})
@@ -641,7 +646,7 @@ def _generate_comprehensive_summary(
                 "performance and organization"
             )
             summary["priority_needs"].append("executive_function_support")
-    
+
     # Determine overall profile
     if len(summary["domains_assessed"]) >= 3:
         summary["overall_profile"] = (
@@ -655,9 +660,9 @@ def _generate_comprehensive_summary(
         )
     else:
         summary["overall_profile"] = "Limited assessment data available"
-    
+
     summary["cross_domain_patterns"] = patterns
-    
+
     return summary
 
 
@@ -667,15 +672,15 @@ def _generate_integrated_recommendations(
     sel_results: Optional[Dict]
 ) -> List[str]:
     """Generate integrated recommendations across all domains"""
-    
+
     recommendations = []
-    
+
     # Academic recommendations
     if academic_results:
         recommendations.append(
             "Complete adaptive academic assessment in all subject areas"
         )
-    
+
     # Speech recommendations
     if speech_results and "error" not in speech_results:
         if speech_results.get("summary", {}).get("therapy_recommended"):
@@ -687,29 +692,29 @@ def _generate_integrated_recommendations(
                 f"Speech-language therapy recommended "
                 f"({severity} severity, {duration})"
             )
-        
+
         # Add top speech recommendations
         speech_recs = speech_results.get("summary", {}).get("recommendations", [])
         recommendations.extend(speech_recs[:3])
-    
+
     # SEL recommendations
     if sel_results and "error" not in sel_results:
         if sel_results.get("summary", {}).get("intervention_recommended"):
             recommendations.append(
                 "Social-emotional learning intervention recommended"
             )
-        
+
         # Mental health concerns
         if sel_results.get("mental_health", {}).get("referral_recommended"):
             recommendations.append(
                 "Mental health referral recommended - "
                 "consult school counselor or psychologist"
             )
-        
+
         # Add top SEL recommendations
         sel_recs = sel_results.get("summary", {}).get("recommendations", [])
         recommendations.extend(sel_recs[:3])
-    
+
     # Integrated recommendations
     if speech_results and sel_results:
         if (speech_results.get("pragmatics", {}).get("age_appropriate") is False and
@@ -718,7 +723,7 @@ def _generate_integrated_recommendations(
                 "Consider integrated social communication intervention "
                 "combining speech therapy and SEL"
             )
-    
+
     return recommendations
 
 
@@ -731,7 +736,7 @@ def _create_personalized_plan(
     sel_results: Optional[Dict]
 ) -> Dict:
     """Create personalized AIVO learning plan"""
-    
+
     plan = {
         "child_id": child_id,
         "plan_name": f"Personalized AIVO Learning Plan - Grade {grade}",
@@ -741,7 +746,7 @@ def _create_personalized_plan(
         "accommodations": [],
         "parent_involvement": []
     }
-    
+
     # Academic focus
     if academic_results:
         for subject in academic_results.keys():
@@ -749,7 +754,7 @@ def _create_personalized_plan(
             plan["goals"].append(
                 f"Progress monitoring and skill building in {subject}"
             )
-    
+
     # Speech therapy schedule
     if speech_results and "error" not in speech_results:
         if speech_results.get("summary", {}).get("therapy_recommended"):
@@ -758,7 +763,7 @@ def _create_personalized_plan(
             )
             for area in priority_areas:
                 plan["focus_areas"].append(f"speech_{area}")
-            
+
             severity = speech_results.get("summary", {}).get("overall_severity")
             if severity == "severe":
                 plan["weekly_schedule"]["speech_therapy"] = "2-3 sessions per week"
@@ -766,20 +771,20 @@ def _create_personalized_plan(
                 plan["weekly_schedule"]["speech_therapy"] = "1-2 sessions per week"
             else:
                 plan["weekly_schedule"]["speech_therapy"] = "1 session per week"
-            
+
             plan["goals"].append(
                 "Improve speech and language skills through targeted therapy"
             )
             plan["parent_involvement"].append(
                 "Practice speech exercises at home 10-15 minutes daily"
             )
-    
+
     # SEL activities schedule
     if sel_results and "error" not in sel_results:
         priority_areas = sel_results.get("summary", {}).get("priority_areas", [])
         for area in priority_areas:
             plan["focus_areas"].append(f"sel_{area}")
-        
+
         if sel_results.get("summary", {}).get("intervention_recommended"):
             plan["weekly_schedule"]["sel_activities"] = "Daily SEL curriculum"
             plan["weekly_schedule"]["counseling"] = "Weekly check-ins"
@@ -787,14 +792,14 @@ def _create_personalized_plan(
             plan["weekly_schedule"]["sel_activities"] = (
                 "Daily SEL moments and mindfulness"
             )
-        
+
         plan["goals"].append(
             "Develop social-emotional competencies and coping skills"
         )
         plan["parent_involvement"].append(
             "Emotion check-ins and mindfulness practice at home"
         )
-    
+
     # Accommodations
     if sel_results:
         ef_appropriate = sel_results.get("executive_function", {}).get(
@@ -806,7 +811,7 @@ def _create_personalized_plan(
                 "Organizational tools and visual schedules",
                 "Breaking tasks into smaller steps"
             ])
-    
+
     if speech_results:
         if not speech_results.get("articulation", {}).get("age_appropriate"):
             plan["accommodations"].append(
@@ -816,18 +821,21 @@ def _create_personalized_plan(
             plan["accommodations"].append(
                 "Provide visual supports and simplified language"
             )
-    
+
     return plan
 
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    item_count = await database.fetchval(
+        "SELECT COUNT(*) FROM item_bank WHERE is_active = TRUE"
+    ) or 0
     return {
         "status": "healthy",
         "service": "baseline-assessment-svc",
         "version": "2.0.0",
-        "item_bank_size": len(MOCK_ITEM_BANK),
+        "item_bank_size": item_count,
         "active_sessions": len(session_manager.sessions),
         "features": [
             "irt_adaptive_testing",
@@ -858,7 +866,7 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "src.main:app",
         host="0.0.0.0",

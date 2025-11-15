@@ -35,6 +35,14 @@ export interface PerformanceMonitorConfig {
   onSnapshot?: (snapshot: PerformanceSnapshot) => void;
 }
 
+type PerformanceWithMemory = Performance & {
+  memory: MemoryInfo;
+};
+
+function hasMemory(perf: Performance): perf is PerformanceWithMemory {
+  return 'memory' in perf && perf.memory != null;
+}
+
 class PerformanceMonitor {
   private config: PerformanceMonitorConfig = {
     interval: 5000, // 5 seconds
@@ -150,8 +158,8 @@ class PerformanceMonitor {
     if (!this.config.trackMemory) return null;
 
     // Check if memory API is available (Chrome only)
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
+    if (hasMemory(performance)) {
+      const memory = performance.memory;
       return {
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,

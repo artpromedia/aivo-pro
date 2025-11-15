@@ -1,5 +1,6 @@
 {
   "name": "@aivo/state",
+  "type": "module",
   "version": "1.0.0",
   "description": "Global state management system for AIVO platform with cross-portal synchronization",
   "main": "dist/index.js",

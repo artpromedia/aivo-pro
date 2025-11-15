@@ -60,12 +60,12 @@ class LanguageAssessment:
     mean_length_utterance: float
     sentence_complexity: str  # simple, compound, complex
     grammar_accuracy: float
-    
+
     # Receptive Language
     receptive_vocabulary_age: float
     following_directions: str  # 1-step, 2-step, 3-step, multi-step
     comprehension_level: str  # literal, inferential, critical
-    
+
     # Overall
     expressive_level: LanguageLevel
     receptive_level: LanguageLevel
@@ -129,7 +129,7 @@ class ComprehensiveSpeechAssessment:
     assessment_date: datetime
     chronological_age: float  # Years
     grade_level: str
-    
+
     # Assessment domains
     articulation: ArticulationAssessment
     language: LanguageAssessment
@@ -137,14 +137,14 @@ class ComprehensiveSpeechAssessment:
     voice: VoiceAssessment
     pragmatics: PragmaticsAssessment
     oral_motor: OralMotorAssessment
-    
+
     # Summary
     overall_severity: str  # mild, moderate, severe
     therapy_recommended: bool
     priority_areas: List[str]
     estimated_therapy_duration: str  # weeks/months
     recommendations: List[str] = field(default_factory=list)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for JSON serialization"""
         return {
@@ -226,7 +226,7 @@ class ComprehensiveSpeechAssessment:
 class SpeechLanguageAssessor:
     """
     Comprehensive Speech and Language Assessor
-    
+
     Conducts multi-domain speech/language evaluation following ASHA guidelines:
     - Articulation and Phonology
     - Expressive and Receptive Language
@@ -235,11 +235,11 @@ class SpeechLanguageAssessor:
     - Pragmatics (Social Communication)
     - Oral Motor Function
     """
-    
+
     def __init__(self, speech_therapy_api_url: str = "http://speech-therapy-svc:8014"):
         self.speech_therapy_api_url = speech_therapy_api_url
         self.client = httpx.AsyncClient(timeout=30.0)
-    
+
     async def conduct_comprehensive_assessment(
         self,
         child_id: str,
@@ -249,18 +249,18 @@ class SpeechLanguageAssessor:
     ) -> ComprehensiveSpeechAssessment:
         """
         Conduct comprehensive speech and language assessment
-        
+
         Args:
             child_id: Child's unique identifier
             age: Chronological age in years
             grade: Grade level (K, 1-12)
             assessment_data: Dict with assessment responses and recordings
-        
+
         Returns:
             ComprehensiveSpeechAssessment with all domain results
         """
         logger.info(f"Starting comprehensive speech assessment for child {child_id}")
-        
+
         # Conduct domain-specific assessments
         articulation = await self._assess_articulation(child_id, age, assessment_data)
         language = await self._assess_language(child_id, age, assessment_data)
@@ -268,12 +268,12 @@ class SpeechLanguageAssessor:
         voice = await self._assess_voice(child_id, age, assessment_data)
         pragmatics = await self._assess_pragmatics(child_id, age, assessment_data)
         oral_motor = await self._assess_oral_motor(child_id, age, assessment_data)
-        
+
         # Determine overall severity and recommendations
         overall_severity = self._determine_overall_severity(
             articulation, language, fluency, voice, pragmatics, oral_motor
         )
-        
+
         therapy_recommended = not all([
             articulation.age_appropriate,
             language.age_appropriate,
@@ -282,18 +282,18 @@ class SpeechLanguageAssessor:
             pragmatics.age_appropriate,
             oral_motor.age_appropriate
         ])
-        
+
         priority_areas = self._identify_priority_areas(
             articulation, language, fluency, voice, pragmatics, oral_motor
         )
-        
+
         duration = self._estimate_therapy_duration(overall_severity, priority_areas)
-        
+
         recommendations = self._generate_overall_recommendations(
             articulation, language, fluency, voice, pragmatics, oral_motor,
             overall_severity, priority_areas
         )
-        
+
         return ComprehensiveSpeechAssessment(
             child_id=child_id,
             assessment_date=datetime.now(),
@@ -311,7 +311,7 @@ class SpeechLanguageAssessor:
             estimated_therapy_duration=duration,
             recommendations=recommendations
         )
-    
+
     async def _assess_articulation(
         self,
         child_id: str,
@@ -319,10 +319,10 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> ArticulationAssessment:
         """Assess articulation and phonology"""
-        
+
         # Extract articulation data from assessment
         artic_data = assessment_data.get("articulation", {})
-        
+
         # Analyze speech sample if provided
         speech_sample = artic_data.get("speech_sample")
         if speech_sample:
@@ -342,17 +342,17 @@ class SpeechLanguageAssessor:
                 analysis = {}
         else:
             analysis = {}
-        
+
         # Determine intelligibility
         intelligibility = analysis.get("intelligibility", artic_data.get("intelligibility", 95.0))
-        
+
         # Identify errors
         error_sounds = artic_data.get("error_sounds", analysis.get("error_sounds", []))
         substitutions = artic_data.get("substitutions", analysis.get("substitutions", {}))
         omissions = artic_data.get("omissions", analysis.get("omissions", []))
         distortions = artic_data.get("distortions", analysis.get("distortions", []))
         phonological_processes = analysis.get("phonological_processes", [])
-        
+
         # Determine level
         if intelligibility >= 95:
             level = ArticulationLevel.AGE_APPROPRIATE
@@ -362,9 +362,9 @@ class SpeechLanguageAssessor:
             level = ArticulationLevel.MODERATE
         else:
             level = ArticulationLevel.SEVERE
-        
+
         age_appropriate = level == ArticulationLevel.AGE_APPROPRIATE
-        
+
         # Generate recommendations
         recommendations = []
         if not age_appropriate:
@@ -379,7 +379,7 @@ class SpeechLanguageAssessor:
             recommendations.append(
                 "Weekly articulation therapy recommended (30-45 minutes)"
             )
-        
+
         return ArticulationAssessment(
             intelligibility_percent=intelligibility,
             error_sounds=error_sounds,
@@ -391,7 +391,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     async def _assess_language(
         self,
         child_id: str,
@@ -399,29 +399,29 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> LanguageAssessment:
         """Assess expressive and receptive language"""
-        
+
         lang_data = assessment_data.get("language", {})
-        
+
         # Expressive language metrics
         exp_vocab_age = lang_data.get("expressive_vocabulary_age", age)
         mlu = lang_data.get("mean_length_utterance", self._expected_mlu(age))
         sentence_complexity = lang_data.get("sentence_complexity", "compound")
         grammar_accuracy = lang_data.get("grammar_accuracy", 90.0)
-        
+
         # Receptive language metrics
         rec_vocab_age = lang_data.get("receptive_vocabulary_age", age)
         following_directions = lang_data.get("following_directions", "2-step")
         comprehension = lang_data.get("comprehension_level", "literal")
-        
+
         # Determine levels
         exp_level = self._determine_language_level(exp_vocab_age, age)
         rec_level = self._determine_language_level(rec_vocab_age, age)
-        
+
         age_appropriate = (
             exp_level in [LanguageLevel.AGE_APPROPRIATE, LanguageLevel.ADVANCED] and
             rec_level in [LanguageLevel.AGE_APPROPRIATE, LanguageLevel.ADVANCED]
         )
-        
+
         # Recommendations
         recommendations = []
         if exp_level == LanguageLevel.SIGNIFICANTLY_DELAYED:
@@ -432,7 +432,7 @@ class SpeechLanguageAssessor:
             recommendations.append(
                 "Weekly expressive language therapy with home practice"
             )
-        
+
         if rec_level == LanguageLevel.SIGNIFICANTLY_DELAYED:
             recommendations.append(
                 "Receptive language intervention with visual supports"
@@ -441,10 +441,10 @@ class SpeechLanguageAssessor:
             recommendations.append(
                 "Receptive language activities in daily routine"
             )
-        
+
         if grammar_accuracy < 80:
             recommendations.append("Focus on grammatical morphemes and syntax")
-        
+
         return LanguageAssessment(
             expressive_vocabulary_age=exp_vocab_age,
             mean_length_utterance=mlu,
@@ -458,7 +458,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     async def _assess_fluency(
         self,
         child_id: str,
@@ -466,16 +466,16 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> FluencyAssessment:
         """Assess fluency and rhythm of speech"""
-        
+
         fluency_data = assessment_data.get("fluency", {})
-        
+
         wpm = fluency_data.get("words_per_minute", self._expected_wpm(age))
         disfluencies = fluency_data.get("disfluencies_per_100", 2.0)
         repetitions = fluency_data.get("repetitions", 0)
         prolongations = fluency_data.get("prolongations", 0)
         blocks = fluency_data.get("blocks", 0)
         secondary_behaviors = fluency_data.get("secondary_behaviors", [])
-        
+
         # Determine level (typical is <3 disfluencies per 100 words)
         if disfluencies < 3 and not secondary_behaviors:
             level = FluencyLevel.AGE_APPROPRIATE
@@ -485,9 +485,9 @@ class SpeechLanguageAssessor:
             level = FluencyLevel.MODERATE_DISFLUENCY
         else:
             level = FluencyLevel.SEVERE_DISFLUENCY
-        
+
         age_appropriate = level == FluencyLevel.AGE_APPROPRIATE
-        
+
         recommendations = []
         if level == FluencyLevel.SEVERE_DISFLUENCY:
             recommendations.append(
@@ -499,7 +499,7 @@ class SpeechLanguageAssessor:
             recommendations.append("Classroom accommodations (extra time, reduced pressure)")
         elif level == FluencyLevel.MILD_DISFLUENCY:
             recommendations.append("Monitor and provide indirect strategies")
-        
+
         return FluencyAssessment(
             words_per_minute=wpm,
             disfluencies_per_100_words=disfluencies,
@@ -511,7 +511,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     async def _assess_voice(
         self,
         child_id: str,
@@ -519,28 +519,28 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> VoiceAssessment:
         """Assess voice quality and characteristics"""
-        
+
         voice_data = assessment_data.get("voice", {})
-        
+
         pitch_appropriate = voice_data.get("pitch_appropriate", True)
         volume_appropriate = voice_data.get("volume_appropriate", True)
         quality_concerns = voice_data.get("quality_concerns", [])
         resonance_appropriate = voice_data.get("resonance_appropriate", True)
-        
+
         age_appropriate = (
             pitch_appropriate and
             volume_appropriate and
             not quality_concerns and
             resonance_appropriate
         )
-        
+
         recommendations = []
         if quality_concerns:
             recommendations.append("ENT referral for voice concerns")
             recommendations.append("Voice therapy focusing on vocal hygiene")
         if not volume_appropriate:
             recommendations.append("Volume regulation strategies")
-        
+
         return VoiceAssessment(
             pitch_appropriate=pitch_appropriate,
             volume_appropriate=volume_appropriate,
@@ -549,7 +549,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     async def _assess_pragmatics(
         self,
         child_id: str,
@@ -557,21 +557,21 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> PragmaticsAssessment:
         """Assess social communication/pragmatics"""
-        
+
         prag_data = assessment_data.get("pragmatics", {})
-        
+
         turn_taking = prag_data.get("turn_taking", "adequate")
         topic_maintenance = prag_data.get("topic_maintenance", "adequate")
         conversational_repair = prag_data.get("conversational_repair", "adequate")
         nonverbal = prag_data.get("nonverbal_communication", "adequate")
         perspective = prag_data.get("perspective_taking", "adequate")
-        
+
         age_appropriate = all(
             skill in ["adequate", "strong"]
             for skill in [turn_taking, topic_maintenance, conversational_repair,
                          nonverbal, perspective]
         )
-        
+
         recommendations = []
         if not age_appropriate:
             if turn_taking == "poor":
@@ -579,7 +579,7 @@ class SpeechLanguageAssessor:
             if perspective == "poor":
                 recommendations.append("Theory of mind activities and perspective-taking exercises")
             recommendations.append("Pragmatic language intervention")
-        
+
         return PragmaticsAssessment(
             turn_taking=turn_taking,
             topic_maintenance=topic_maintenance,
@@ -589,7 +589,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     async def _assess_oral_motor(
         self,
         child_id: str,
@@ -597,21 +597,21 @@ class SpeechLanguageAssessor:
         assessment_data: Dict
     ) -> OralMotorAssessment:
         """Assess oral motor structure and function"""
-        
+
         oral_data = assessment_data.get("oral_motor", {})
-        
+
         structure_normal = oral_data.get("structure_normal", True)
         structure_concerns = oral_data.get("structure_concerns", [])
         function_adequate = oral_data.get("function_adequate", True)
         function_concerns = oral_data.get("function_concerns", [])
         feeding_concerns = oral_data.get("feeding_concerns", [])
-        
+
         age_appropriate = (
             structure_normal and
             function_adequate and
             not feeding_concerns
         )
-        
+
         recommendations = []
         if structure_concerns:
             recommendations.append(f"Medical evaluation for: {', '.join(structure_concerns)}")
@@ -619,7 +619,7 @@ class SpeechLanguageAssessor:
             recommendations.append("Feeding therapy/OT consultation")
         if function_concerns and not structure_concerns:
             recommendations.append("Oral motor exercises and therapy")
-        
+
         return OralMotorAssessment(
             structure_normal=structure_normal,
             structure_concerns=structure_concerns,
@@ -629,7 +629,7 @@ class SpeechLanguageAssessor:
             age_appropriate=age_appropriate,
             recommendations=recommendations
         )
-    
+
     def _determine_overall_severity(
         self,
         articulation: ArticulationAssessment,
@@ -640,9 +640,9 @@ class SpeechLanguageAssessor:
         oral_motor: OralMotorAssessment
     ) -> str:
         """Determine overall severity level"""
-        
+
         severity_scores = []
-        
+
         # Articulation
         if articulation.level == ArticulationLevel.SEVERE:
             severity_scores.append(3)
@@ -652,7 +652,7 @@ class SpeechLanguageAssessor:
             severity_scores.append(1)
         else:
             severity_scores.append(0)
-        
+
         # Language
         if language.expressive_level == LanguageLevel.SIGNIFICANTLY_DELAYED:
             severity_scores.append(3)
@@ -660,7 +660,7 @@ class SpeechLanguageAssessor:
             severity_scores.append(2)
         elif language.expressive_level == LanguageLevel.EMERGING:
             severity_scores.append(1)
-        
+
         # Fluency
         if fluency.level == FluencyLevel.SEVERE_DISFLUENCY:
             severity_scores.append(3)
@@ -668,7 +668,7 @@ class SpeechLanguageAssessor:
             severity_scores.append(2)
         elif fluency.level == FluencyLevel.MILD_DISFLUENCY:
             severity_scores.append(1)
-        
+
         # Voice, pragmatics, oral motor (binary)
         if not voice.age_appropriate:
             severity_scores.append(2)
@@ -676,12 +676,12 @@ class SpeechLanguageAssessor:
             severity_scores.append(2)
         if not oral_motor.age_appropriate:
             severity_scores.append(2)
-        
+
         if not severity_scores:
             return "none"
-        
+
         avg_severity = sum(severity_scores) / len(severity_scores)
-        
+
         if avg_severity >= 2.5:
             return "severe"
         elif avg_severity >= 1.5:
@@ -690,7 +690,7 @@ class SpeechLanguageAssessor:
             return "mild"
         else:
             return "minimal"
-    
+
     def _identify_priority_areas(
         self,
         articulation: ArticulationAssessment,
@@ -701,9 +701,9 @@ class SpeechLanguageAssessor:
         oral_motor: OralMotorAssessment
     ) -> List[str]:
         """Identify priority treatment areas"""
-        
+
         priorities = []
-        
+
         if not articulation.age_appropriate:
             priorities.append("articulation")
         if not language.age_appropriate:
@@ -716,16 +716,16 @@ class SpeechLanguageAssessor:
             priorities.append("pragmatics")
         if not oral_motor.age_appropriate:
             priorities.append("oral_motor")
-        
+
         return priorities
-    
+
     def _estimate_therapy_duration(
         self,
         overall_severity: str,
         priority_areas: List[str]
     ) -> str:
         """Estimate therapy duration"""
-        
+
         if overall_severity == "severe":
             return "12-24 months"
         elif overall_severity == "moderate":
@@ -734,7 +734,7 @@ class SpeechLanguageAssessor:
             return "3-6 months"
         else:
             return "monitoring only"
-    
+
     def _generate_overall_recommendations(
         self,
         articulation: ArticulationAssessment,
@@ -747,9 +747,9 @@ class SpeechLanguageAssessor:
         priority_areas: List[str]
     ) -> List[str]:
         """Generate overall recommendations"""
-        
+
         recommendations = []
-        
+
         if overall_severity == "severe":
             recommendations.append(
                 "Recommend comprehensive speech-language evaluation by SLP"
@@ -765,12 +765,12 @@ class SpeechLanguageAssessor:
             recommendations.append(
                 "Speech-language therapy or monitoring recommended"
             )
-        
+
         if priority_areas:
             recommendations.append(
                 f"Priority treatment areas: {', '.join(priority_areas)}"
             )
-        
+
         # Add specific recommendations from each domain
         all_recs = (
             articulation.recommendations +
@@ -780,22 +780,22 @@ class SpeechLanguageAssessor:
             pragmatics.recommendations +
             oral_motor.recommendations
         )
-        
+
         # Get unique recommendations
         unique_recs = []
         for rec in all_recs:
             if rec not in unique_recs and rec not in recommendations:
                 unique_recs.append(rec)
-        
+
         recommendations.extend(unique_recs[:5])  # Top 5 specific recs
-        
+
         return recommendations
-    
+
     def _expected_mlu(self, age: float) -> float:
         """Expected Mean Length of Utterance by age"""
         # Brown's stages: MLU = age - 0.5 (approximate)
         return max(1.0, age - 0.5)
-    
+
     def _expected_wpm(self, age: float) -> int:
         """Expected words per minute by age"""
         if age < 6:
@@ -806,11 +806,11 @@ class SpeechLanguageAssessor:
             return 140
         else:
             return 150
-    
+
     def _determine_language_level(self, language_age: float, chronological_age: float) -> LanguageLevel:
         """Determine language level based on age comparison"""
         difference = chronological_age - language_age
-        
+
         if difference >= 2.0:
             return LanguageLevel.SIGNIFICANTLY_DELAYED
         elif difference >= 1.0:

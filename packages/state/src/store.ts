@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { BroadcastChannel } from 'broadcast-channel';
-import { GlobalState, PortalType, User, StudentProfile, LearningSession, OfflineAction } from './types';
+import { GlobalState, PortalType } from './types';
 import { createAuthSlice, type AuthSlice } from './slices/authSlice';
 import { createStudentsSlice, type StudentsSlice } from './slices/studentsSlice';
 import { createLearningSlice, type LearningSlice } from './slices/learningSlice';
@@ -15,8 +15,8 @@ const crossPortalChannel = new BroadcastChannel('aivo-state-sync');
 
 export interface StoreActions extends AuthSlice, StudentsSlice, LearningSlice, SyncSlice, UISlice {
   // Cross-portal actions
-  broadcastMessage: (type: string, payload: any, targetPortal?: PortalType) => void;
-  syncWithPortal: (portalType: PortalType, data: any) => void;
+  broadcastMessage: (type: string, payload: unknown, targetPortal?: PortalType) => void;
+  syncWithPortal: (portalType: PortalType, data: Record<string, unknown>) => void;
 
   // State management
   resetState: () => void;
@@ -74,18 +74,18 @@ const initialState: GlobalState = {
 
 export const useGlobalStore = create<GlobalState & StoreActions>()(
   persist(
-    immer((set, get) => ({
+    immer((set, get, store) => ({
       ...initialState,
       
       // Combine all slice actions
-      ...createAuthSlice(set, get, {} as any),
-      ...createStudentsSlice(set, get, {} as any),
-      ...createLearningSlice(set, get, {} as any),
-      ...createSyncSlice(set, get, {} as any),
-      ...createUISlice(set, get, {} as any),
+      ...createAuthSlice(set, get, store),
+      ...createStudentsSlice(set, get, store),
+      ...createLearningSlice(set, get, store),
+      ...createSyncSlice(set, get, store),
+      ...createUISlice(set, get, store),
 
       // Cross-portal communication
-      broadcastMessage: (type: string, payload: any, targetPortal?: PortalType) => {
+      broadcastMessage: (type: string, payload: unknown, targetPortal?: PortalType) => {
         const message = {
           id: `msg-${Date.now()}`,
           type,
@@ -99,7 +99,7 @@ export const useGlobalStore = create<GlobalState & StoreActions>()(
         crossPortalChannel.postMessage(message);
       },
 
-      syncWithPortal: (portalType: PortalType, data: any) => {
+      syncWithPortal: (portalType: PortalType, data: Record<string, unknown>) => {
         set((state) => {
           state.portals[portalType] = { ...state.portals[portalType], ...data };
         });
@@ -147,16 +147,18 @@ export const useGlobalStore = create<GlobalState & StoreActions>()(
         }
       }),
       version: 1,
-      migrate: (persistedState: any, version: number) => {
-        // Handle state migrations between versions
+      migrate: (persistedState: unknown, version: number) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return initialState;
+        }
+
         if (version === 0) {
-          // Migration logic for version 0 to 1
           return {
-            ...persistedState,
-            // Add new fields or transform existing ones
+            ...(persistedState as GlobalState)
           };
         }
-        return persistedState;
+
+        return persistedState as GlobalState;
       }
     }
   )

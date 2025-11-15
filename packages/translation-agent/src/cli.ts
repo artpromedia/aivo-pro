@@ -41,7 +41,7 @@ class TranslationCLI {
       const locale = file.replace('.json', '');
       const filePath = join(this.config.localesDir, file);
       const content = readFileSync(filePath, 'utf-8');
-      const translations = JSON.parse(content);
+  const translations = JSON.parse(content) as Record<string, unknown>;
 
       this.manager.registerLocale(locale, translations);
       console.log(`  ✓ Loaded ${locale}`);
@@ -208,6 +208,10 @@ class TranslationCLI {
 }
 
 // CLI Entry Point
+type ExportFormat = 'json' | 'flat' | 'csv';
+const isExportFormat = (value: unknown): value is ExportFormat =>
+  value === 'json' || value === 'flat' || value === 'csv';
+
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -240,13 +244,18 @@ async function main() {
         await cli.suggest(args[1] || 'es');
         break;
 
-      case 'export':
+      case 'export': {
+        const formatArg = args[2];
+        const format: ExportFormat = isExportFormat(formatArg)
+          ? formatArg
+          : 'json';
         await cli.export(
           args[1] || 'en',
-          (args[2] as any) || 'json',
+          format,
           args[3] || 'translations.json'
         );
         break;
+      }
 
       default:
         console.log(`

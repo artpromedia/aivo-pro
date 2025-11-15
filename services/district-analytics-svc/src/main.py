@@ -63,25 +63,25 @@ class ExportAnalyticsRequest(BaseModel):
 
 class DistrictDetectionEngine:
     """District detection using geographic data"""
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
         self.district_mapper = DistrictMapper()
         self.boundary_loader = BoundaryLoader()
         self.geocoder = Nominatim(user_agent=settings.NOMINATIM_USER_AGENT)
         self.district_boundaries_cache = {}
-    
+
     async def initialize(self):
         """Initialize district detection system"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         await self.district_mapper.initialize()
         await self.load_district_boundaries()
         print("✅ District Detection Engine initialized")
-    
+
     async def load_district_boundaries(self):
         """Load school district boundaries"""
         boundaries = await self.boundary_loader.load_all_boundaries()
-        
+
         for boundary in boundaries:
             district_id = boundary["district_id"]
             self.district_boundaries_cache[district_id] = {
@@ -89,9 +89,9 @@ class DistrictDetectionEngine:
                 "state": boundary["state"],
                 "nces_id": boundary["nces_id"]
             }
-        
+
         print(f"📍 Loaded {len(self.district_boundaries_cache)} districts")
-    
+
     async def detect_district_by_zipcode(
         self,
         zipcode: str,
@@ -101,19 +101,19 @@ class DistrictDetectionEngine:
         # Check cache
         cache_key = f"district:zipcode:{zipcode}"
         cached = await self.redis_client.get(cache_key)
-        
+
         if cached:
             return json.loads(cached)
-        
+
         # Get coordinates
         coordinates = await self._get_zipcode_coordinates(zipcode)
-        
+
         if not coordinates:
             return {
                 "detected": False,
                 "reason": "Invalid zipcode"
             }
-        
+
         # Find district (simplified for demo)
         detected_districts = [
             {
@@ -124,7 +124,7 @@ class DistrictDetectionEngine:
                 "confidence": 0.95
             }
         ]
-        
+
         result = {
             "detected": len(detected_districts) > 0,
             "zipcode": zipcode,
@@ -132,17 +132,17 @@ class DistrictDetectionEngine:
             "districts": detected_districts,
             "primary_district": detected_districts[0] if detected_districts else None
         }
-        
+
         # Cache result
         await self.redis_client.setex(
             cache_key,
             86400,
             json.dumps(result, default=str)
         )
-        
+
         districts_detected.inc()
         return result
-    
+
     async def _get_zipcode_coordinates(self, zipcode: str) -> Optional[Dict]:
         """Get coordinates for zipcode"""
         try:
@@ -150,7 +150,7 @@ class DistrictDetectionEngine:
                 f"{settings.ZIP_API_URL}/us/{zipcode}",
                 timeout=5
             )
-            
+
             if response.status_code == 200:
                 data = response.json()
                 return {
@@ -159,9 +159,9 @@ class DistrictDetectionEngine:
                 }
         except Exception as e:
             print(f"Geocoding error: {e}")
-        
+
         return None
-    
+
     async def get_district_info(
         self,
         district_id: str,
@@ -173,7 +173,7 @@ class DistrictDetectionEngine:
             District.__table__.select().where(District.id == district_id)
         )
         district = result.first()
-        
+
         if not district:
             return {
                 "district": {
@@ -186,7 +186,7 @@ class DistrictDetectionEngine:
                 "demographics": {},
                 "curriculum_standards": []
             }
-        
+
         return {
             "district": {
                 "id": str(district.id),
@@ -201,7 +201,7 @@ class DistrictDetectionEngine:
 
 class AnalyticsEngine:
     """Comprehensive analytics engine"""
-    
+
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
         self.learning_analytics = LearningAnalyticsEngine()
@@ -209,14 +209,14 @@ class AnalyticsEngine:
         self.outcome_predictor = OutcomePredictor()
         self.trend_analyzer = TrendAnalyzer()
         self.report_generator = ReportGenerator()
-    
+
     async def initialize(self):
         """Initialize analytics engine"""
         self.redis_client = await redis.from_url(settings.REDIS_URL)
         await self.outcome_predictor.load_models()
         await self.trend_analyzer.load_models()
         print("✅ Analytics Engine initialized")
-    
+
     async def generate_comprehensive_analytics(
         self,
         entity_type: str,
@@ -228,41 +228,41 @@ class AnalyticsEngine:
         """Generate comprehensive analytics report"""
         start_time = datetime.utcnow()
         report_id = str(uuid.uuid4())
-        
+
         # Collect raw data
         raw_data = await self._collect_raw_data(
             entity_type, entity_id, date_range, db
         )
-        
+
         # Process metrics
         metrics = {}
-        
+
         if "learning" in metrics_requested:
             metrics["learning"] = await self._analyze_learning_metrics(
                 raw_data, entity_type, date_range
             )
-        
+
         if "engagement" in metrics_requested:
             metrics["engagement"] = await self._analyze_engagement_metrics(
                 raw_data, entity_type, date_range
             )
-        
+
         if "progress" in metrics_requested:
             metrics["progress"] = await self._analyze_progress_metrics(
                 raw_data, entity_type, date_range
             )
-        
+
         # Generate insights
         insights = await self._generate_insights(metrics, entity_type)
-        
+
         # Generate recommendations
         recommendations = await self._generate_recommendations(
             metrics, insights
         )
-        
+
         generation_time = (datetime.utcnow() - start_time).total_seconds()
         analytics_latency.observe(generation_time)
-        
+
         # Store report
         report = AnalyticsReport(
             id=uuid.uuid4(),
@@ -275,12 +275,12 @@ class AnalyticsEngine:
             recommendations=recommendations,
             generation_time_seconds=generation_time
         )
-        
+
         db.add(report)
         await db.commit()
-        
+
         analytics_generated.inc()
-        
+
         return {
             "report_id": str(report.id),
             "entity": {"type": entity_type, "id": entity_id},
@@ -290,7 +290,7 @@ class AnalyticsEngine:
             "recommendations": recommendations,
             "generation_time": generation_time
         }
-    
+
     async def _collect_raw_data(
         self,
         entity_type: str,
@@ -317,7 +317,7 @@ class AnalyticsEngine:
                 }
             ]
         }
-    
+
     async def _analyze_learning_metrics(
         self,
         raw_data: Dict,
@@ -326,14 +326,14 @@ class AnalyticsEngine:
     ) -> Dict:
         """Analyze learning metrics"""
         learning_sessions = raw_data.get("learning_sessions", [])
-        
+
         metrics = await self.learning_analytics.analyze_learning_data(
             learning_sessions,
             date_range
         )
-        
+
         return metrics
-    
+
     async def _analyze_engagement_metrics(
         self,
         raw_data: Dict,
@@ -342,14 +342,14 @@ class AnalyticsEngine:
     ) -> Dict:
         """Analyze engagement metrics"""
         engagement_events = raw_data.get("engagement_events", [])
-        
+
         metrics = await self.engagement_tracker.calculate_engagement(
             engagement_events,
             date_range
         )
-        
+
         return metrics
-    
+
     async def _analyze_progress_metrics(
         self,
         raw_data: Dict,
@@ -362,7 +362,7 @@ class AnalyticsEngine:
             "goals_met": 5,
             "goals_total": 8
         }
-    
+
     async def _generate_insights(
         self,
         metrics: Dict,
@@ -370,11 +370,11 @@ class AnalyticsEngine:
     ) -> List[Dict]:
         """Generate actionable insights"""
         insights = []
-        
+
         if "learning" in metrics:
             learning = metrics["learning"]
             completion_rate = learning.get("completion_rate", 0)
-            
+
             if completion_rate < 0.7:
                 insights.append({
                     "category": "engagement",
@@ -383,9 +383,9 @@ class AnalyticsEngine:
                     "value": f"{completion_rate*100:.1f}%",
                     "recommendation": "Consider shorter sessions"
                 })
-        
+
         return insights
-    
+
     async def _generate_recommendations(
         self,
         metrics: Dict,
@@ -393,7 +393,7 @@ class AnalyticsEngine:
     ) -> List[Dict]:
         """Generate recommendations"""
         recommendations = []
-        
+
         for insight in insights:
             if insight.get("recommendation"):
                 recommendations.append({
@@ -401,37 +401,37 @@ class AnalyticsEngine:
                     "action": insight["recommendation"],
                     "related_metric": insight["category"]
                 })
-        
+
         return recommendations
 
 
 # Main Service
 class DistrictAnalyticsService:
     """Combined District Detection and Analytics Service"""
-    
+
     def __init__(self):
         self.district_engine = DistrictDetectionEngine()
         self.analytics_engine = AnalyticsEngine()
         self.redis_client: Optional[redis.Redis] = None
         self.db_engine = None
         self.async_session = None
-    
+
     async def initialize(self):
         self.redis_client = await redis.from_url(settings.REDIS_URL)
-        
+
         # Setup database
         self.db_engine = create_async_engine(settings.DATABASE_URL)
         self.async_session = sessionmaker(
             self.db_engine, class_=AsyncSession, expire_on_commit=False
         )
-        
+
         # Create tables
         async with self.db_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
+
         await self.district_engine.initialize()
         await self.analytics_engine.initialize()
-        
+
         print("✅ District & Analytics Service initialized")
 
 
@@ -522,10 +522,10 @@ async def get_dashboard_data(
     """Get real-time dashboard data"""
     cache_key = f"dashboard:{entity_type}:{entity_id}"
     cached = await district_analytics_service.redis_client.get(cache_key)
-    
+
     if cached:
         return json.loads(cached)
-    
+
     # Generate fresh metrics (simplified for demo)
     metrics = {
         "entity": {"type": entity_type, "id": entity_id},
@@ -536,14 +536,14 @@ async def get_dashboard_data(
             "active_users": 150
         }
     }
-    
+
     # Cache for 5 minutes
     await district_analytics_service.redis_client.setex(
         cache_key,
         300,
         json.dumps(metrics, default=str)
     )
-    
+
     return metrics
 
 
@@ -555,7 +555,7 @@ async def export_analytics(
 ):
     """Export analytics data"""
     export_id = str(uuid.uuid4())
-    
+
     return {
         "export_id": export_id,
         "status": "processing",
@@ -583,7 +583,7 @@ async def get_benchmarks(
             "percentiles": {"25": 0.70, "50": 0.82, "75": 0.91}
         }
     ]
-    
+
     return {
         "entity_type": entity_type,
         "level": level,

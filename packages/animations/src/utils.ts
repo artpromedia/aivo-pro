@@ -5,6 +5,12 @@
 
 import { Variants, Transition } from 'framer-motion';
 
+type EasingOption = string | number[] | ((t: number) => number);
+
+type TweenLikeTransition = Transition & {
+  ease?: EasingOption;
+};
+
 /**
  * Create stagger animation for children
  */
@@ -104,12 +110,12 @@ export function createSpring(
  */
 export function createTween(
   duration = 0.3,
-  ease: string | number[] = 'easeInOut'
-): Transition {
+  ease: EasingOption = 'easeInOut'
+): TweenLikeTransition {
   return {
     type: 'tween',
     duration,
-    ease: ease as any,
+    ease,
   };
 }
 

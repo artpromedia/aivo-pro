@@ -77,7 +77,7 @@ class CollaborativeDocument {
   /**
    * Get map type for collaborative key-value storage
    */
-  getMap<T = any>(name: string): Y.Map<T> {
+  getMap<T = unknown>(name: string): Y.Map<T> {
     if (!this.ydoc) {
       throw new Error('Document not initialized');
     }
@@ -87,7 +87,7 @@ class CollaborativeDocument {
   /**
    * Get array type for collaborative lists
    */
-  getArray<T = any>(name: string): Y.Array<T> {
+  getArray<T = unknown>(name: string): Y.Array<T> {
     if (!this.ydoc) {
       throw new Error('Document not initialized');
     }
@@ -169,7 +169,7 @@ class CollaborativeDocument {
   /**
    * Get document as JSON
    */
-  toJSON(): any {
+  toJSON(): ReturnType<Y.Doc['toJSON']> | null {
     if (!this.ydoc) {
       return null;
     }
@@ -228,7 +228,7 @@ class CollaborativeDocument {
   /**
    * Undo manager for collaborative undo/redo
    */
-  createUndoManager(scope: Y.Text | Y.Array<any> | Y.Map<any>): Y.UndoManager {
+  createUndoManager(scope: Y.Text | Y.Array<unknown> | Y.Map<unknown>): Y.UndoManager {
     if (!this.ydoc) {
       throw new Error('Document not initialized');
     }
@@ -256,13 +256,13 @@ export function getCollabText(name?: string): Y.Text {
 /**
  * Get collaborative map
  */
-export function getCollabMap<T = any>(name: string): Y.Map<T> {
+export function getCollabMap<T = unknown>(name: string): Y.Map<T> {
   return collaborativeDoc.getMap<T>(name);
 }
 
 /**
  * Get collaborative array
  */
-export function getCollabArray<T = any>(name: string): Y.Array<T> {
+export function getCollabArray<T = unknown>(name: string): Y.Array<T> {
   return collaborativeDoc.getArray<T>(name);
 }

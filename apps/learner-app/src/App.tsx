@@ -120,14 +120,11 @@ function AppRouter() {
           try {
             // Parse baseline results
             const baselineResults = JSON.parse(decodeURIComponent(results));
-            
-            // Simulate fetching full child profile from API
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setLoadingMessage('Creating your personalized learning model...');
-            
-            // Simulate AI model cloning process
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            setLoadingMessage('Setting up your learning dashboard...');
+            console.log('📊 Received baseline results for model cloning:', {
+              answers: Object.keys(baselineResults.answers || {}).length,
+              responses: baselineResults.responses?.length || 0,
+              hasData: !!(baselineResults.answers || baselineResults.responses)
+            });
             
             // Create complete child profile
             const profile: ChildProfile = {
@@ -136,15 +133,7 @@ function AppRouter() {
               age: baselineResults.age || 8,
               grade: baselineResults.grade || 'Grade 3',
               parentId: baselineResults.parentId || 'parent_123',
-              baselineResults: {
-                mathLevel: baselineResults.mathLevel || 5,
-                readingLevel: baselineResults.readingLevel || 5,
-                scienceLevel: baselineResults.scienceLevel || 5,
-                learningStyle: baselineResults.learningStyle || 'visual',
-                interests: baselineResults.interests || ['math', 'science'],
-                strengths: baselineResults.strengths || ['problem-solving'],
-                needsImprovement: baselineResults.needsImprovement || ['focus']
-              },
+              baselineResults: baselineResults, // Pass entire baseline results including responses array
               aiModelCloned: true,
               personalizedContent: {
                 difficulty: (baselineResults.mathLevel || 5) >= 8 ? 'advanced' : (baselineResults.mathLevel || 5) >= 5 ? 'intermediate' : 'beginner',
@@ -157,6 +146,43 @@ function AppRouter() {
             
             setChildProfile(profile);
             localStorage.setItem('aivoChildProfile', JSON.stringify(profile));
+            
+            // Actually trigger model cloning with baseline data
+            setLoadingMessage('Creating your personalized learning model...');
+            try {
+              const { ModelCloningManager } = await import('./services/ModelCloningManager');
+              
+              const studentProfile = {
+                id: childId,
+                name: baselineResults.childName || 'Student',
+                age: baselineResults.age || 8,
+                grade: parseInt(baselineResults.grade?.replace(/\D/g, '') || '3'),
+                learningStyle: baselineResults.learningStyle || 'visual',
+                disabilities: baselineResults.disabilities || [],
+                specialNeeds: baselineResults.specialNeeds || [],
+                interests: baselineResults.interests || ['math', 'science'],
+                baselineResults: baselineResults // Contains responses array from baseline assessment
+              };
+              
+              console.log('🧠 Starting model cloning with profile:', studentProfile);
+              
+              const cloneInfo = await ModelCloningManager.startCloning(
+                studentProfile,
+                (status) => {
+                  console.log('Clone status update:', status);
+                  setLoadingMessage(`Creating model: ${status.status}... ${Math.round(status.progress || 0)}%`);
+                }
+              );
+              
+              console.log('✅ Model cloning initiated:', cloneInfo);
+              setLoadingMessage('Setting up your learning dashboard...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+            } catch (cloneError) {
+              console.error('⚠️ Model cloning error (continuing anyway):', cloneError);
+              setLoadingMessage('Setting up your learning dashboard...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
             
           } catch (parseError) {
             console.error('Error parsing baseline results:', parseError);

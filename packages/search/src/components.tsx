@@ -2,8 +2,7 @@
  * Search Components
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Search, X, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 
 export interface SearchBarProps {
   value: string;
