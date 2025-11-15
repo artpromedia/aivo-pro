@@ -48,6 +48,22 @@ class DynamicAssessmentAPI {
     // Try curriculum-content-svc first (our actual AI service)
     try {
       const curriculumUrl = import.meta.env.VITE_CURRICULUM_CONTENT_URL || 'http://localhost:8006';
+      
+      // Enhanced prompt for better assessment questions
+      const assessmentPrompt = `Create a ${request.difficulty || 'medium'} difficulty ${request.subject} assessment question for grade ${request.grade}.
+
+REQUIREMENTS:
+- The question must be clear, specific, and age-appropriate
+- Include exactly 4 multiple choice options
+- Only ONE option should be correct
+- Wrong options should be plausible but clearly incorrect
+- For SEL/Speech Therapy: Use realistic scenarios
+- For Math: Show the problem clearly
+- For Reading/ELA: Provide context if needed
+- For Science: Use grade-appropriate concepts
+
+Format as multiple choice with clear options.`;
+
       const response = await fetch(`${curriculumUrl}/v1/content/generate`, {
         method: 'POST',
         headers: {
@@ -58,22 +74,40 @@ class DynamicAssessmentAPI {
           grade_level: request.grade.toString(),
           difficulty: (request.difficulty === 'easy' ? 0.3 : request.difficulty === 'hard' ? 0.8 : 0.5),
           content_type: 'assessment',
+          prompt: assessmentPrompt,
           count: 1,
-          session_id: this.sessionId, // Include session for uniqueness
-          previous_questions: Array.from(this.usedQuestionIds).slice(-10) // Last 10 questions to avoid
+          session_id: this.sessionId,
+          previous_questions: Array.from(this.usedQuestionIds).slice(-10),
+          format: 'multiple_choice'
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('📦 Curriculum-content-svc response:', JSON.stringify(data, null, 2));
+        
         if (data.contents && data.contents.length > 0) {
           const content = data.contents[0];
           const questionData = content.content;
           
-          console.log('✅ Generated AI question from curriculum-content-svc');
+          console.log('📝 Question data:', questionData);
           
-          // Generate unique options if not provided
-          const options = questionData.options || this.generateOptions(questionData.answer, request.subject);
+          // Validate we have proper question data
+          if (!questionData.question || questionData.question.includes('Sample') || 
+              questionData.question.includes('content') || questionData.question.length < 10) {
+            console.warn('⚠️ Poor quality question from curriculum-content-svc, trying LocalAI');
+            throw new Error('Invalid question format');
+          }
+          
+          // Validate options
+          let options = questionData.options;
+          if (!options || options.length < 4 || 
+              options.some((opt: string) => opt === 'answer' || opt.includes('(incorrect)') || opt === 'All of the above' || opt === 'None of the above')) {
+            console.warn('⚠️ Poor quality options, regenerating...');
+            throw new Error('Invalid options');
+          }
+          
+          console.log('✅ Generated quality AI question from curriculum-content-svc');
           
           const questionId = `ai_curriculum_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           this.usedQuestionIds.add(questionId);
@@ -82,9 +116,9 @@ class DynamicAssessmentAPI {
             question: {
               id: questionId,
               subject: request.subject,
-              question: questionData.question || questionData.problem || 'Question generated',
+              question: questionData.question,
               options: options,
-              correctAnswer: questionData.answer,
+              correctAnswer: questionData.answer || options[0],
               difficulty: request.difficulty || 'medium',
               gradeLevel: request.grade,
               explanation: questionData.explanation || questionData.hint
@@ -93,11 +127,34 @@ class DynamicAssessmentAPI {
         }
       }
     } catch (error) {
-      console.warn('⚠️ Curriculum-content-svc not available:', error);
+      console.warn('⚠️ Curriculum-content-svc failed, trying LocalAI:', error);
     }
     
     try {
-      // Fallback to LocalAI
+      // Fallback to LocalAI with enhanced prompting
+      console.log('🔄 Trying LocalAI for question generation...');
+      
+      // Subject-specific examples for better quality
+      const subjectExamples: { [key: string]: string } = {
+        'Math': `Example: "Sarah has 12 cookies and wants to share them equally with 3 friends. How many cookies will each person get?"
+Options: ["3 cookies", "4 cookies", "5 cookies", "6 cookies"]
+Correct: "4 cookies"`,
+        'Reading': `Example: "In the sentence 'The quick brown fox jumps over the lazy dog,' which word is an adjective describing the dog?"
+Options: ["quick", "lazy", "jumps", "brown"]
+Correct: "lazy"`,
+        'Science': `Example: "What happens to water when it freezes?"
+Options: ["It becomes a solid called ice", "It evaporates into the air", "It becomes warmer", "It stays liquid but gets colder"]
+Correct: "It becomes a solid called ice"`,
+        'SEL': `Example: "Your friend looks sad at recess. What is the BEST way to show empathy?"
+Options: ["Ask them how they're feeling and listen", "Ignore them and play with someone else", "Tell them to stop being sad", "Laugh to cheer them up"]
+Correct: "Ask them how they're feeling and listen"`,
+        'Speech Therapy': `Example: "Which word has the same beginning sound as 'cat'?"
+Options: ["kite", "dog", "fish", "sun"]
+Correct: "kite"`
+      };
+      
+      const exampleText = subjectExamples[request.subject] || subjectExamples['Math'];
+      
       const localAIResponse = await fetch('http://localhost:8080/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -107,33 +164,61 @@ class DynamicAssessmentAPI {
           model: 'ibm-granite.granite-4.0-1b',
           messages: [{
             role: 'system',
-            content: `You are an educational assessment expert. Create a UNIQUE ${request.difficulty || 'medium'} difficulty ${request.subject} question appropriate for grade ${request.grade}. 
-IMPORTANT: Make each question different and creative. Session ID: ${this.sessionId}
-Avoid questions similar to IDs: ${Array.from(this.usedQuestionIds).slice(-5).join(', ')}
+            content: `You are an expert teacher creating assessment questions. Create a ${request.difficulty || 'medium'} difficulty ${request.subject} question for grade ${request.grade}.
 
-Return your response in this exact JSON format:
+CRITICAL REQUIREMENTS:
+- Write a COMPLETE, SPECIFIC question with clear context
+- NO placeholders like "Sample content" or generic text
+- Include 4 distinct, realistic multiple choice options
+- Make wrong answers plausible but clearly incorrect
+- Use age-appropriate language for grade ${request.grade}
+- For word problems, include names and specific numbers
+- For concepts, provide clear scenarios
+
+Example format for ${request.subject}:
+${exampleText}
+
+Return ONLY valid JSON in this exact format:
 {
-  "question": "Your question here",
-  "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-  "correct_answer": "Option 1",
-  "explanation": "Brief explanation of why this is correct"
+  "question": "Complete specific question here with all necessary context",
+  "options": ["Full option 1", "Full option 2", "Full option 3", "Full option 4"],
+  "correct_answer": "Full correct option (must match one of the options exactly)",
+  "explanation": "Why this answer is correct"
 }`
           }, {
             role: 'user', 
-            content: `Create a UNIQUE ${request.subject} question for grade ${request.grade} at ${request.difficulty} difficulty. Session: ${this.sessionId}, Timestamp: ${Date.now()}`
+            content: `Create ONE unique ${request.subject} assessment question for grade ${request.grade} at ${request.difficulty} difficulty. Make it specific and complete with realistic options. Session: ${this.sessionId.slice(-8)}`
           }],
-          temperature: 0.9, // Higher temperature for more variety
-          max_tokens: 500
+          temperature: 0.8,
+          max_tokens: 600
         }),
       });
 
       if (localAIResponse.ok) {
         const data = await localAIResponse.json();
         const content = data.choices?.[0]?.message?.content;
+        console.log('🤖 LocalAI response:', content);
+        
         if (content) {
           try {
-            const questionData = JSON.parse(content);
-            console.log('✅ Generated AI question from LocalAI');
+            // Try to extract JSON if wrapped in markdown code blocks
+            let jsonContent = content;
+            const jsonMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+            if (jsonMatch) {
+              jsonContent = jsonMatch[1];
+            }
+            
+            const questionData = JSON.parse(jsonContent);
+            
+            // Validate question quality
+            if (!questionData.question || questionData.question.length < 15 ||
+                questionData.question.toLowerCase().includes('sample') ||
+                !questionData.options || questionData.options.length !== 4) {
+              console.warn('⚠️ LocalAI returned poor quality question, using mock');
+              throw new Error('Invalid question quality');
+            }
+            
+            console.log('✅ Generated quality AI question from LocalAI');
             
             const questionId = `ai_local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             this.usedQuestionIds.add(questionId);
@@ -151,7 +236,7 @@ Return your response in this exact JSON format:
               }
             };
           } catch (parseError) {
-            console.warn('Failed to parse AI response:', parseError);
+            console.warn('⚠️ Failed to parse LocalAI response, using mock:', parseError);
           }
         }
       }
