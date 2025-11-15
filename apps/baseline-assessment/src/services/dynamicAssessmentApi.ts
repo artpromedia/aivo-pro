@@ -49,57 +49,90 @@ class DynamicAssessmentAPI {
     try {
       console.log('🧠 Requesting question from AIVO Main Brain (trained education model)...');
       
-      const response = await fetch(`${this.aivoBaseUrl}/generate-assessment-question`, {
+      // Construct a detailed prompt for question generation
+      const questionPrompt = `Generate a ${request.difficulty || 'medium'} difficulty ${request.subject} assessment question for grade ${request.grade}.
+
+Create ONE complete multiple-choice question with 4 options. Return ONLY valid JSON:
+
+{
+  "question": "Complete specific question with all context needed",
+  "options": ["Option A with full text", "Option B with full text", "Option C with full text", "Option D with full text"],
+  "correct_answer": "The correct option text (must match exactly)",
+  "explanation": "Why this answer is correct"
+}
+
+Make it age-appropriate, specific, and engaging for grade ${request.grade} students.`;
+
+      const response = await fetch(`${this.aivoBaseUrl}/v1/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          grade_level: request.grade,
+          prompt: questionPrompt,
+          grade_level: request.grade.toString(),
           subject: request.subject,
-          previous_performance: request.previousAnswers || [],
-          difficulty_preference: request.difficulty || 'medium',
-          adaptive: true,
-          session_id: this.sessionId,
-          previous_question_ids: Array.from(this.usedQuestionIds).slice(-10)
+          learning_style: 'visual',
+          max_tokens: 500,
+          temperature: 0.7
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🧠 AIVO Brain response:', JSON.stringify(data, null, 2));
+        console.log('🧠 AIVO Brain raw response:', data.response?.substring(0, 200));
         
-        // Validate AIVO Brain response quality
-        if (data.question && data.question.length > 15 && 
-            !data.question.includes('Sample') &&
-            (data.options || data.choices) && 
-            (data.options?.length >= 4 || data.choices?.length >= 4)) {
-          
-          console.log('✅ Generated quality question from AIVO Main Brain');
-          
-          const questionId = `aivo_brain_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          this.usedQuestionIds.add(questionId);
-          
-          return {
-            question: {
-              id: questionId,
-              subject: data.subject || request.subject,
-              question: data.question,
-              options: data.options || data.choices,
-              correctAnswer: data.correct_answer,
-              difficulty: data.difficulty || request.difficulty || 'medium',
-              gradeLevel: request.grade,
-              explanation: data.explanation
-            },
-            nextSubject: data.next_subject,
-            adjustedDifficulty: data.adjusted_difficulty
-          };
-        } else {
-          console.warn('⚠️ AIVO Brain returned incomplete data, trying LocalAI');
+        if (data.response) {
+          try {
+            // Try to parse JSON from response
+            let jsonContent = data.response.trim();
+            
+            // Extract JSON if wrapped in code blocks or has extra text
+            const jsonMatch = jsonContent.match(/\{[\s\S]*?"question"[\s\S]*?\}/);
+            if (jsonMatch) {
+              jsonContent = jsonMatch[0];
+            }
+            
+            const questionData = JSON.parse(jsonContent);
+            
+            // Validate AIVO Brain response quality
+            if (questionData.question && questionData.question.length > 15 && 
+                !questionData.question.toLowerCase().includes('sample') &&
+                questionData.options && Array.isArray(questionData.options) && 
+                questionData.options.length === 4 &&
+                questionData.correct_answer) {
+              
+              console.log('✅ Generated quality question from AIVO Main Brain');
+              console.log('   Question:', questionData.question.substring(0, 60) + '...');
+              
+              const questionId = `aivo_brain_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+              this.usedQuestionIds.add(questionId);
+              
+              return {
+                question: {
+                  id: questionId,
+                  subject: request.subject,
+                  question: questionData.question,
+                  options: questionData.options,
+                  correctAnswer: questionData.correct_answer,
+                  difficulty: request.difficulty || 'medium',
+                  gradeLevel: request.grade,
+                  explanation: questionData.explanation || ''
+                }
+              };
+            } else {
+              console.warn('⚠️ AIVO Brain returned incomplete question data');
+              console.warn('   Question length:', questionData.question?.length);
+              console.warn('   Options count:', questionData.options?.length);
+            }
+          } catch (parseError) {
+            console.warn('⚠️ Failed to parse AIVO Brain JSON response:', parseError);
+            console.warn('   Raw response:', data.response?.substring(0, 200));
+          }
         }
       }
     } catch (error) {
-      console.warn('⚠️ AIVO Main Brain not available, trying LocalAI:', error);
+      console.warn('⚠️ AIVO Main Brain not available:', error);
     }
     
     try {
